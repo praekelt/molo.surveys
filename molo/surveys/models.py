@@ -18,10 +18,16 @@ from molo.core.models import (
     PreventDeleteMixin, index_pages_after_copy, Main
 )
 from molo.core.utils import generate_slug
+from molo.core.blocks import MarkDownBlock
 
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, \
-    MultiFieldPanel
+    MultiFieldPanel, StreamFieldPanel
+from wagtail.wagtailcore.fields import StreamField
+from wagtail.wagtailcore import blocks
+from wagtail.wagtailimages.blocks import ImageChooserBlock
+from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
+
 from wagtailsurveys import models as surveys_models
 from django.db.models import Q
 from django.http import Http404
@@ -58,13 +64,43 @@ def create_survey_index_page(sender, instance, **kwargs):
         survey_index.save_revision().publish()
 
 
+class TermsAndConditions(ArticlePage):
+    parent_page_types = ['surveys.MoloSurveyPage']
+    subpage_types = []
+
+    def get_parent_page(self):
+        return MoloSurveyPage.objects.ancestor_of(self).last()
+
+
+TermsAndConditions.promote_panels = [
+    MultiFieldPanel(
+        Page.promote_panels,
+        "Common page configuration", "collapsible collapsed")]
+
+
 class MoloSurveyPage(
         TranslatablePageMixinNotRoutable, surveys_models.AbstractSurvey):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
-    subpage_types = []
+    subpage_types = ['surveys.TermsAndConditions']
 
     intro = TextField(blank=True)
+    image = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+'
+    )
+
+    content = StreamField([
+        ('heading', blocks.CharBlock(classname="full title")),
+        ('paragraph', MarkDownBlock()),
+        ('image', ImageChooserBlock()),
+        ('list', blocks.ListBlock(blocks.CharBlock(label="Item"))),
+        ('numbered_list', blocks.ListBlock(blocks.CharBlock(label="Item"))),
+        ('page', blocks.PageChooserBlock()),
+    ], null=True, blank=True)
     thank_you_text = TextField(blank=True)
     submit_text = TextField(blank=True)
     homepage_button_text = TextField(blank=True)
@@ -113,6 +149,8 @@ class MoloSurveyPage(
     )
     content_panels = surveys_models.AbstractSurvey.content_panels + [
         FieldPanel('intro', classname='full'),
+        ImageChooserPanel('image'),
+        StreamFieldPanel('content'),
         InlinePanel('survey_form_fields', label='Form fields'),
         FieldPanel('thank_you_text', classname='full'),
         FieldPanel('submit_text', classname='full'),

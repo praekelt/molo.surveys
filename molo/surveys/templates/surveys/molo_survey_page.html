@@ -1,12 +1,42 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags wagtailimages_tags core_tags static %}
 
 {% block content %}
 <div class="surveys surveys{{page.get_parent_section.get_effective_extra_style_hints}}">
   <h1 class="surveys__title">{{ page.title }}</h1>
   <h4 class="surveys__intro">{{ page.intro }}</h4>
+  {% if page.image %}
+    {% image page.image width-98 as tmp_photo_small %}
+    {% image page.image width-320 as tmp_photo_large %}
+     <img src="{{ tmp_photo_small.url }}" srcset="{{ tmp_photo_large.url }}" alt="{{ self.title }}" class="feature-image" />
+  {% endif %}
+  <div class="surveys--inner-content">
+  {% for block in page.content %}
+      {% if block.block_type == 'heading' %}
+      <h1 class="heading">
+        {{ block.value }}
+      </h1>
+      {% elif block.block_type == 'image' %}
+        {% image block.value width-240 %}
+      {% elif block.block_type == 'numbered_list' %}
+        <ol>
+        {% for item in block.value %}
+          <li>{{ item|handle_markdown }}</li>
+        {% endfor %}
+        </ol>
+      {% elif block.block_type == 'list' %}
+        <ul>
+        {% for item in block.value %}
+          <li>{{ item|handle_markdown }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+          {{ block }}
+      {% endif %}
+  {% endfor %}
+  </div>
   {% if user.is_authenticated and user.is_active or request.is_preview or self.allow_anonymous_submissions %}
     {% if form %}
       <form class="surveys__form" action="{% pageurl self %}{% if self.multi_step %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
@@ -43,3 +73,4 @@
   {% endif %}
 </div>
 {% endblock %}
+
