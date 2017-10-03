@@ -1,6 +1,14 @@
 CHANGE LOG
 ==========
 
+5.6.3
+-----
+- Bug Fix: - removed yourwords surveys from template tag lists
+
+5.6.2
+-----
+- Bug Fix: remove PreventDeleteMixin from Ts&Cs index page
+
 5.6.1
 -----
 - Use FooterPage instead of ArticlePage for the Surveys Ts&Cs

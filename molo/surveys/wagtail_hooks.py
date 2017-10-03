@@ -60,14 +60,14 @@ def create_new_page_relations(request, page, new_page):
     if page and new_page:
         if new_page.get_descendants().count() >= \
                 page.get_descendants().count():
-            for survey in MoloSurveyPage.objects.descendant_of(new_page):
-
+            for survey in MoloSurveyPage.objects.descendant_of(
+                    new_page.get_site().root_page):
                 # replace old terms and conditions with new one, if it exists
                 relations = SurveyTermsConditions.objects.filter(page=survey)
                 for relation in relations:
                     if relation.terms_and_conditions:
                         new_article = ArticlePage.objects.descendant_of(
-                            new_page).filter(
+                            new_page.get_site().root_page).filter(
                                 slug=relation.terms_and_conditions.slug)\
                             .first()
                         relation.terms_and_conditions = new_article
