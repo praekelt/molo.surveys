@@ -1,6 +1,53 @@
 CHANGE LOG
 ==========
 
+5.7.0
+--------
+- Added Article Tag Rule to allow segmenting on article visits
+- Added ability to skip questions and surveys based on user's response
+
+5.6.5
+-----
+- Bug Fix: get the correct index page for the correct site when converting YWC to an article
+
+5.6.4
+-----
+- Bug Fix: add yourwords check to surveys list
+
+5.6.3
+-----
+- Bug Fix: removed yourwords surveys from template tag lists
+
+5.6.2
+-----
+- Bug Fix: remove PreventDeleteMixin from Ts&Cs index page
+
+5.6.1
+-----
+- Use FooterPage instead of ArticlePage for the Surveys Ts&Cs
+
+5.6.0
+-----
+- Added Terms and Conditions index page and page relation to molo survey page
+- Added image and body content to survey
+
+5.5.0
+-----
+- Add advanced surveys
+
+5.4.0
+-----
+- Add option to enter customised homepage button text
+
+5.3.0
+-----
+- Add option to convert survey submission to an article
+
+5.2.1
+-----
+- Add option to show results as percentage
+- Add option to enter customised submit text
+
 5.2.0
 -----
 - Add templatetags filters for direct and linked surveys

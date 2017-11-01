@@ -22,6 +22,9 @@ Django setup::
 
    INSTALLED_APPS = (
       'wagtailsurveys',
+      'wagtail_personalisation',
+      'wagtailfontawesome',
+
    )
 
 
