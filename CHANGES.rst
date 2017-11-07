@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+5.8.1
+--------
+- Fixed Combination Rule clean method for checking rule operator ordering
+- Bug Fix: removed reference to non-existent migration
+
 5.8.0
 --------
 - Added Combination Rule to allow combining rules within a segment
