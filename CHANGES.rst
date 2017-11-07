@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+5.8.0
+--------
+- Added Combination Rule to allow combining rules within a segment
+- Bug Fix: renamed migration
+
 5.7.0
 --------
 - Added Article Tag Rule to allow segmenting on article visits

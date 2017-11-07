@@ -8,17 +8,20 @@ from django.utils import six
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
+from wagtail.wagtailcore.blocks.stream_block import StreamBlockValidationError
 from wagtail.wagtailadmin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
     PageChooserPanel,
+    StreamFieldPanel,
 )
-from wagtail_personalisation.adapters import get_segment_adapter
 from wagtail_personalisation.rules import AbstractBaseRule, VisitCountRule
 
 from molo.core.models import ArticlePageTags
 
 from .edit_handlers import TagPanel
+
+from molo.surveys import blocks
 
 
 # Filer the Visit Count Page only by articles
@@ -348,6 +351,7 @@ class ArticleTagRule(AbstractBaseRule):
                 )
 
     def test_user(self, request):
+        from wagtail_personalisation.adapters import get_segment_adapter
         operator = self.OPERATORS[self.operator]
         adapter = get_segment_adapter(request)
         visit_count = adapter.get_tag_count(
@@ -368,3 +372,53 @@ class ArticleTagRule(AbstractBaseRule):
                 self.count
             ),
         }
+
+
+class CombinationRule(AbstractBaseRule):
+    body = blocks.StreamField([
+        ('Rule', blocks.RuleSelectBlock()),
+        ('Operator', blocks.AndOrBlock()),
+        ('NestedLogic', blocks.LogicBlock())
+    ])
+
+    panels = [
+        StreamFieldPanel('body'),
+    ]
+
+    def description(self):
+        return {
+            'title': _(
+                'Based on whether they satisfy a '
+                'particular combination of rules'),
+        }
+
+    def clean(self):
+        super(CombinationRule, self).clean()
+        if isinstance(self.body.stream_data[0], dict):
+            newData = [block['type'] for block in self.body.stream_data]
+        elif isinstance(self.body.stream_data[0], tuple):
+            newData = [block[0] for block in self.body.stream_data]
+
+        if (len(newData) - 1) % 2 != 0:
+            raise StreamBlockValidationError(non_block_errors=[_(
+                'Rule Combination must follow the <Rule/NestedLogic>'
+                '<Operator> <Rule/NestedLogic> pattern.')])
+
+        iterations = (len(newData) - 1) / 2
+        for i in range(iterations):
+            first_rule_index = i * 2
+            operator_index = (i * 2) + 1
+            second_rule_index = (i * 2) + 2
+
+            if not (
+                (newData[first_rule_index] == 'Rule' or
+                 newData[first_rule_index] == 'NestedLogic') and
+                (newData[operator_index] == 'Operator') and
+                (newData[second_rule_index] == 'Rule' or
+                    newData[second_rule_index] == 'NestedLogic')):
+                raise StreamBlockValidationError(non_block_errors=[_(
+                    'Rule Combination must follow the <Rule/NestedLogic> '
+                    '<Operator> <Rule/NestedLogic> pattern.')])
+
+    class Meta:
+        verbose_name = _('Rule Combination')
