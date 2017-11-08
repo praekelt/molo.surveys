@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+5.8.2
+--------
+- Bug Fix: fixed string replacement bug in combination rule javascript
+
 5.8.1
 --------
 - Fixed Combination Rule clean method for checking rule operator ordering

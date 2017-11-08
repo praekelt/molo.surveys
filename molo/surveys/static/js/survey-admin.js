@@ -100,7 +100,7 @@ $(function(){
     $.each(ruleIndex, function(index_outer, form){
       $.each(form.blockIds, function(index_inner, value) {
         ruleValueTextPairs.push({
-          "value": form.ruleName.replace(" ", "") + "_" + String(index_inner),
+          "value": form.ruleName.replace(/ /g, "") + "_" + String(index_inner),
           "text": form.ruleName + " " + String(index_inner + 1),
         });
       });
