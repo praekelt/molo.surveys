@@ -15,6 +15,7 @@ install:
   - pip install coveralls coverage --cache-dir $HOME/.pip-cache/
   - pip install flake8 --cache-dir $HOME/.pip-cache/
   - pip install -r requirements-dev.txt --cache-dir $HOME/.pip-cache/
+  - pip install git+git://github.com/torchbox/wagtail-personalisation.git@b786b0a4d2e7a39c6034eb7b99d6158f065ca784#egg=wagtail_personalisation
   - pip install -e . --cache-dir $HOME/.pip-cache/
 script:
   - flake8 molo
