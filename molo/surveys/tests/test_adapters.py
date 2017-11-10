@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.test import TestCase, RequestFactory
 from django.test.client import Client
 
@@ -14,6 +13,7 @@ from molo.surveys.adapters import (
     transform_into_boolean_list,
     evaluate,
 )
+from molo.surveys.models import SegmentUserGroup
 
 from molo.surveys.rules import GroupMembershipRule
 
@@ -29,10 +29,10 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
         self.request.user = get_user_model().objects.create_user(
             username='tester', email='tester@example.com', password='tester')
 
-        self.group_1 = Group.objects.create(name='Group 1')
-        self.group_2 = Group.objects.create(name='Group 2')
+        self.group_1 = SegmentUserGroup.objects.create(name='Group 1')
+        self.group_2 = SegmentUserGroup.objects.create(name='Group 2')
 
-        self.request.user.groups.add(self.group_1)
+        self.request.user.segment_groups.add(self.group_1)
 
     def test_get_rule(self):
         fake_ds = {

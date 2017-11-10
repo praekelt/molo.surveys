@@ -1,6 +1,12 @@
 CHANGE LOG
 ==========
 
+5.9.0
+-----
+- Added static and dynamic segments
+- Changed dependency on wagtail personalisation to a forked version
+- Update user privacy
+
 5.8.2
 --------
 - Bug Fix: fixed string replacement bug in combination rule javascript

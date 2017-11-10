@@ -581,3 +581,14 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AbstractFormField):
 
     class Meta(AbstractFormField.Meta):
         verbose_name = _('personalisable form field')
+
+
+class SegmentUserGroup(models.Model):
+    name = models.CharField(max_length=254)
+    users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='segment_groups',
+    )
+
+    def __str__(self):
+        return self.name
