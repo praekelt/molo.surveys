@@ -1,6 +1,13 @@
 CHANGE LOG
 ==========
 
+5.9.1
+-----
+- Bug Fix: Update wagtail-personalisation-molo which adds in collectstatic
+- Change NestedBlocks to Nested Blocks in Admin UI
+- Bug Fix:  Ensure that 'Add Rule Combination' button only appears when there is no Rule Combination
+- Add description for how Rule Combination works
+
 5.9.0
 -----
 - Added static and dynamic segments

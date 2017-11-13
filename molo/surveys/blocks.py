@@ -175,3 +175,4 @@ class LogicBlock(blocks.StructBlock):
 
     class Meta:
         icon = 'cogs'
+        label = 'Nested Logic'

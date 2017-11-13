@@ -245,6 +245,18 @@ $(function(){
       });
       $("#id_surveys_combinationrule_related-ADD").toggle();
     });
+
+    if($("#id_surveys_combinationrule_related-FORMS").children("li").length > 0){
+      $("#id_surveys_combinationrule_related-ADD").toggle();
+
+      var deleteButton = $("#id_surveys_combinationrule_related-FORMS")
+        .children("li")
+        .find('button[title^="Delete"]')
+
+      deleteButton.click(function () {
+          $("#id_surveys_combinationrule_related-ADD").toggle();
+      });
+    }
   }
   addHideToRuleCombinationFunctionality();
 
