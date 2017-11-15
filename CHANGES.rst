@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+5.9.2
+-----
+- Added a filter to check if a form field is a checkbox
+
 5.9.1
 -----
 - Bug Fix: Update wagtail-personalisation-molo which adds in collectstatic
