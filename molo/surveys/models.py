@@ -197,9 +197,13 @@ class MoloSurveyPage(
 
     def get_data_fields(self):
         data_fields = [
-            ('username', 'Username'),
+            ('username', _('Username')),
+            ('created_at', _('Submission Date')),
         ]
-        data_fields += super(MoloSurveyPage, self).get_data_fields()
+        data_fields += [
+            (field.clean_name, field.admin_label)
+            for field in self.get_form_fields()
+        ]
         return data_fields
 
     def get_submission_class(self):
@@ -383,6 +387,26 @@ class SurveyTermsConditions(Orderable):
         'terms_and_conditions', 'core.FooterPage')]
 
 
+class AdminLabelMixin(models.Model):
+    admin_label = models.CharField(
+        max_length=256,
+        help_text=_('Column header used during CSV export of survey '
+                    'responses.'),
+        default='',
+    )
+
+    class Meta:
+        abstract = True
+
+
+surveys_models.AbstractFormField._meta.get_field('label').verbose_name = (
+    'Question'
+)
+
+
+surveys_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
+
+
 class SkipLogicMixin(models.Model):
     skip_logic = SkipLogicField()
 
@@ -433,7 +457,7 @@ class SkipLogicMixin(models.Model):
         return super(SkipLogicMixin, self).save(*args, **kwargs)
 
 
-class MoloSurveyFormField(SkipLogicMixin, AbstractFormField):
+class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin, AbstractFormField):
     page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
 
     class Meta(AbstractFormField.Meta):
@@ -561,7 +585,8 @@ class PersonalisableSurvey(MoloSurveyPage):
             request, *args, **kwargs)
 
 
-class PersonalisableSurveyFormField(SkipLogicMixin, AbstractFormField):
+class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
+                                    AbstractFormField):
     """
     Form field that has a segment assigned.
     """

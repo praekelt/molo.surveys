@@ -55,6 +55,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
             page=molo_survey_page,
             sort_order=1,
             label='Your favourite animal',
+            admin_label='fav_animal',
             field_type='singleline',
             required=True
         )
@@ -121,3 +122,25 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         # it should not show convert to article as there is already article
         self.assertNotContains(response, 'Convert to Article')
+
+    def test_export_submission(self):
+        molo_survey_page, molo_survey_form_field = \
+            self.create_molo_survey_page(parent=self.section_index)
+
+        self.client.force_login(self.user)
+        answer = 'PYTHON'
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): answer
+        })
+
+        self.client.force_login(self.super_user)
+        response = self.client.get(
+            '/admin/surveys/submissions/%s/' % (molo_survey_page.id),
+            {'action': 'CSV'},
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertContains(response, 'Username')
+        self.assertContains(response, 'Submission Date')
+        self.assertNotContains(response, molo_survey_form_field.label)
+        self.assertContains(response, molo_survey_form_field.admin_label)
+        self.assertContains(response, answer)

@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+5.9.3
+-----
+- Add admin label to survey questions
+
 5.9.2
 -----
 - Added a filter to check if a form field is a checkbox
