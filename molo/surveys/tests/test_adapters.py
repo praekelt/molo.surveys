@@ -34,6 +34,10 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
 
         self.request.user.segment_groups.add(self.group_1)
 
+        self.group_rule_1 = GroupMembershipRule(group=self.group_1)
+        self.group_rule_2 = GroupMembershipRule(group=self.group_2)
+        self.logged_in_rule = UserIsLoggedInRule(is_logged_in=True)
+
     def test_get_rule(self):
         fake_ds = {
             'TimeRule': ['first time rule', 'second time rule'],
@@ -48,14 +52,12 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
                          fake_ds["UserIsLoggedInRule"][0])
 
     def test_index_rules_by_type(self):
-        group_rule_1 = GroupMembershipRule(group=self.group_1)
-        group_rule_2 = GroupMembershipRule(group=self.group_2)
-        logged_in_rule = UserIsLoggedInRule(is_logged_in=True)
-
-        test_input = [logged_in_rule, group_rule_1, group_rule_2]
+        test_input = [self.logged_in_rule,
+                      self.group_rule_1,
+                      self.group_rule_2]
         expected_output = {
-            'GroupMembershipRule': [group_rule_1, group_rule_2],
-            'UserIsLoggedInRule': [logged_in_rule]
+            'GroupMembershipRule': [self.group_rule_1, self.group_rule_2],
+            'UserIsLoggedInRule': [self.logged_in_rule]
         }
 
         self.assertEqual(
@@ -63,10 +65,6 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
             expected_output)
 
     def test_transform_into_boolean_list_simple(self):
-        group_rule_1 = GroupMembershipRule(group=self.group_1)
-        group_rule_2 = GroupMembershipRule(group=self.group_2)
-        logged_in_rule = UserIsLoggedInRule(is_logged_in=True)
-
         sample_stream_data = [
             {u'type': u'Rule', u'value': u'UserIsLoggedInRule_0'},
             {u'type': u'Operator', u'value': u'and'},
@@ -80,8 +78,8 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
         ]
 
         sample_indexed_rules = {
-            'GroupMembershipRule': [group_rule_1, group_rule_2],
-            'UserIsLoggedInRule': [logged_in_rule]
+            'GroupMembershipRule': [self.group_rule_1, self.group_rule_2],
+            'UserIsLoggedInRule': [self.logged_in_rule]
         }
 
         self.assertEqual(
@@ -90,12 +88,41 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
                 sample_indexed_rules,
                 self.request
             ),
-            [logged_in_rule.test_user(self.request),
+            [self.logged_in_rule.test_user(self.request),
              u'and',
              [
-                group_rule_1.test_user(self.request),
+                self.group_rule_1.test_user(self.request),
                 u'or',
-                group_rule_2.test_user(self.request)
+                self.group_rule_2.test_user(self.request)
+            ]]
+        )
+
+    def test_transform_into_boolean_list_only_nested(self):
+        sample_stream_data = [
+            {
+                u'type': u'NestedLogic',
+                u'value': {
+                    u'operator': u'or',
+                    u'rule_1': u'UserIsLoggedInRule_0',
+                    u'rule_2': u'GroupMembershipRule_0'}
+            }
+        ]
+
+        sample_indexed_rules = {
+            'GroupMembershipRule': [self.group_rule_1],
+            'UserIsLoggedInRule': [self.logged_in_rule]
+        }
+
+        self.assertEqual(
+            transform_into_boolean_list(
+                sample_stream_data,
+                sample_indexed_rules,
+                self.request
+            ),
+            [[
+                self.logged_in_rule.test_user(self.request),
+                u'or',
+                self.group_rule_1.test_user(self.request)
             ]]
         )
 
@@ -149,4 +176,11 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
                 [[False, "or", True], "and",
                  [False, "and", False], "or",
                  [True, 'and', False]])
+        )
+
+    def test_evaluate_8(self):
+        self.assertEqual(
+            ((False or True)),
+            evaluate(
+                [[False, "or", True]])
         )

@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+5.9.4
+-----
+- Bug Fix: Handle case where single nested logic block is given to the Combination Rule
+
 5.9.3
 -----
 - Add admin label to survey questions

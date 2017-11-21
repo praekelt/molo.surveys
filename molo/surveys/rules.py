@@ -398,26 +398,35 @@ class CombinationRule(AbstractBaseRule):
             elif isinstance(self.body.stream_data[0], tuple):
                 newData = [block[0] for block in self.body.stream_data]
 
-            if len(newData) == 1 or (len(newData) - 1) % 2 != 0:
+            if (len(newData) - 1) % 2 != 0:
                 raise StreamBlockValidationError(non_block_errors=[_(
                     'Rule Combination must follow the <Rule/NestedLogic>'
                     '<Operator> <Rule/NestedLogic> pattern.')])
 
-            iterations = (len(newData) - 1) / 2
-            for i in range(iterations):
-                first_rule_index = i * 2
-                operator_index = (i * 2) + 1
-                second_rule_index = (i * 2) + 2
-
-                if not (
-                    (newData[first_rule_index] == 'Rule' or
-                     newData[first_rule_index] == 'NestedLogic') and
-                    (newData[operator_index] == 'Operator') and
-                    (newData[second_rule_index] == 'Rule' or
-                        newData[second_rule_index] == 'NestedLogic')):
+            if len(newData) == 1:
+                if newData[0] == 'NestedLogic':
+                    pass
+                else:
                     raise StreamBlockValidationError(non_block_errors=[_(
                         'Rule Combination must follow the <Rule/NestedLogic> '
                         '<Operator> <Rule/NestedLogic> pattern.')])
+            else:
+                iterations = (len(newData) - 1) / 2
+                for i in range(iterations):
+                    first_rule_index = i * 2
+                    operator_index = (i * 2) + 1
+                    second_rule_index = (i * 2) + 2
+
+                    if not (
+                        (newData[first_rule_index] == 'Rule' or
+                         newData[first_rule_index] == 'NestedLogic') and
+                        (newData[operator_index] == 'Operator') and
+                        (newData[second_rule_index] == 'Rule' or
+                            newData[second_rule_index] == 'NestedLogic')):
+                        raise StreamBlockValidationError(non_block_errors=[_(
+                            'Rule Combination must follow the '
+                            '<Rule/NestedLogic> '
+                            '<Operator> <Rule/NestedLogic> pattern.')])
         else:
             raise StreamBlockValidationError(non_block_errors=[_(
                 'Rule Combination must follow the <Rule/NestedLogic>'

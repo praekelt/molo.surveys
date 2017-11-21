@@ -90,7 +90,9 @@ def evaluate(list_):
     Sample Input:
 
     '''
-    if len(list_) == 3:
+    if len(list_) == 1 and isinstance(list_[0], list):
+        return evaluate(list_[0])
+    elif len(list_) == 3:
         operator = list_[1]
         first = list_[0] if isinstance(list_[0], bool) else evaluate(list_[0])
         second = list_[2] if isinstance(list_[2], bool) else evaluate(list_[2])
