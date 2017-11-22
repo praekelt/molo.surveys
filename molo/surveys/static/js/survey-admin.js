@@ -65,6 +65,7 @@ $(function(){
     'Profile Data Rule',
     'Survey Submission Data Rule',
     'Group Membership Rule',
+    'Comment Count Rule',
   ]
 
   window.ruleIndex = {};
@@ -92,8 +93,6 @@ $(function(){
       window.ruleIndex[ruleInfo.form.attr("id")] = ruleInfo;
     })
   }
-
-
 
   window.extractRuleInfo = function(){
     var ruleValueTextPairs = []

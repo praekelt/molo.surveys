@@ -3,6 +3,10 @@ CHANGE LOG
 
 5.9.4
 -----
+- Bug Fix: Make sure Comment Count Ruls is surface in Combination Rule
+
+5.9.4
+-----
 - Bug Fix: Handle case where single nested logic block is given to the Combination Rule
 
 5.9.3
