@@ -1,4 +1,4 @@
-molo.core<6.0.0,>=5.0.0
+molo.core<7.0.0,>=6.0.0
 celery<4.0
 django-celery
 wagtailsurveys==0.1.1
