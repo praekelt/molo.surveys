@@ -1,7 +1,11 @@
 CHANGE LOG
 ==========
 
-5.9.4
+5.9.6
+-----
+- Bug Fix: Tackle MultiValueKeyError exception when checkboxes answer is empty
+
+5.9.5
 -----
 - Bug Fix: Make sure Comment Count Ruls is surface in Combination Rule
 

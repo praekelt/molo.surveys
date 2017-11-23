@@ -41,7 +41,7 @@ class SkipLogicPaginator(Paginator):
             question.sort_order for question in self.object_list
         ]
         last_question = self.object_list[index]
-        last_answer = data[last_question.clean_name]
+        last_answer = data.get(last_question.clean_name)
         if last_question.is_next_action(last_answer, SkipState.QUESTION):
             # Sorted or is 0 based in the backend and 1 on the front
             next_question_id = last_question.next_page(last_answer) - 1
