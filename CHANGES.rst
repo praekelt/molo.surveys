@@ -1,6 +1,12 @@
 CHANGE LOG
 ==========
 
+5.9.7
+-----
+- Add survey response rule
+- Add character limits to multiline text inputs
+- Bug Fix: Fix visitor rule not updating
+
 5.9.6
 -----
 - Bug Fix: Tackle MultiValueKeyError exception when checkboxes answer is empty

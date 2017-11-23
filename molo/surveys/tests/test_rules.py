@@ -1,4 +1,5 @@
 import datetime
+import json
 import pytest
 
 from django.contrib.auth import get_user_model
@@ -19,11 +20,14 @@ from ..models import (
     PersonalisableSurveyFormField,
     PersonalisableSurvey,
     SegmentUserGroup,
+    MoloSurveyPage,
+    MoloSurveyFormField,
 )
 from ..rules import (
     ArticleTagRule,
     GroupMembershipRule,
     SurveySubmissionDataRule,
+    SurveyResponseRule
 )
 
 
@@ -178,6 +182,68 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         # Fails for logged-out user
         self.request.user = AnonymousUser()
         self.assertFalse(rule.test_user(self.request))
+
+
+class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.request_factory = RequestFactory()
+        self.request = self.request_factory.get('/')
+        self.user = get_user_model().objects.create_user(
+            username='tester', email='tester@example.com', password='tester')
+        self.request.user = self.user
+        # Create survey
+        self.personalisable_survey = PersonalisableSurvey(title='Test Survey')
+        self.survey = MoloSurveyPage(title='Other Survey')
+        SurveysIndexPage.objects.first().add_child(instance=self.survey)
+        SurveysIndexPage.objects.first().add_child(
+            instance=self.personalisable_survey
+        )
+        self.personalisable_survey.save_revision()
+        self.survey.save_revision()
+        PersonalisableSurveyFormField.objects.create(
+            field_type='singleline', label='Singleline Text',
+            page=self.personalisable_survey
+        )
+        MoloSurveyFormField.objects.create(
+            field_type='singleline', label='Singleline Text', page=self.survey)
+
+    def submit_survey(self, survey, user):
+        submission = survey.get_submission_class()
+        data = {field.clean_name: 'super random text'
+                for field in survey.get_form_fields()}
+        submission.objects.create(user=user, page=survey,
+                                  form_data=json.dumps(data))
+
+    def test_user_not_submitted(self):
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertFalse(rule.test_user(self.request))
+
+    def test_user_submitted_normal(self):
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertTrue(rule.test_user(self.request))
+
+    def test_user_submitted_personalised(self):
+        self.submit_survey(self.personalisable_survey, self.user)
+        rule = SurveyResponseRule(survey=self.personalisable_survey)
+        self.assertTrue(rule.test_user(self.request))
+
+    def test_user_submitted_other(self):
+        self.submit_survey(self.personalisable_survey, self.user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertFalse(rule.test_user(self.request))
+
+    def test_other_user_submitted_fails(self):
+        new_user = get_user_model().objects.create_user(
+            username='other', email='other@example.com', password='other')
+
+        self.submit_survey(self.survey, new_user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertFalse(rule.test_user(self.request))
+
+        self.request.user = new_user
+        self.assertTrue(rule.test_user(self.request))
 
 
 class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):

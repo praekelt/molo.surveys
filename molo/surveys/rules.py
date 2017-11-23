@@ -238,6 +238,38 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         }
 
 
+class SurveyResponseRule(AbstractBaseRule):
+    survey = models.ForeignKey('MoloSurveyPage',
+                               verbose_name=_('survey'),
+                               on_delete=models.CASCADE)
+
+    panels = [
+        PageChooserPanel('survey')
+    ]
+
+    class Meta:
+        verbose_name = _('Survey response rule')
+
+    def test_user(self, request):
+        if not request.user.is_authenticated():
+            return False
+
+        submission_class = self.survey.get_submission_class()
+
+        return submission_class.objects.filter(
+            user=request.user,
+            page=self.survey,
+        ).exists()
+
+    def description(self):
+        return {
+            'title': _('Based on responses to surveys.'),
+            'value': _('Have responsed to: %s') % (
+                self.survey,
+            )
+        }
+
+
 class GroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
     group = models.ForeignKey('surveys.segmentusergroup')

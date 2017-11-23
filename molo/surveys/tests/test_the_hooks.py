@@ -51,7 +51,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             language_setting=self.language_setting2,
             locale='en',
             is_active=True)
-        self.mk_main2(title='main3', slug='main3', path=00010003)
+        self.mk_main2(title='main3', slug='main3', path="00010003")
         self.client2 = Client(HTTP_HOST=self.main2.get_site().hostname)
 
     def create_molo_survey_page(self, parent, **kwargs):

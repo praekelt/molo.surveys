@@ -1,17 +1,77 @@
 import csv
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.exceptions import ValidationError
-from django.forms.utils import ErrorList
+from django.forms.utils import ErrorList, flatatt
+from django.utils.encoding import force_text
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 
 from wagtail.wagtailadmin.forms import WagtailAdminPageForm
+from wagtailsurveys.forms import FormBuilder
 
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
+
+
+class CharacterCountWidget(forms.TextInput):
+    class Media:
+        js = (static('js/widgets/character_count.js'),)
+
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        max_length = final_attrs['maxlength']
+        maximum_text = _('Maximum: {max_length}').format(max_length=max_length)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = force_text(self._format_value(value))
+        return format_html('<input {} /><span>{}</span>',
+                           flatatt(final_attrs),
+                           maximum_text)
+
+
+class MultiLineWidget(forms.Textarea):
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, name=name)
+        return format_html('<textarea{}>\r\n{}</textarea><span>{}</span>',
+                           flatatt(final_attrs),
+                           force_text(value),
+                           _('No limit'))
+
+
+class SurveysFormBuilder(FormBuilder):
+    def create_singleline_field(self, field, options):
+        options['widget'] = CharacterCountWidget
+        return super(SurveysFormBuilder, self).create_singleline_field(field,
+                                                                       options)
+
+    def create_multiline_field(self, field, options):
+        options['widget'] = MultiLineWidget
+        return forms.CharField(**options)
+
+    @property
+    def formfields(self):
+        formfields = OrderedDict()
+
+        for field in self.fields:
+            options = self.get_field_options(field)
+
+            if field.field_type in self.FIELD_TYPES:
+                method = getattr(self,
+                                 self.FIELD_TYPES[field.field_type].__name__)
+                formfields[field.clean_name] = method(field, options)
+            else:
+                raise Exception("Unrecognised field type: " + field.field_type)
+
+        return formfields
 
 
 class CSVGroupCreationForm(forms.ModelForm):
