@@ -107,9 +107,9 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             self.survey.get_form_fields(),
             {self.second_field.clean_name: 'next'},
         )
-        self.assertEqual(paginator.previous_question_page, 1)
-        self.assertEqual(paginator.next_question_page, 2)
-        page = paginator.page(paginator.next_question_page)
+        self.assertEqual(paginator.previous_page, 1)
+        self.assertEqual(paginator.next_page, 2)
+        page = paginator.page(paginator.next_page)
         self.assertEqual(page.object_list, [self.third_field])
         self.assertEqual(page.number, 2)
 
@@ -140,16 +140,16 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
                 self.second_field.clean_name: 'question',
             }
         )
-        self.assertEqual(paginator.previous_question_page, 1)
+        self.assertEqual(paginator.previous_page, 1)
         self.assertEqual(paginator.last_question_index, 1)
-        self.assertEqual(paginator.next_question_page, 3)
+        self.assertEqual(paginator.next_page, 3)
         self.assertEqual(paginator.next_question_index, 3)
 
     def test_no_data_index(self):
         paginator = SkipLogicPaginator(self.survey.get_form_fields())
-        self.assertEqual(paginator.previous_question_page, 1)
+        self.assertEqual(paginator.previous_page, 1)
         self.assertEqual(paginator.last_question_index, 0)
-        self.assertEqual(paginator.next_question_page, 1)
+        self.assertEqual(paginator.next_page, 1)
         self.assertEqual(paginator.next_question_index, 0)
 
     def test_no_data_index_with_checkbox(self):
@@ -163,9 +163,9 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             self.survey.get_form_fields(),
             data={'csrf': 'dummy'},
         )
-        self.assertEqual(paginator.previous_question_page, 1)
+        self.assertEqual(paginator.previous_page, 1)
         self.assertEqual(paginator.last_question_index, 0)
-        self.assertEqual(paginator.next_question_page, 2)
+        self.assertEqual(paginator.next_page, 2)
         self.assertEqual(paginator.next_question_index, 1)
 
     def test_single_question_quiz_with_skip_logic_pages_correctly(self):
@@ -249,9 +249,9 @@ class TestSkipLogicEveryPage(TestCase, MoloTestCaseMixin):
             self.survey.get_form_fields(),
             {self.first_field.clean_name: 'question'},
         )
-        self.assertEqual(paginator.previous_question_page, 1)
-        self.assertEqual(paginator.next_question_page, 4)
-        page = paginator.page(paginator.next_question_page)
+        self.assertEqual(paginator.previous_page, 1)
+        self.assertEqual(paginator.next_page, 4)
+        page = paginator.page(paginator.next_page)
         self.assertEqual(page.object_list, [self.fourth_field])
         self.assertEqual(page.number, 4)
 
@@ -260,9 +260,9 @@ class TestSkipLogicEveryPage(TestCase, MoloTestCaseMixin):
             self.survey.get_form_fields(),
             {self.first_field.clean_name: 'next'},
         )
-        self.assertEqual(paginator.previous_question_page, 1)
-        self.assertEqual(paginator.next_question_page, 2)
-        page = paginator.page(paginator.next_question_page)
+        self.assertEqual(paginator.previous_page, 1)
+        self.assertEqual(paginator.next_page, 2)
+        page = paginator.page(paginator.next_page)
         self.assertEqual(page.object_list, [self.second_field])
         self.assertEqual(page.number, 2)
 
@@ -271,7 +271,7 @@ class TestSkipLogicEveryPage(TestCase, MoloTestCaseMixin):
             self.survey.get_form_fields(),
             {self.first_field.clean_name: 'survey'},
         )
-        self.assertEqual(paginator.previous_question_page, 1)
+        self.assertEqual(paginator.previous_page, 1)
         page = paginator.page(1)
         self.assertFalse(page.has_next())
 
@@ -300,6 +300,64 @@ class SkipLogicPaginatorMulti(TestCase, MoloTestCaseMixin):
             field_type='dropdown',
             skip_logic=skip_logic_data(field_choices, field_choices),
             required=True
+        )
+        self.last_field = MoloSurveyFormField.objects.create(
+            page=self.survey,
+            sort_order=3,
+            label='Your least favourite animal',
+            field_type='singleline',
+            required=True
+        )
+        self.paginator = SkipLogicPaginator(self.survey.get_form_fields())
+
+    def test_correct_num_pages(self):
+        self.assertEqual(self.paginator.num_pages, 3)
+
+    def test_page_breaks_correct(self):
+        self.assertEqual(self.paginator.page_breaks, [0, 1, 2, 3])
+
+    def test_first_page_correct(self):
+        self.assertEqual(
+            self.paginator.page(1).object_list,
+            [self.first_field],
+        )
+
+    def test_middle_page_correct(self):
+        self.assertEqual(
+            self.paginator.page(2).object_list,
+            [self.second_field],
+        )
+
+    def test_last_page_correct(self):
+        last_page = self.paginator.page(3)
+        self.assertEqual(last_page.object_list, [self.last_field])
+        self.assertFalse(last_page.has_next())
+
+
+class SkipLogicPaginatorPageBreak(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.survey = MoloSurveyPage(
+            title='Test Survey',
+            slug='test-survey',
+        )
+        self.section_index.add_child(instance=self.survey)
+        self.survey.save_revision().publish()
+        self.first_field = MoloSurveyFormField.objects.create(
+            page=self.survey,
+            sort_order=1,
+            label='Your other favourite animal',
+            field_type='singleline',
+            required=True,
+            page_break=True,
+        )
+        self.second_field = MoloSurveyFormField.objects.create(
+            page=self.survey,
+            sort_order=2,
+            label='Your favourite animal',
+            field_type='singleline',
+            required=True,
+            page_break=True,
         )
         self.last_field = MoloSurveyFormField.objects.create(
             page=self.survey,

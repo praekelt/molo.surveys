@@ -13,14 +13,17 @@
         question.questionSelectors = () => question.find('[id$="-question_1"]');
         question.questionSelectors = () => question.find('[id$="-question_1"]');
         question.answerHelpText = () => question.choices().find('.help');
+        question.addBlockLabel = () => question.find('.action-add-block-skip_logic').children('span');
         question.filterSelectors = sortOrder => question.questionSelectors().find(`option[value=${sortOrder}]`);
         question.hasSelected = sortOrder => {
             return question.questionSelectors().filter(':visible').is( function(index, element) {
                 return $(element).val() == sortOrder;
             } );
         };
+        question.setAddBlockLabel = newLabel => question.addBlockLabel().text(newLabel);
         return question;
     };
+
 
     window.question = function(id) {
         this.fieldID = id;
@@ -50,10 +53,19 @@
                 } else {
                     showChoices(duration);
                 };
-                if (thisQuestion.fieldSelect().val() == 'checkbox') {
+                // Set the help text for "checkbox"
+                if (thisQuestion.fieldSelect().val() === 'checkbox') {
                     thisQuestion.answerHelpText().show();
                 } else {
                     thisQuestion.answerHelpText().hide();
+                }
+                // Set the label for the stream field add block for "checkboxes".
+                // Set it to "choice" since there's no skip logic setting and
+                // calling it skip logic has a little sense.
+                if (thisQuestion.fieldSelect().val() === 'checkboxes') {
+                    thisQuestion.setAddBlockLabel('Choice')
+                } else {
+                    thisQuestion.setAddBlockLabel('Skip Logic')
                 }
             };
 

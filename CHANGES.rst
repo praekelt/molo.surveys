@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+5.9.10
+-----
+- Add page break setting
+- Add different label for checkboxes instead of skip logic
+
 5.9.9
 -----
 - Bug Fix: Issue with static wrapper

@@ -12,7 +12,7 @@
   {% endif %}
   {% if user.is_authenticated and user.is_active or request.is_preview or self.allow_anonymous_submissions %}
     {% if form %}
-      <form class="surveys__form" action="{% pageurl self %}{% if self.multi_step or self.has_skip_logic %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
+      <form class="surveys__form" action="{% pageurl self %}{% if self.multi_step or self.has_page_breaks %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
         {% csrf_token %}
         {{ form.media }}
         {% for field in form %}

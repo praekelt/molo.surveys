@@ -350,7 +350,7 @@ class MoloSurveyPage(
         context = self.get_context(request)
         context['form'] = form
         context['fields_step'] = step
-        context['is_intermediate_step'] = step.has_next()
+        context['is_intermediate_step'] = step.possibly_has_next()
 
         return render(
             request,
@@ -359,15 +359,18 @@ class MoloSurveyPage(
         )
 
     @cached_property
-    def has_skip_logic(self):
-        return any(field.has_skipping for field in self.get_form_fields())
+    def has_page_breaks(self):
+        return any(
+            field.has_skipping or field.page_break
+            for field in self.get_form_fields()
+        )
 
     def serve(self, request, *args, **kwargs):
         if not self.allow_multiple_submissions_per_user \
                 and self.has_user_submitted_survey(request, self.id):
             return render(request, self.template, self.get_context(request))
 
-        if self.has_skip_logic or self.multi_step:
+        if self.has_page_breaks or self.multi_step:
             return self.serve_questions(request)
 
         if request.method == 'POST':
@@ -398,6 +401,21 @@ class SurveyTermsConditions(Orderable):
         'terms_and_conditions', 'core.FooterPage')]
 
 
+class QuestionPaginationMixin(models.Model):
+    page_break = models.BooleanField(
+        default=False,
+        help_text=_(
+            'Inserts a page break which puts the next question onto a new page'
+        )
+    )
+
+    class Meta:
+        abstract = True
+
+
+surveys_models.AbstractFormField.panels.append(FieldPanel('page_break'))
+
+
 class AdminLabelMixin(models.Model):
     admin_label = models.CharField(
         max_length=256,
@@ -410,12 +428,10 @@ class AdminLabelMixin(models.Model):
         abstract = True
 
 
+surveys_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
 surveys_models.AbstractFormField._meta.get_field('label').verbose_name = (
     'Question'
 )
-
-
-surveys_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
 
 
 class SkipLogicMixin(models.Model):
@@ -468,7 +484,8 @@ class SkipLogicMixin(models.Model):
         return super(SkipLogicMixin, self).save(*args, **kwargs)
 
 
-class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin, AbstractFormField):
+class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
+                          QuestionPaginationMixin, AbstractFormField):
     page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
 
     class Meta(AbstractFormField.Meta):
@@ -597,6 +614,7 @@ class PersonalisableSurvey(MoloSurveyPage):
 
 
 class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
+                                    QuestionPaginationMixin,
                                     AbstractFormField):
     """
     Form field that has a segment assigned.
