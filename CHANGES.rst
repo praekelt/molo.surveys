@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+5.9.8
+-----
+- Bug Fix: Issue with static wrapper
+
 5.9.7
 -----
 - Add survey response rule
