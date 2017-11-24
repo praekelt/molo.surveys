@@ -4,7 +4,6 @@ from collections import defaultdict, OrderedDict
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.exceptions import ValidationError
 from django.forms.utils import ErrorList, flatatt
 from django.utils.encoding import force_text
@@ -20,7 +19,7 @@ from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 
 class CharacterCountWidget(forms.TextInput):
     class Media:
-        js = (static('js/widgets/character_count.js'),)
+        js = ('js/widgets/character_count.js',)
 
     def render(self, name, value, attrs=None):
         if value is None:
