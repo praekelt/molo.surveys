@@ -16,6 +16,15 @@
         {% csrf_token %}
         {{ form.media }}
         {% for field in form %}
+          {% if fields_step %}
+            <h4 class="surveys__question-title">
+              Question {{ fields_step.paginator.answered|length|add:forloop.counter }}
+            </h4>
+          {% else %}
+            <h4 class="surveys__question-title">
+              Question {{ forloop.counter }}
+            </h4>
+          {% endif %}
           <fieldset>
               <div class="input-group">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
