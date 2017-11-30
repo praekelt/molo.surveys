@@ -1,12 +1,21 @@
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 
 from molo.core.models import SiteLanguageRelation, Main, Languages, ArticlePage
 from molo.core.tests.base import MoloTestCaseMixin
-from molo.surveys.models import (MoloSurveyPage, MoloSurveyFormField,
-                                 SurveysIndexPage)
-
+from molo.surveys.models import (
+    MoloSurveyPage,
+    MoloSurveyFormField,
+    SurveysIndexPage,
+    PersonalisableSurvey,
+    PersonalisableSurveyFormField,
+)
+from wagtail_personalisation.models import Segment
+from wagtail_personalisation.rules import UserIsLoggedInRule
 
 User = get_user_model()
 
@@ -60,6 +69,32 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
             required=True
         )
         return molo_survey_page, molo_survey_form_field
+
+    def create_personalisable_molo_survey_page(self, parent, **kwargs):
+        # create segment for personalisation
+        test_segment = Segment.objects.create(name="Test Segment")
+        UserIsLoggedInRule.objects.create(
+            segment=test_segment,
+            is_logged_in=True)
+
+        personalisable_survey = PersonalisableSurvey(
+            title='Test Survey', slug='test-survey',
+            intro='Introduction to Test Survey ...',
+            thank_you_text='Thank you for taking the Test Survey',
+            **kwargs
+        )
+
+        parent.add_child(instance=personalisable_survey)
+        personalisable_survey.save_revision().publish()
+
+        molo_survey_form_field = PersonalisableSurveyFormField.objects.create(
+            field_type='singleline',
+            label='Question 1',
+            admin_label='question_1',
+            page=personalisable_survey,
+            segment=test_segment)
+
+        return personalisable_survey, molo_survey_form_field
 
     def test_convert_to_article(self):
         molo_survey_page, molo_survey_form_field = \
@@ -123,7 +158,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         # it should not show convert to article as there is already article
         self.assertNotContains(response, 'Convert to Article')
 
-    def test_export_submission(self):
+    def test_export_submission_standard_survey(self):
         molo_survey_page, molo_survey_form_field = \
             self.create_molo_survey_page(parent=self.section_index)
 
@@ -143,4 +178,37 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'Submission Date')
         self.assertNotContains(response, molo_survey_form_field.label)
         self.assertContains(response, molo_survey_form_field.admin_label)
+        self.assertContains(response, answer)
+
+    def test_export_submission_personalisable_survey(self):
+        molo_survey_page, molo_survey_form_field = (
+            self.create_personalisable_molo_survey_page(
+                parent=self.section_index))
+
+        answer = 'PYTHON'
+
+        molo_survey_page.get_submission_class().objects.create(
+            form_data=json.dumps({"question-1": answer},
+                                 cls=DjangoJSONEncoder),
+            page=molo_survey_page,
+            user=self.user
+        )
+
+        self.client.force_login(self.super_user)
+        response = self.client.get(
+            '/admin/surveys/submissions/{}/'.format(molo_survey_page.id),
+            {'action': 'CSV'},
+        )
+
+        self.assertEquals(response.status_code, 200)
+        self.assertContains(response, 'Username')
+        self.assertContains(response, 'Submission Date')
+        self.assertNotContains(response, molo_survey_form_field.label)
+
+        self.assertContains(
+            response,
+            '{} ({})'.format(molo_survey_form_field.admin_label,
+                             molo_survey_form_field.segment.name))
+
+        self.assertContains(response, self.user.username)
         self.assertContains(response, answer)

@@ -58,6 +58,11 @@ class SurveysFormBuilder(FormBuilder):
 
     @property
     def formfields(self):
+        '''
+        Override parent function in order to ensure that the
+        overridden create_..._field methods are referenced
+        instead of the parent class methods.
+        '''
         formfields = OrderedDict()
 
         for field in self.fields:

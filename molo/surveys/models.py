@@ -89,7 +89,7 @@ def create_survey_index_pages(sender, instance, **kwargs):
     if not instance.get_children().filter(
             title='Surveys').exists():
         survey_index = SurveysIndexPage(
-            title='Surveys', slug=('surveys-%s' % (
+            title='Surveys', slug=('surveys-{}'.format(
                 generate_slug(instance.title), )))
         instance.add_child(instance=survey_index)
         survey_index.save_revision().publish()
@@ -268,7 +268,7 @@ class MoloSurveyPage(
         When the last step is submitted correctly, the whole form is saved in
         the DB.
         """
-        session_key_data = 'survey_data-%s' % self.pk
+        session_key_data = 'survey_data-{}'.format(self.pk)
         survey_data = json.loads(request.session.get(session_key_data, '{}'))
 
         paginator = SkipLogicPaginator(
@@ -366,8 +366,8 @@ class MoloSurveyPage(
         )
 
     def serve(self, request, *args, **kwargs):
-        if not self.allow_multiple_submissions_per_user \
-                and self.has_user_submitted_survey(request, self.id):
+        if (not self.allow_multiple_submissions_per_user and
+                self.has_user_submitted_survey(request, self.id)):
             return render(request, self.template, self.get_context(request))
 
         if self.has_page_breaks or self.multi_step:
@@ -582,15 +582,16 @@ class PersonalisableSurvey(MoloSurveyPage):
         if there's one associated.
         """
         data_fields = [
+            ('username', _('Username')),
             ('created_at', _('Submission Date')),
         ]
 
         # Add segment name to a field label if it is segmented.
         for field in self.get_form_fields():
-            label = field.label
+            label = field.admin_label
 
             if field.segment:
-                label = '%s (%s)' % (label, field.segment.name)
+                label = '{} ({})'.format(label, field.segment.name)
 
             data_fields.append((field.clean_name, label))
 
@@ -631,7 +632,7 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     ] + AbstractFormField.panels
 
     def __str__(self):
-        return '%s - %s' % (self.page, self.label)
+        return '{} - {}'.format(self.page, self.label)
 
     class Meta(AbstractFormField.Meta):
         verbose_name = _('personalisable form field')

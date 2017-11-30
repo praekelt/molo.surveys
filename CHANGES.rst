@@ -1,12 +1,16 @@
 CHANGE LOG
 ==========
 
+5.9.12
+------
+- Bug Fix: Fix csv headers and columns for personalisable surveys
+
 5.9.11
------
+------
 - Bug Fix: Fix question order numbering
 
 5.9.10
------
+------
 - Add page break setting
 - Add different label for checkboxes instead of skip logic
 
