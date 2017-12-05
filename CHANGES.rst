@@ -1,6 +1,99 @@
 CHANGE LOG
 ==========
 
+6.0.0
+-----
+- Official release for Molo Surveys 6.0.0
+- Dropped support for Django 1.10
+
+6.0.0-beta.1
+------------
+- Upgrade to Django 1.0, Molo 6x
+
+5.9.12
+------
+- Bug Fix: Fix csv headers and columns for personalisable surveys
+
+5.9.11
+------
+- Bug Fix: Fix question order numbering
+
+5.9.10
+------
+- Add page break setting
+- Add different label for checkboxes instead of skip logic
+
+5.9.9
+-----
+- Bug Fix: Issue with static wrapper
+
+5.9.8
+-----
+- [ERROR]
+- Intended changes not added to release
+
+5.9.7
+-----
+- Add survey response rule
+- Add character limits to multiline text inputs
+- Bug Fix: Fix visitor rule not updating
+
+5.9.6
+-----
+- Bug Fix: Tackle MultiValueKeyError exception when checkboxes answer is empty
+
+5.9.5
+-----
+- Bug Fix: Make sure Comment Count Ruls is surface in Combination Rule
+
+5.9.4
+-----
+- Bug Fix: Handle case where single nested logic block is given to the Combination Rule
+
+5.9.3
+-----
+- Add admin label to survey questions
+
+5.9.2
+-----
+- Added a filter to check if a form field is a checkbox
+
+5.9.1
+-----
+- Bug Fix: Update wagtail-personalisation-molo which adds in collectstatic
+- Change NestedBlocks to Nested Blocks in Admin UI
+- Bug Fix:  Ensure that 'Add Rule Combination' button only appears when there is no Rule Combination
+- Add description for how Rule Combination works
+
+5.9.0
+-----
+- Added static and dynamic segments
+- Changed dependency on wagtail personalisation to a forked version
+- Update user privacy
+
+5.8.2
+--------
+- Bug Fix: fixed string replacement bug in combination rule javascript
+
+5.8.1
+--------
+- Fixed Combination Rule clean method for checking rule operator ordering
+- Bug Fix: removed reference to non-existent migration
+
+5.8.0
+--------
+- Added Combination Rule to allow combining rules within a segment
+- Bug Fix: renamed migration
+
+5.7.0
+--------
+- Added Article Tag Rule to allow segmenting on article visits
+- Added ability to skip questions and surveys based on user's response
+
+5.6.5
+-----
+- Bug Fix: get the correct index page for the correct site when converting YWC to an article
+
 5.6.4
 -----
 - Bug Fix: add yourwords check to surveys list

@@ -81,7 +81,8 @@ def submission_article(request, survey_id, submission_id):
         page=survey_page).filter(pk=submission_id).first()
     if not submission.article_page:
         survey_index_page = (
-            SurveysIndexPage.objects.live().first())
+            SurveysIndexPage.objects.descendant_of(
+                request.site.root_page).live().first())
         body = []
         for value in submission.get_data().values():
             body.append({"type": "paragraph", "value": str(value)})
