@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from django import forms
 from django.apps import apps
 from django.core.exceptions import ValidationError
@@ -6,9 +8,40 @@ from django.utils import six
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, PageChooserPanel
+from wagtail.wagtailcore.blocks.stream_block import StreamBlockValidationError
+from wagtail.wagtailadmin.edit_handlers import (
+    FieldPanel,
+    FieldRowPanel,
+    PageChooserPanel,
+    StreamFieldPanel,
+)
+from wagtail_personalisation.rules import AbstractBaseRule, VisitCountRule
 
-from wagtail_personalisation.rules import AbstractBaseRule
+from molo.core.models import ArticlePageTags
+
+from .edit_handlers import TagPanel
+
+from molo.surveys import blocks
+
+
+# Filer the Visit Count Page only by articles
+VisitCountRule._meta.verbose_name = 'Page Visit Count Rule'
+
+
+# Add ordering to the base class
+AbstractBaseRule.__old_subclasses__ = AbstractBaseRule.__subclasses__
+
+
+def __ordered_subclasses__(cls):
+    subclasses = cls.__old_subclasses__()
+    for i, item in enumerate(subclasses):
+        if not hasattr(item, 'order'):
+            item.order = (i + 1) * 100
+
+    return sorted(subclasses, key=attrgetter('order'))
+
+
+AbstractBaseRule.__subclasses__ = classmethod(__ordered_subclasses__)
 
 
 class SurveySubmissionDataRule(AbstractBaseRule):
@@ -205,11 +238,41 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         }
 
 
+class SurveyResponseRule(AbstractBaseRule):
+    survey = models.ForeignKey('MoloSurveyPage',
+                               verbose_name=_('survey'),
+                               on_delete=models.CASCADE)
+
+    panels = [
+        PageChooserPanel('survey')
+    ]
+
+    class Meta:
+        verbose_name = _('Survey response rule')
+
+    def test_user(self, request):
+        if not request.user.is_authenticated():
+            return False
+
+        submission_class = self.survey.get_submission_class()
+
+        return submission_class.objects.filter(
+            user=request.user,
+            page=self.survey,
+        ).exists()
+
+    def description(self):
+        return {
+            'title': _('Based on responses to surveys.'),
+            'value': _('Have responsed to: %s') % (
+                self.survey,
+            )
+        }
+
+
 class GroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
-    group = models.ForeignKey('auth.Group', on_delete=models.PROTECT,
-                              help_text=_('User must be part of this group to '
-                                          'activate the rule.'))
+    group = models.ForeignKey('surveys.segmentusergroup')
 
     panels = [
         FieldPanel('group')
@@ -230,4 +293,176 @@ class GroupMembershipRule(AbstractBaseRule):
             return False
 
         # Check whether user is part of a group
-        return request.user.groups.filter(id=self.group_id).exists()
+        return request.user.segment_groups.filter(id=self.group_id).exists()
+
+
+class ArticleTagRule(AbstractBaseRule):
+    order = 410
+    EQUALS = 'eq'
+    GREATER_THAN = 'gt'
+    LESS_THAN = 'lt'
+
+    OPERATORS = {
+        EQUALS: lambda a, b: a == b,
+        GREATER_THAN: lambda a, b: a > b,
+        LESS_THAN: lambda a, b: a < b,
+    }
+
+    OPERATOR_CHOICES = (
+        (GREATER_THAN, _('more than')),
+        (LESS_THAN, _('less than')),
+        (EQUALS, _('equal to')),
+    )
+
+    tag = models.ForeignKey(
+        'core.Tag',
+        on_delete=models.CASCADE,
+        help_text=_(
+            'The number in the bracket indicates the number of articles '
+            'that have the tag.'
+        )
+    )
+
+    operator = models.CharField(
+        _('operator'),
+        max_length=3,
+        choices=OPERATOR_CHOICES,
+        default=GREATER_THAN,
+    )
+    count = models.PositiveIntegerField()
+
+    # Naive datetimes as we are not storing the datetime based on the users
+    # timezone.
+    date_from = models.DateTimeField(blank=True, null=True)
+    date_to = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text=_(
+            'All times are UTC. Leave both fields blank to search all time.'
+        ),
+    )
+
+    panels = [
+        TagPanel('tag'),
+        FieldRowPanel(
+            [
+                FieldPanel('operator'),
+                FieldPanel('count'),
+            ]
+        ),
+        FieldPanel('date_from'),
+        FieldPanel('date_to'),
+    ]
+
+    class Meta:
+        verbose_name = _('Article tag rule')
+
+    def clean(self):
+        super(ArticleTagRule, self).clean()
+        if self.date_from and self.date_to:
+            if self.date_from > self.date_to:
+                raise ValidationError(
+                    {
+                        'date_from': [_('Date from must be before date to.')],
+                        'date_to': [_('Date from must be before date to.')],
+                    }
+                )
+
+        if hasattr(self, 'tag'):
+            if self.count > ArticlePageTags.objects.filter(
+                    tag=self.tag
+            ).count():
+                raise ValidationError(
+                    {
+                        'count': [_(
+                            'Count can not exceed the number of articles.'
+                        )],
+                    }
+                )
+
+    def test_user(self, request):
+        from wagtail_personalisation.adapters import get_segment_adapter
+        operator = self.OPERATORS[self.operator]
+        adapter = get_segment_adapter(request)
+        visit_count = adapter.get_tag_count(
+            self.tag,
+            self.date_from,
+            self.date_to,
+        )
+
+        return operator(visit_count, self.count)
+
+    def description(self):
+        return {
+            'title': _('These users visited {}').format(
+                self.tag
+            ),
+            'value': _('{} {} times').format(
+                self.get_operator_display(),
+                self.count
+            ),
+        }
+
+
+class CombinationRule(AbstractBaseRule):
+    body = blocks.StreamField([
+        ('Rule', blocks.RuleSelectBlock()),
+        ('Operator', blocks.AndOrBlock()),
+        ('NestedLogic', blocks.LogicBlock())
+    ])
+
+    panels = [
+        StreamFieldPanel('body'),
+    ]
+
+    def description(self):
+        return {
+            'title': _(
+                'Based on whether they satisfy a '
+                'particular combination of rules'),
+        }
+
+    def clean(self):
+        super(CombinationRule, self).clean()
+        if len(self.body.stream_data) > 0:
+            if isinstance(self.body.stream_data[0], dict):
+                newData = [block['type'] for block in self.body.stream_data]
+            elif isinstance(self.body.stream_data[0], tuple):
+                newData = [block[0] for block in self.body.stream_data]
+
+            if (len(newData) - 1) % 2 != 0:
+                raise StreamBlockValidationError(non_block_errors=[_(
+                    'Rule Combination must follow the <Rule/NestedLogic>'
+                    '<Operator> <Rule/NestedLogic> pattern.')])
+
+            if len(newData) == 1:
+                if newData[0] == 'NestedLogic':
+                    pass
+                else:
+                    raise StreamBlockValidationError(non_block_errors=[_(
+                        'Rule Combination must follow the <Rule/NestedLogic> '
+                        '<Operator> <Rule/NestedLogic> pattern.')])
+            else:
+                iterations = (len(newData) - 1) / 2
+                for i in range(iterations):
+                    first_rule_index = i * 2
+                    operator_index = (i * 2) + 1
+                    second_rule_index = (i * 2) + 2
+
+                    if not (
+                        (newData[first_rule_index] == 'Rule' or
+                         newData[first_rule_index] == 'NestedLogic') and
+                        (newData[operator_index] == 'Operator') and
+                        (newData[second_rule_index] == 'Rule' or
+                            newData[second_rule_index] == 'NestedLogic')):
+                        raise StreamBlockValidationError(non_block_errors=[_(
+                            'Rule Combination must follow the '
+                            '<Rule/NestedLogic> '
+                            '<Operator> <Rule/NestedLogic> pattern.')])
+        else:
+            raise StreamBlockValidationError(non_block_errors=[_(
+                'Rule Combination must follow the <Rule/NestedLogic>'
+                '<Operator> <Rule/NestedLogic> pattern.')])
+
+    class Meta:
+        verbose_name = _('Rule Combination')

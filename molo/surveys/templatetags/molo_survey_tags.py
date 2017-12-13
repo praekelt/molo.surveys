@@ -1,4 +1,5 @@
 from django import template
+from django.forms.fields import MultipleChoiceField
 
 from copy import copy
 from wagtail.wagtailcore.models import Page
@@ -81,10 +82,11 @@ def surveys_list_headline(context):
 
 @register.inclusion_tag('surveys/surveys_list.html', takes_context=True)
 def surveys_list(context, pk=None, only_linked_surveys=False,
-                 only_direct_surveys=False):
+                 only_direct_surveys=False, only_yourwords=False):
     context = get_survey_list(context,
                               only_linked_surveys=only_linked_surveys,
-                              only_direct_surveys=only_direct_surveys)
+                              only_direct_surveys=only_direct_surveys,
+                              only_yourwords=only_yourwords)
     return add_form_objects_to_surveys(context)
 
 
@@ -126,3 +128,8 @@ def surveys_list_for_pages(context, pk=None, page=None):
         'surveys': get_pages(context, surveys, locale_code)
     })
     return add_form_objects_to_surveys(context)
+
+
+@register.filter(name='is_multiple_choice_field')
+def is_multiple_choice_field(value):
+    return isinstance(value.field, MultipleChoiceField)
