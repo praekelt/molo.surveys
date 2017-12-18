@@ -926,3 +926,70 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, self.skip_logic_form_field.label)
         self.assertNotContains(response, self.molo_survey_form_field.label)
         self.assertContains(response, self.molo_survey_page.submit_text)
+
+    def test_skip_logic_required_with_radio_button_field(self):
+        self.user = User.objects.create_user(
+            username='tester',
+            email='tester@example.com',
+            password='tester')
+        self.client.login(username='tester', password='tester')
+        survey = MoloSurveyPage(
+            title='Test Survey With Redio Button',
+            slug='testw-survey-with-redio-button',
+        )
+
+        another_survey = MoloSurveyPage(
+            title='Anotherw Test Survey',
+            slug='anotherw-test-survey',
+        )
+        self.section_index.add_child(instance=survey)
+        survey.save_revision().publish()
+        self.section_index.add_child(instance=another_survey)
+        another_survey.save_revision().publish()
+
+        field_choices = ['next', 'end']
+
+        third_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=4,
+            label='A random animal',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(
+                field_choices,
+                field_choices,
+            ),
+            required=True
+        )
+        first_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=1,
+            label='Your other favourite animal',
+            field_type='radio',
+            skip_logic=skip_logic_data(
+                field_choices + ['question', 'survey'],
+                field_choices + ['question', 'survey'],
+                question=third_field,
+                survey=another_survey,
+            ),
+            required=True
+        )
+        second_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=2,
+            label='Your favourite animal',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(
+                field_choices,
+                field_choices,
+            ),
+            required=True
+        )
+
+        response = self.client.post(
+            survey.url + '?p=2',
+            {another_survey: ''},
+            follow=True,
+        )
+        self.assertContains(response, 'required')
+        self.assertNotContains(response, second_field.label)
+        self.assertContains(response, first_field.label)

@@ -285,6 +285,8 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.mk_main()
         self.request_factory = RequestFactory()
         self.request = self.request_factory.get('/')
+        self.request.user = get_user_model().objects.create_user(
+            username='tester', email='tester@example.com', password='tester')
         middleware = SessionMiddleware()
         middleware.process_request(self.request)
         self.request.session.save()

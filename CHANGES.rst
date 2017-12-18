@@ -1,6 +1,33 @@
 CHANGE LOG
 ==========
 
+6.1.3
+-----
+- Bug Fix: Include Include Survey Response Rule in Combination Rule
+
+6.1.2
+-----
+- Bug Fix: Show form validation error when no redio button choice has been selected in skip logic
+
+6.1.1
+-----
+- Minor improvement: Segments with ArticleTagRule using PersistentSurveysSegmentsAdapter now
+  retrieve data from the model rather than the session.
+
+6.1.0
+-----
+- New feature: PersistentSurveysSegmentsAdapter can be used instead of SurveysSegmentsAdapter to
+  store ArticleTagRule data in a model.
+
+6.0.0
+-----
+- Official release for Molo Surveys 6.0.0
+- Dropped support for Django 1.10
+
+6.0.0-beta.1
+------------
+- Upgrade to Django 1.0, Molo 6x
+
 5.9.12
 ------
 - Bug Fix: Fix csv headers and columns for personalisable surveys
