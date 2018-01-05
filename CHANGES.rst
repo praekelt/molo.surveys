@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.1.4
+-----
+- Bug Fix: Prevent 404 errors when attempting to access edit view on segments
+
 6.1.3
 -----
 - Bug Fix: Include Include Survey Response Rule in Combination Rule
