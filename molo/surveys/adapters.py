@@ -2,6 +2,8 @@ from collections import defaultdict
 import datetime
 
 from wagtail_personalisation.adapters import SessionSegmentsAdapter
+from django.apps import apps
+from django.db.models import Count
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 
@@ -169,3 +171,71 @@ class SurveysSegmentsAdapter(SessionSegmentsAdapter):
             )
 
             return evaluate(nested_list_of_booleans)
+
+
+class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
+    '''
+    Implements a segments adapter which includes support for persistence.
+
+    Does not support requests without a user property or anonymous users to
+    reduce unnecessary database writes and reads.
+
+    self.request.user comes from Django's AuthenticationMiddleware - we defend
+    against the middleware not being present or not working by returning early.
+
+    Todo: currently only partially implemented so that we can start collecting
+          data as quickly as possible.
+    '''
+
+    def add_page_visit(self, page):
+        '''
+        Persist pageview data in a model.
+        '''
+        super(PersistentSurveysSegmentsAdapter, self).add_page_visit(page)
+
+        if not hasattr(self.request, 'user'):
+            return
+
+        if isinstance(page.specific, ArticlePage):
+            MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
+            user = self.request.user
+
+            if user.is_authenticated():
+                for navigation_tag in page.nav_tags.all():
+                    pageview = MoloSurveyPageView.objects.create(
+                        user=user,
+                        tag=navigation_tag.tag.specific,
+                        page=page.specific,
+                    )
+                    pageview.save()
+
+    def get_tag_count(self, tag, date_from=None, date_to=None):
+        '''
+        Fetch the number of times a user has viewed a given tag
+        within the date period, grouped uniquely by article.
+        '''
+        if not hasattr(self.request, 'user'):
+            return 0
+
+        user = self.request.user
+
+        if user.is_anonymous():
+            return 0
+
+        MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
+
+        query_parameters = {
+            'user': user,
+            'tag': tag.specific,
+        }
+
+        if date_from:
+            query_parameters['visited_at__gte'] = date_from
+
+        if date_to:
+            query_parameters['visited_at__lte'] = date_to
+
+        pageviews = MoloSurveyPageView.objects.filter(**query_parameters)
+        unique_pages = pageviews.values('page_id').annotate(Count('page_id'))
+
+        return unique_pages.count()

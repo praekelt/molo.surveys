@@ -64,6 +64,7 @@ $(function(){
     'Comment Data Rule',
     'Profile Data Rule',
     'Survey Submission Data Rule',
+    'Survey Response Rule',
     'Group Membership Rule',
     'Comment Count Rule',
   ]
