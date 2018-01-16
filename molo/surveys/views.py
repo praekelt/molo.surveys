@@ -67,7 +67,7 @@ class SurveySuccess(TemplateView):
             for question, answers in results.items():
                 total = sum(answers.values())
                 for key in answers.keys():
-                    answers[key] = (answers[key] * 100) / total
+                    answers[key] = int((answers[key] * 100) / total)
         context.update({'self': survey, 'results': results})
         return context
 
