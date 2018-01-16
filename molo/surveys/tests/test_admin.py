@@ -133,17 +133,18 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
             page=molo_survey_page).first()
         self.assertEquals(article.title, article.slug)
         self.assertEquals(submission.article_page, article)
-        self.assertEquals(article.body.stream_data, [
-            {u"type": u"paragraph",
-             u"id": submission.article_page.body.stream_data[0]['id'],
-             u'value': u'tester'},
-            {u'type': u'paragraph',
-             u'id': submission.article_page.body.stream_data[1]['id'],
-             u'value': u'python'},
-            {u'type': u'paragraph',
-             u'id': submission.article_page.body.stream_data[2]['id'],
-             u'value': str(submission.created_at)}
-        ])
+
+        self.assertEqual(
+            sorted([
+                body_elem['type'] for body_elem in article.body.stream_data]),
+            ['paragraph', 'paragraph', 'paragraph'],
+        )
+
+        self.assertEqual(
+            sorted([
+                body_elem['value'] for body_elem in article.body.stream_data]),
+            [str(submission.created_at), 'python', 'tester'],
+        )
 
         # first time it goes to the move page
         self.assertEquals(
