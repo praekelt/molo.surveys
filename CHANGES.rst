@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+6.3.0
+-----
+- Add support for Python 3
+- Improve templates
+
 6.2.0
 -----
 - add support for Django 1.11
