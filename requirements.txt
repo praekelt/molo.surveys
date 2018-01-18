@@ -1,4 +1,4 @@
-molo.core<7.0.0,>=6.0.0
+molo.core<7.0.0,>=6.3.1
 celery<4.0
 django-celery
 wagtailsurveys==0.1.1
@@ -6,4 +6,5 @@ wagtail-personalisation-molo==0.10.3
 django==1.10.8
 psycopg2
 html5lib==0.9999999
+six==1.11.0
 Unidecode==0.04.16
