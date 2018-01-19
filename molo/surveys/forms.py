@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 
 from wagtail.wagtailadmin.forms import WagtailAdminPageForm
-from wagtailsurveys.forms import FormBuilder
+from wagtail.wagtailforms.forms import FormBuilder
 
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 
@@ -273,7 +273,7 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
 
 
 class MoloSurveyForm(BaseMoloSurveyForm):
-    form_field_name = 'survey_form_fields'
+    form_field_name = 'form_fields'
     survey_clean_methods = [
         'check_doesnt_loop_to_self',
         'check_doesnt_link_to_personalised_survey',

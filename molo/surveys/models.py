@@ -39,8 +39,8 @@ from wagtail.wagtailcore.models import Orderable, Page
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
-from wagtailsurveys import models as surveys_models
-from wagtailsurveys.models import AbstractFormField
+from wagtail.wagtailforms import models as surveys_models
+from wagtail.wagtailforms.models import AbstractFormField
 
 from .blocks import SkipLogicField, SkipState, SkipLogicStreamPanel
 from .forms import (  # noqa
@@ -96,7 +96,7 @@ def create_survey_index_pages(sender, instance, **kwargs):
 
 
 class MoloSurveyPage(
-        TranslatablePageMixinNotRoutable, surveys_models.AbstractSurvey):
+        TranslatablePageMixinNotRoutable, surveys_models.AbstractForm):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
@@ -173,18 +173,18 @@ class MoloSurveyPage(
         help_text=_(
             "Styling options that can be applied to this page "
             "and all its descendants"))
-    content_panels = surveys_models.AbstractSurvey.content_panels + [
+    content_panels = surveys_models.AbstractForm.content_panels + [
         FieldPanel('intro', classname='full'),
         ImageChooserPanel('image'),
         StreamFieldPanel('content'),
-        InlinePanel('survey_form_fields', label='Form fields'),
+        InlinePanel('form_fields', label='Form fields'),
         FieldPanel('thank_you_text', classname='full'),
         FieldPanel('submit_text', classname='full'),
         FieldPanel('homepage_button_text', classname='full'),
         InlinePanel('terms_and_conditions', label="Terms and Conditions"),
     ]
 
-    settings_panels = surveys_models.AbstractSurvey.settings_panels + [
+    settings_panels = surveys_models.AbstractForm.settings_panels + [
         MultiFieldPanel([
             FieldPanel('allow_anonymous_submissions'),
             FieldPanel('allow_multiple_submissions_per_user'),
@@ -511,7 +511,7 @@ class SkipLogicMixin(models.Model):
 
 class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                           QuestionPaginationMixin, AbstractFormField):
-    page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
+    page = ParentalKey(MoloSurveyPage, related_name='form_fields')
 
     class Meta(AbstractFormField.Meta):
         pass
@@ -553,7 +553,7 @@ def get_personalisable_survey_content_panels():
 
     for panel in MoloSurveyPage.content_panels:
         if isinstance(panel, InlinePanel) and \
-                panel.relation_name == 'survey_form_fields':
+                panel.relation_name == 'form_fields':
             panel = InlinePanel('personalisable_survey_form_fields',
                                 label=_('personalisable form fields'))
         panels.append(panel)
