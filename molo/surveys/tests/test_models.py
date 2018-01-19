@@ -49,6 +49,13 @@ class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
             field_type='singleline',
             required=True
         )
+        self.positive_number_field = MoloSurveyFormField.objects.create(
+            page=self.survey,
+            sort_order=3,
+            label='How old are you',
+            field_type='positive_number',
+            required=True
+        )
 
     def test_choices_updated_from_streamfield_on_save(self):
         self.assertEqual(
@@ -64,6 +71,9 @@ class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
 
     def test_normal_field_is_not_skippable(self):
         self.assertFalse(self.normal_field.has_skipping)
+
+    def test_positive_number_field_is_not_skippable(self):
+        self.assertFalse(self.positive_number_field.has_skipping)
 
     def test_only_next_doesnt_skip(self):
         self.assertFalse(self.choice_field.has_skipping)

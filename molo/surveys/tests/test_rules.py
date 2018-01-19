@@ -56,13 +56,18 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             field_type='checkbox', label='Checbox Field', page=self.survey)
         self.number = PersonalisableSurveyFormField.objects.create(
             field_type='number', label='Number Field', page=self.survey)
+        self.positive_number = PersonalisableSurveyFormField.objects.create(
+            field_type='positive_number', label='Positive Number Field',
+            page=self.survey)
 
         # Create survey submission
         data = {
             self.singleline_text.clean_name: 'super random text',
             self.checkboxes.clean_name: ['choice 3', 'choice 1'],
             self.checkbox.clean_name: True,
-            self.number.clean_name: 5
+            self.number.clean_name: 5,
+            self.positive_number.clean_name: 8,
+
         }
         form = self.survey.get_form(
             data, page=self.survey, user=self.request.user)
@@ -175,6 +180,22 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='4',
             field_name=self.number.clean_name)
+
+        self.assertFalse(rule.test_user(self.request))
+
+    def test_passing_positive_number_rule(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='8',
+            field_name=self.positive_number.clean_name)
+
+        self.assertTrue(rule.test_user(self.request))
+
+    def test_failing_positive_number_rule(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='4',
+            field_name=self.positive_number.clean_name)
 
         self.assertFalse(rule.test_user(self.request))
 
