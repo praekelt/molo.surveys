@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.3.1
+-----
+- Bug Fix: Ensure segmentation rules are static
+
 6.3.0
 -----
 - Add support for Python 3
