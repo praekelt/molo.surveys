@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.3.2
+-----
+- Upgrade wagtail-personalisation-molo to 0.10.4
+
 6.3.1
 -----
 - Bug Fix: Ensure segmentation rules are static
