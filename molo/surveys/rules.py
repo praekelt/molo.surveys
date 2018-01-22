@@ -45,6 +45,8 @@ AbstractBaseRule.__subclasses__ = classmethod(__ordered_subclasses__)
 
 
 class SurveySubmissionDataRule(AbstractBaseRule):
+    static = True
+
     EQUALS = 'eq'
     CONTAINS = 'in'
 
@@ -239,6 +241,8 @@ class SurveySubmissionDataRule(AbstractBaseRule):
 
 
 class SurveyResponseRule(AbstractBaseRule):
+    static = True
+
     survey = models.ForeignKey('MoloSurveyPage',
                                verbose_name=_('survey'),
                                on_delete=models.CASCADE)
@@ -272,6 +276,8 @@ class SurveyResponseRule(AbstractBaseRule):
 
 class GroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
+    static = True
+
     group = models.ForeignKey('surveys.segmentusergroup')
 
     panels = [
@@ -297,6 +303,8 @@ class GroupMembershipRule(AbstractBaseRule):
 
 
 class ArticleTagRule(AbstractBaseRule):
+    static = True
+
     order = 410
     EQUALS = 'eq'
     GREATER_THAN = 'gt'
