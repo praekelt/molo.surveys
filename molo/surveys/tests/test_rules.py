@@ -74,6 +74,14 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.survey.refresh_from_db()
 
+    def test_survey_data_rule_is_static(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name=self.singleline_text.clean_name)
+
+        self.assertTrue(rule.static)
+
     def test_passing_string_rule_with_equal_operator(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
@@ -215,6 +223,10 @@ class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
         submission.objects.create(user=user, page=survey,
                                   form_data=json.dumps(data))
 
+    def test_survey_response_rule_is_static(self):
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertTrue(rule.static)
+
     def test_user_not_submitted(self):
         rule = SurveyResponseRule(survey=self.survey)
         self.assertFalse(rule.test_user(self.request))
@@ -259,6 +271,10 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.group = SegmentUserGroup.objects.create(name='Super Test Group!')
 
         self.request.user.segment_groups.add(self.group)
+
+    def test_group_membership_rule_is_static(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertTrue(rule.static)
 
     def test_user_membership_rule_when_they_are_member(self):
         rule = GroupMembershipRule(group=self.group)
@@ -312,6 +328,10 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
                 page=new_article,
             )
         return new_article
+
+    def test_article_tag_rule_is_static(self):
+        rule = ArticleTagRule(tag=self.tag, count=1)
+        self.assertTrue(rule.static)
 
     def test_user_visits_page_with_tag(self):
         rule = ArticleTagRule(

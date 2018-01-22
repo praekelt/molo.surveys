@@ -415,18 +415,22 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/')
         self.assertContains(
             response,
-            '<a href="/surveys-main-1/test-survey/" class="footer-link">'
-            '<img src="/static/img/clipboard.png" width="auto" '
-            'class="menu-list__item--icon" />Test Survey</a>', html=True)
+            '<a href="/surveys-main-1/test-survey/" class="footer-link"> '
+            '<div class="footer-link__thumbnail-icon"> '
+            '<img src="/static/img/clipboard.png" '
+            'class="menu-list__item--icon" /></div> '
+            '<span class="footer-link__title">Test Survey', html=True)
 
         self.client.get('/locale/fr/')
         response = self.client.get('/')
         self.assertContains(
             response,
-            '<a href="/surveys-main-1/french-translation-of-test-survey/" '
-            'class="footer-link"><img src="/static/img/clipboard.png" '
-            'width="auto" class="menu-list__item--icon" />'
-            'French translation of Test Survey</a>', html=True)
+            '<a href="/surveys-main-1/french-translation-of-test-survey/"'
+            'class="footer-link"> <div class="footer-link__thumbnail-icon"> '
+            '<img src="/static/img/clipboard.png" '
+            'class="menu-list__item--icon" /></div> '
+            '<span class="footer-link__title">'
+            'French translation of Test Survey', html=True)
 
     def test_survey_template_tag_on_section_page(self):
         molo_survey_page, molo_survey_form_field = \

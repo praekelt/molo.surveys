@@ -1,6 +1,19 @@
 CHANGE LOG
 ==========
 
+6.3.1
+-----
+- Bug Fix: Ensure segmentation rules are static
+
+6.3.0
+-----
+- Add support for Python 3
+- Improve templates
+
+6.2.0
+-----
+- add support for Django 1.11
+
 6.1.4
 -----
 - Bug Fix: Prevent 404 errors when attempting to access edit view on segments
