@@ -15,8 +15,12 @@ An implementation of wagtailsurveys as a Molo plugin
 
 Installation::
 
-   pip install molo.surveys
+   pip install -e ../molo.surveys for local package installs
+   pip install ../molo.surveys for global package installs
 
+Testing:
+   read the .travis.yml file
+   follow the instructions under the scripts file
 
 Django setup::
 
