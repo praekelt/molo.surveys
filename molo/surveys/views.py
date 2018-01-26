@@ -23,6 +23,7 @@ from wagtail_personalisation.models import Segment
 
 from .forms import CSVGroupCreationForm
 
+
 class SegmentCountForm(SegmentAdminForm):
     class Meta:
         model = Segment

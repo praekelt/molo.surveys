@@ -1,3 +1,4 @@
+import json
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -10,9 +11,13 @@ from molo.surveys.models import (
     MoloSurveyFormField,
     MoloSurveyPage,
     SurveysIndexPage,
+    PersonalisableSurvey,
+    PersonalisableSurveyFormField
 )
 
 from .utils import skip_logic_data
+
+from .constants import SEGMENT_FORM_DATA
 
 User = get_user_model()
 
@@ -1056,3 +1061,36 @@ class TestPositiveNumberView(TestCase, MoloTestCaseMixin):
 
         self.assertContains(
             response, survey.thank_you_text)
+
+
+class SegmentCountView(TestCase, MoloTestCaseMixin):
+
+    def setUp(self):
+        self.mk_main()
+        self.user = User.objects.create_user(
+            username='tester', email='tester@example.com', password='tester')
+        # Create survey
+        self.personalisable_survey = PersonalisableSurvey(title='Test Survey')
+        SurveysIndexPage.objects.first().add_child(
+            instance=self.personalisable_survey
+        )
+        self.personalisable_survey.save_revision()
+        PersonalisableSurveyFormField.objects.create(
+            field_type='singleline', label='Singleline Text',
+            page=self.personalisable_survey
+        )
+
+
+    def submit_survey(self, survey, user):
+        submission = survey.get_submission_class()
+        data = {field.clean_name: 'super random text'
+                for field in survey.get_form_fields()}
+        submission.objects.create(user=user, page=self.personalisable_survey,
+                                  form_data=json.dumps(data))
+
+
+    def test_segment_user_count(self):
+        self.submit_survey(self.personalisable_survey, self.user)
+        response = self.client.post( '/surveys/count/', SEGMENT_FORM_DATA)
+
+        self.assertContains(response, '"segmentusercount": 1')
