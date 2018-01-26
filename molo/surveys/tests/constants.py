@@ -34,7 +34,8 @@ SEGMENT_FORM_DATA = {
     'wagtail_personalisation_userisloggedinrule_related-TOTAL_FORMS': ['0'],
     'wagtail_personalisation_userisloggedinrule_related-INITIAL_FORMS': ['0'],
     'wagtail_personalisation_userisloggedinrule_related-MIN_NUM_FORMS': ['0'],
-    'wagtail_personalisation_userisloggedinrule_related-MAX_NUM_FORMS': ['1000'],
+    'wagtail_personalisation_userisloggedinrule_related-MAX_NUM_FORMS': [
+        '1000'],
     'surveys_surveysubmissiondatarule_related-TOTAL_FORMS': ['0'],
     'surveys_surveysubmissiondatarule_related-INITIAL_FORMS': ['0'],
     'surveys_surveysubmissiondatarule_related-MIN_NUM_FORMS': ['0'],

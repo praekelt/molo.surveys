@@ -1080,7 +1080,6 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
             page=self.personalisable_survey
         )
 
-
     def submit_survey(self, survey, user):
         submission = survey.get_submission_class()
         data = {field.clean_name: 'super random text'
@@ -1088,9 +1087,8 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
         submission.objects.create(user=user, page=self.personalisable_survey,
                                   form_data=json.dumps(data))
 
-
     def test_segment_user_count(self):
         self.submit_survey(self.personalisable_survey, self.user)
-        response = self.client.post( '/surveys/count/', SEGMENT_FORM_DATA)
+        response = self.client.post('/surveys/count/', SEGMENT_FORM_DATA)
 
         self.assertContains(response, '"segmentusercount": 1')
