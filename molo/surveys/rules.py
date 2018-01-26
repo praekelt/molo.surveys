@@ -170,14 +170,18 @@ class SurveySubmissionDataRule(AbstractBaseRule):
                 'expected_response': error
             })
 
-    def test_user(self, request):
-        # Must be logged-in to use this rule
-        if not request.user.is_authenticated():
+    def test_user(self, request, user=None):
+        if request:
+            # When testing a request they must be logged-in to use this rule
+            if not request.user.is_authenticated():
+                return False
+            user = request.user
+
+        if not user:
             return False
 
         try:
-            survey_submission = self.get_survey_submission_of_user(
-                request.user)
+            survey_submission = self.get_survey_submission_of_user(user)
         except self.survey_submission_model.DoesNotExist:
             # No survey found so return false
             return False
@@ -254,14 +258,18 @@ class SurveyResponseRule(AbstractBaseRule):
     class Meta:
         verbose_name = _('Survey response rule')
 
-    def test_user(self, request):
-        if not request.user.is_authenticated():
+    def test_user(self, request, user=None):
+        if request:
+            if not request.user.is_authenticated():
+                return False
+            user = request.user
+        if not user:
             return False
 
         submission_class = self.survey.get_submission_class()
 
         return submission_class.objects.filter(
-            user=request.user,
+            user=user,
             page=self.survey,
         ).exists()
 
@@ -293,13 +301,17 @@ class GroupMembershipRule(AbstractBaseRule):
             'value': _('Member of: "%s"') % self.group
         }
 
-    def test_user(self, request):
-        # Ignore not-logged in users
-        if not request.user.is_authenticated():
+    def test_user(self, request, user=None):
+        if request:
+            # Ignore not-logged in users when testing requests
+            if not request.user.is_authenticated():
+                return False
+            user = request.user
+        if not user:
             return False
 
         # Check whether user is part of a group
-        return request.user.segment_groups.filter(id=self.group_id).exists()
+        return user.segment_groups.filter(id=self.group_id).exists()
 
 
 class ArticleTagRule(AbstractBaseRule):
@@ -388,7 +400,13 @@ class ArticleTagRule(AbstractBaseRule):
                     }
                 )
 
-    def test_user(self, request):
+    def test_user(self, request, user=None):
+        if user:
+            # This rule currently does not support testing a user directly
+            # TODO: Make this test a user directly when the rule uses
+            # historical data
+            return False
+
         from wagtail_personalisation.adapters import get_segment_adapter
         operator = self.OPERATORS[self.operator]
         adapter = get_segment_adapter(request)
