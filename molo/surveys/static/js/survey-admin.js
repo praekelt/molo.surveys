@@ -259,6 +259,7 @@ $(function(){
     }
   }
 
+
   $('#segmentcountbutton').on('click',function(event){
         event.preventDefault();
         var elem = $(this);
@@ -267,8 +268,13 @@ $(function(){
         $.post(url, send_data, function(data) {
           $("#count-result").html(data.segmentusercount);
       }, 'json');
+
       elem.css({'backgroundColor':'#f37e77','borderColor':'#f37e77'});
+      setTimeout(function(){
+          elem.css({'backgroundColor':'','borderColor':''})
+      }, 2000);
     });
+
 
   addHideToRuleCombinationFunctionality();
 
