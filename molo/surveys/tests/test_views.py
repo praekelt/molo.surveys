@@ -997,3 +997,62 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'required')
         self.assertNotContains(response, second_field.label)
         self.assertContains(response, first_field.label)
+
+
+class TestPositiveNumberView(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.main = Main.objects.all().first()
+        self.language_setting = Languages.objects.create(
+            site_id=self.main.get_site().pk)
+        self.english = SiteLanguageRelation.objects.create(
+            language_setting=self.language_setting,
+            locale='en',
+            is_active=True)
+
+        self.surveys_index = SurveysIndexPage(
+            title='Surveys',
+            slug='surveys')
+        self.main.add_child(instance=self.surveys_index)
+        self.surveys_index.save_revision().publish()
+
+    def test_positive_number_field_validation(self):
+        self.user = User.objects.create_user(
+            username='tester',
+            email='tester@example.com',
+            password='tester')
+        self.client.login(username='tester', password='tester')
+        survey = MoloSurveyPage(
+            title='Test Survey With Positive Number',
+            slug='testw-survey-with-positive-number',
+            thank_you_text='Thank you for taking the survey',
+        )
+        self.surveys_index.add_child(instance=survey)
+        survey.save_revision().publish()
+
+        positive_number_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=1,
+            label='Your lucky number?',
+            field_type='positive_number',
+            required=True
+        )
+
+        response = self.client.post(
+            survey.url + '?p=2',
+            {positive_number_field.clean_name: '-1'},
+            follow=True,
+        )
+
+        self.assertContains(response, positive_number_field.label)
+        self.assertContains(
+            response, 'Ensure this value is greater than or equal to 0')
+
+        response = self.client.post(
+            survey.url + '?p=2',
+            {positive_number_field.clean_name: '1'},
+            follow=True,
+        )
+
+        self.assertContains(
+            response, survey.thank_you_text)
