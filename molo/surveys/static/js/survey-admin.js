@@ -267,10 +267,7 @@ $(function(){
         $.post(url, send_data, function(data) {
           $("#count-result").html(data.segmentusercount);
       }, 'json');
-      elem.css({
-          'backgroundColor':'#f37e77',
-          'borderColor':'#f37e77'
-      });
+      elem.css({'backgroundColor':'#f37e77','borderColor':'#f37e77'});
     });
 
   addHideToRuleCombinationFunctionality();
