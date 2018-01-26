@@ -2,10 +2,18 @@
 {% load i18n %}
 
 {% block titletag %}{{ view.get_meta_title }}{% endblock %}
-
 {% block extra_css %}
     {% include "wagtailadmin/pages/_editor_css.html" %}
     {{ view.media.css }}
+    <style type="text/css">
+        .matching-users-result__result {
+            margin-left: 1.5%;
+        }
+        .matching-users-result__label {
+            font-weight: bold;
+            margin: 0;
+        }
+    </style>
 {% endblock %}
 
 {% block extra_js %}
@@ -37,16 +45,16 @@
                         {% endblock %}
                     </li>
 
-                    <li class="preview" style="margin-right: 1.5%;">
+                    <li class="preview">
                         <div class="dropup dropdown-button match-width">
                             <button id="segmentcountbutton" class="button icon" tabindex="3" count-href="{% url 'molo.surveys:segmentusercount' %} " data-clicked-text="{% trans 'counting...' %}">
                                 {% trans 'count matching users' %}
                             </button>
-                         </div>
+                        </div>
                     </li>
-                    <li class="actions">
-                        <em>{% trans 'Number of matching users:' %}</em>
-                        <p id="count-result" style="margin-bottom:0">0</p>
+                    <li class="matching-users-result__result actions">
+                        <p class="matching-users-result__label"><em>{% trans 'Number of matching users:' %}</em></p>
+                        <p id="count-result">-</p>
                     </li>
                 </ul>
             </footer>

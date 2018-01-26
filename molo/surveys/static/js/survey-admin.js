@@ -259,14 +259,19 @@ $(function(){
     }
   }
 
-  $('#segmentcountbutton').click(function(event){
-    event.preventDefault();
-    var url = $(this).attr("count-href");
-    var send_data = $("#create_form").serializeArray();
-    $.post(url, send_data, function(data) {
-      $("#count-result").html(data.segmentusercount);
-    }, 'json');
-  });
+  $('#segmentcountbutton').on('click',function(event){
+        event.preventDefault();
+        var elem = $(this);
+        var url = elem.attr("count-href");
+        var send_data = $("#create_form").serializeArray();
+        $.post(url, send_data, function(data) {
+          $("#count-result").html(data.segmentusercount);
+      }, 'json');
+      elem.css({
+          'backgroundColor':'#f37e77',
+          'borderColor':'#f37e77'
+      });
+    });
 
   addHideToRuleCombinationFunctionality();
 
