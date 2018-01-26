@@ -258,6 +258,16 @@ $(function(){
       });
     }
   }
+
+  $('#segmentcountbutton').click(function(event){
+    event.preventDefault();
+    var url = $(this).attr("count-href");
+    var send_data = $("#create_form").serializeArray();
+    $.post(url, send_data, function(data) {
+      $("#count-result").html(data.segmentusercount);
+    }, 'json');
+  });
+
   addHideToRuleCombinationFunctionality();
 
   initRuleIndex();
