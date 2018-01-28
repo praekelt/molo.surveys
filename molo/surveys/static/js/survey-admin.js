@@ -64,6 +64,7 @@ $(function(){
     'Comment Data Rule',
     'Profile Data Rule',
     'Survey Submission Data Rule',
+    'Survey Response Rule',
     'Group Membership Rule',
     'Comment Count Rule',
   ]
@@ -257,6 +258,24 @@ $(function(){
       });
     }
   }
+
+
+  $('#segmentcountbutton').on('click',function(event){
+        event.preventDefault();
+        var elem = $(this);
+        var url = elem.attr("count-href");
+        var send_data = $("#create_form").serializeArray();
+        $.post(url, send_data, function(data) {
+          $("#count-result").html(data.segmentusercount);
+      }, 'json');
+
+      elem.css({'backgroundColor':'#f37e77','borderColor':'#f37e77'});
+      setTimeout(function(){
+          elem.css({'backgroundColor':'','borderColor':''})
+      }, 2000);
+    });
+
+
   addHideToRuleCombinationFunctionality();
 
   initRuleIndex();

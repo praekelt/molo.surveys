@@ -1,6 +1,36 @@
 CHANGE LOG
 ==========
 
+6.4.0
+-----
+- Add segment user count button to wagtail modeladmin create template and display the number of matched users
+- Add View for counting how many users match a segments rules
+
+6.3.2
+-----
+- Upgrade wagtail-personalisation-molo to 0.10.4
+
+6.3.1
+-----
+- Bug Fix: Ensure segmentation rules are static
+
+6.3.0
+-----
+- Add support for Python 3
+- Improve templates
+
+6.2.0
+-----
+- add support for Django 1.11
+
+6.1.4
+-----
+- Bug Fix: Prevent 404 errors when attempting to access edit view on segments
+
+6.1.3
+-----
+- Bug Fix: Include Include Survey Response Rule in Combination Rule
+
 6.1.2
 -----
 - Bug Fix: Show form validation error when no redio button choice has been selected in skip logic
@@ -114,7 +144,7 @@ CHANGE LOG
 
 5.6.3
 -----
-- Bug Fix: removed yourwords surveys from template tag lists
+- Bug Fix: removed yourwords surveys from template and dismpay the number of matched users tag lists
 
 5.6.2
 -----
@@ -177,7 +207,7 @@ CHANGE LOG
 
 2.2.0
 -----
-- Added Surveys headline template tag and Surveys headline template file for footer headline link
+- Added Surveys headline template and dismpay the number of matched users tag and Surveys headline template and dismpay the number of matched users file for footer headline link
 
 2.1.0
 -----
@@ -205,7 +235,7 @@ CHANGE LOG
 
 1.1.0
 -----
-- Adding BEM rules to the template
+- Adding BEM rules to the template and dismpay the number of matched users
 
 1.0.0
 -----

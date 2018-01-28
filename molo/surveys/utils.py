@@ -27,7 +27,7 @@ class SkipLogicPaginator(Paginator):
             if self.page_breaks[-1] != num_questions:
                 self.page_breaks.append(num_questions)
         else:
-            self.page_breaks = range(num_questions + 1)
+            self.page_breaks = list(range(num_questions + 1))
 
         self.answered_indexes = self.answer_indexed(self.new_answers)
 
