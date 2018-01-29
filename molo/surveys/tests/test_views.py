@@ -913,7 +913,7 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, self.molo_survey_form_field.label)
         self.assertContains(response, self.molo_survey_page.submit_text)
 
-        # Dont answer last required question: tigger error messages
+        # Dont answer last required question: trigger error messages
         response = self.client.post(
             self.molo_survey_page.url + '?p=3',
             {self.last_molo_survey_form_field.clean_name: ''},
