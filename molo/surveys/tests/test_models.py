@@ -174,11 +174,12 @@ def create_molo_survey_page(parent, **kwargs):
 def create_survey(fields={}, **kwargs):
     survey = create_molo_survey_page(SurveysIndexPage.objects.first())
 
-    if not fields =={}:
+    if not fields == {}:
         num_questions = len(fields)
         for index, field in enumerate(reversed(fields)):
             sort_order = num_questions - (index + 1)
             create_molo_survey_form_field(survey, sort_order, field)
+
 
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
     def setUp(self):
@@ -194,14 +195,14 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
 
     def test_setup2(self):
         create_survey([{
-            "question": "Why do you feel that way about speaking your opinion?",
+            "question":
+                "Why do you feel that way about speaking your opinion?",
             "type": 'multiline',
             "required": False,
             "page_break": True,
         }, ])
 
         self.assertEquals(1, MoloSurveyPage.objects.count())
-
 
     def test_two_questions_in_one_step_when_one_required(self):
         create_survey([
@@ -220,13 +221,15 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
                 "page_break": False,
             },
             {
-                "question": "Why do you feel that way about speaking your opinion?",
+                "question":
+                    "Why do you feel that way about speaking your opinion?",
                 "type": 'multiline',
                 "required": False,
                 "page_break": True,
             },
             {
-                "question": "I am able to stand up for myself and what I believe in",
+                "question":
+                    "I am able to stand up for myself and what I believe in",
                 "type": 'radio',
                 "choices": ["Strongly disagree", "I don't know"],
                 "required": True,
@@ -285,7 +288,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'Next Question')
 
         response = self.client.post(survey.url + '?p=2', {
-            field_1.clean_name: field_1.skip_logic.stream_data[0]['value']['choice'],
+            field_1.clean_name:
+                field_1.skip_logic.stream_data[0]['value']['choice'],
         })
         self.assertContains(response, field_2.label)
         self.assertContains(response, field_3.label)
@@ -297,7 +301,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         self.assertContains(response, "This field is required")
 
         response = self.client.post(survey.url + '?p=3', {
-            field_2.clean_name: field_2.skip_logic.stream_data[0]['value']['choice'],
+            field_2.clean_name:
+                field_2.skip_logic.stream_data[0]['value']['choice'],
             field_3.clean_name: 'because ;)',
         })
 
@@ -307,7 +312,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         self.assertContains(response, "This field is required")
 
         response = self.client.post(survey.url + '?p=4', {
-            field_4.clean_name: field_4.skip_logic.stream_data[0]['value']['choice'],
+            field_4.clean_name:
+                field_4.skip_logic.stream_data[0]['value']['choice'],
         }, follow=True)
 
         self.assertContains(response, survey.thank_you_text)
@@ -329,7 +335,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
                 "page_break": False,
             },
             {
-                "question": "Why do you feel that way about speaking your opinion?",
+                "question":
+                    "Why do you feel that way about speaking your opinion?",
                 "type": 'multiline',
                 "required": False,
                 "page_break": False,
@@ -375,7 +382,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'Next Question')
 
         response = self.client.post(survey.url + '?p=2', {
-            field_1.clean_name: field_1.skip_logic.stream_data[0]['value']['choice'],
+            field_1.clean_name:
+                field_1.skip_logic.stream_data[0]['value']['choice'],
         })
         self.assertContains(response, field_2.label)
         self.assertContains(response, field_3.label)
@@ -386,7 +394,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
 
         self.assertContains(response, "This field is required")
         response = self.client.post(survey.url + '?p=3', {
-            field_2.clean_name: field_2.skip_logic.stream_data[0]['value']['choice'],
+            field_2.clean_name:
+                field_2.skip_logic.stream_data[0]['value']['choice'],
             field_3.clean_name: 'because ;)',
         }, follow=True)
         self.assertContains(response, survey.thank_you_text)

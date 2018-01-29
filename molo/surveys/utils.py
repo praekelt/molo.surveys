@@ -42,13 +42,11 @@ class SkipLogicPaginator(Paginator):
             # display one question per page
             self.page_breaks = list(range(num_questions + 1))
 
-
         # add the missing data
         self.new_answers.update({
             checkbox.clean_name: 'off'
             for checkbox in self.missing_checkboxes
         })
-
 
     def _get_page(self, *args, **kwargs):
         return SkipLogicPage(*args, **kwargs)
@@ -78,12 +76,14 @@ class SkipLogicPaginator(Paginator):
         last_answer = self.last_question_previous_page
         if last_answer >= 0:
             # It isn't the first page
-            return self.next_question_from_previous_index(last_answer, self.previous_answers)
+            return self.next_question_from_previous_index(
+                last_answer, self.previous_answers)
         return 0
 
     @cached_property
     def last_question_previous_page(self):
-        previous_answers_indexes = self.index_of_questions(self.previous_answers)
+        previous_answers_indexes = self.index_of_questions(
+            self.previous_answers)
         try:
             return max(previous_answers_indexes)
         except ValueError:
