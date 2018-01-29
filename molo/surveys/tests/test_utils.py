@@ -148,7 +148,6 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
     def test_no_data_index(self):
         paginator = SkipLogicPaginator(self.survey.get_form_fields())
         self.assertEqual(paginator.previous_page, 1)
-        self.assertEqual(paginator.last_question_index, 0)
         self.assertEqual(paginator.next_page, 1)
         self.assertEqual(paginator.next_question_index, 0)
 
