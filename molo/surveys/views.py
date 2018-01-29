@@ -13,12 +13,38 @@ from wagtail.wagtailcore.utils import cautious_slugify
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
+from django.http import JsonResponse
 from django.utils.translation import ugettext as _
 
 from wagtail.wagtailadmin import messages
 from wagtail.wagtailadmin.utils import permission_required
+from wagtail_personalisation.forms import SegmentAdminForm
+from wagtail_personalisation.models import Segment
 
 from .forms import CSVGroupCreationForm
+
+
+class SegmentCountForm(SegmentAdminForm):
+    class Meta:
+        model = Segment
+        fields = ['type', 'status', 'count', 'name', 'match_any']
+
+
+def get_segment_user_count(request):
+        f = SegmentCountForm(request.POST)
+        context = {}
+        if f.is_valid():
+            rules = [
+                form.instance for formset in f.formsets.values()
+                for form in formset
+                if form not in formset.deleted_forms
+            ]
+            count = f.count_matching_users(rules, f.instance.match_any)
+            context = {'segmentusercount': count}
+        else:
+            context = {'error': f.errors}
+
+        return JsonResponse(context)
 
 
 class SurveySuccess(TemplateView):
@@ -67,7 +93,7 @@ class SurveySuccess(TemplateView):
             for question, answers in results.items():
                 total = sum(answers.values())
                 for key in answers.keys():
-                    answers[key] = (answers[key] * 100) / total
+                    answers[key] = int((answers[key] * 100) / total)
         context.update({'self': survey, 'results': results})
         return context
 

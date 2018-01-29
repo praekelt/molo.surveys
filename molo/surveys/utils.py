@@ -40,7 +40,8 @@ class SkipLogicPaginator(Paginator):
                 self.page_breaks.append(num_questions)
         else:
             # display one question per page
-            self.page_breaks = range(num_questions + 1)
+            self.page_breaks = list(range(num_questions + 1))
+
 
         # add the missing data
         self.new_answers.update({

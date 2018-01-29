@@ -5,6 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import TestCase, RequestFactory
 from django.test.client import Client
+from django.utils.timezone import make_aware
 
 from wagtail_personalisation.rules import UserIsLoggedInRule
 
@@ -311,7 +312,7 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
         )
         self.assertEqual(self.adapter.get_tag_count(
             self.important_tag,
-            date_from=datetime(2099, 12, 31),
+            date_from=make_aware(datetime(2099, 12, 31)),
         ), 0)
 
     def test_get_tag_count_uses_date_to_if_provided(self):
@@ -322,7 +323,7 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
         )
         self.assertEqual(self.adapter.get_tag_count(
             self.important_tag,
-            date_to=datetime(2000, 1, 1),
+            date_to=make_aware(datetime(2000, 1, 1)),
         ), 0)
 
     def test_get_tag_count_groups_by_unique_article(self):
