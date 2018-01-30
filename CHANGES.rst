@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+6.4.2
+-----
+- Bug Fix: Display errors for Segment creation form when calculating the count
+- Bug Fix: Remove extra Positive Number survey field option
+
 6.4.1
 -----
 - Bug Fix: Fix skipping required question when two questions are in one step and one is required
