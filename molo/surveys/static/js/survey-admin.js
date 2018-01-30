@@ -266,7 +266,18 @@ $(function(){
         var url = elem.attr("count-href");
         var send_data = $("#create_form").serializeArray();
         $.post(url, send_data, function(data) {
-          $("#count-result").html(data.segmentusercount);
+          $(".error-message").remove();
+          $(".error").removeClass("error");
+          if (data.error != undefined) {
+            for (key in data.error) {
+              field = $("[name='" + key + "']");
+              field.after("<p class='error-message'><span>"+data.error[key]+"</span></p>");
+              field.closest("li").addClass("error");
+            }
+            $("#count-result").html("Please correct errors.");
+          } else {
+            $("#count-result").html(data.segmentusercount);
+          }
       }, 'json');
 
       elem.css({'backgroundColor':'#f37e77','borderColor':'#f37e77'});
