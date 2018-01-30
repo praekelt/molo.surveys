@@ -56,13 +56,18 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             field_type='checkbox', label='Checbox Field', page=self.survey)
         self.number = PersonalisableSurveyFormField.objects.create(
             field_type='number', label='Number Field', page=self.survey)
+        self.positive_number = PersonalisableSurveyFormField.objects.create(
+            field_type='positive_number', label='Positive Number Field',
+            page=self.survey)
 
         # Create survey submission
         data = {
             self.singleline_text.clean_name: 'super random text',
             self.checkboxes.clean_name: ['choice 3', 'choice 1'],
             self.checkbox.clean_name: True,
-            self.number.clean_name: 5
+            self.number.clean_name: 5,
+            self.positive_number.clean_name: 8,
+
         }
         form = self.survey.get_form(
             data, page=self.survey, user=self.request.user)
@@ -178,6 +183,22 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.assertFalse(rule.test_user(self.request))
 
+    def test_passing_positive_number_rule(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='8',
+            field_name=self.positive_number.clean_name)
+
+        self.assertTrue(rule.test_user(self.request))
+
+    def test_failing_positive_number_rule(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='4',
+            field_name=self.positive_number.clean_name)
+
+        self.assertFalse(rule.test_user(self.request))
+
     def test_not_logged_in_user_fails(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
@@ -190,6 +211,20 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         # Fails for logged-out user
         self.request.user = AnonymousUser()
         self.assertFalse(rule.test_user(self.request))
+
+    def test_test_user_without_request(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='er ra',
+            field_name=self.singleline_text.clean_name)
+        self.assertTrue(rule.test_user(None, self.request.user))
+
+    def test_test_user_without_user_or_request(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='er ra',
+            field_name=self.singleline_text.clean_name)
+        self.assertFalse(rule.test_user(None))
 
 
 class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
@@ -257,6 +292,16 @@ class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
         self.request.user = new_user
         self.assertTrue(rule.test_user(self.request))
 
+    def test_test_user_without_request(self):
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertTrue(rule.test_user(None, self.request.user))
+
+    def test_test_user_without_user_or_request(self):
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertFalse(rule.test_user(None))
+
 
 class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
     def setUp(self):
@@ -292,6 +337,14 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         rule = GroupMembershipRule(group=self.group)
 
         self.assertFalse(rule.test_user(self.request))
+
+    def test_test_user_without_request(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertTrue(rule.test_user(None, self.request.user))
+
+    def test_test_user_without_user_or_request(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertFalse(rule.test_user(None))
 
 
 class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):

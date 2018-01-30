@@ -1,6 +1,20 @@
 CHANGE LOG
 ==========
 
+6.4.2
+-----
+- Bug Fix: Display errors for Segment creation form when calculating the count
+- Bug Fix: Remove extra Positive Number survey field option
+
+6.4.1
+-----
+- Bug Fix: Fix skipping required question when two questions are in one step and one is required
+
+6.4.0
+-----
+- Add segment user count button to wagtail modeladmin create template and display the number of matched users
+- Add View for counting how many users match a segments rules
+
 6.3.2
 -----
 - Upgrade wagtail-personalisation-molo to 0.10.4
@@ -139,7 +153,7 @@ CHANGE LOG
 
 5.6.3
 -----
-- Bug Fix: removed yourwords surveys from template tag lists
+- Bug Fix: removed yourwords surveys from template and dismpay the number of matched users tag lists
 
 5.6.2
 -----
@@ -202,7 +216,7 @@ CHANGE LOG
 
 2.2.0
 -----
-- Added Surveys headline template tag and Surveys headline template file for footer headline link
+- Added Surveys headline template and dismpay the number of matched users tag and Surveys headline template and dismpay the number of matched users file for footer headline link
 
 2.1.0
 -----
@@ -230,7 +244,7 @@ CHANGE LOG
 
 1.1.0
 -----
-- Adding BEM rules to the template
+- Adding BEM rules to the template and dismpay the number of matched users
 
 1.0.0
 -----

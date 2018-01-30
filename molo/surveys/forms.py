@@ -56,6 +56,9 @@ class SurveysFormBuilder(FormBuilder):
         options['widget'] = MultiLineWidget
         return forms.CharField(**options)
 
+    def create_positive_number_field(self, field, options):
+        return forms.DecimalField(min_value=0, **options)
+
     @property
     def formfields(self):
         '''
@@ -64,6 +67,8 @@ class SurveysFormBuilder(FormBuilder):
         instead of the parent class methods.
         '''
         formfields = OrderedDict()
+        self.FIELD_TYPES.update({
+            'positive_number': self.create_positive_number_field})
 
         for field in self.fields:
             options = self.get_field_options(field)
