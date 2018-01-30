@@ -650,8 +650,6 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     """
     Form field that has a segment assigned.
     """
-    AbstractFormField.FORM_FIELD_CHOICES += (
-        ('positive_number', _("Positive Number")),)
     field_type = models.CharField(
         verbose_name=_('field type'),
         max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
