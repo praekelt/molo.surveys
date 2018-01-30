@@ -15,7 +15,7 @@ An implementation of wagtailsurveys as a Molo plugin
 
 Installation::
 
-   pip install -e
+   pip install molo.surveys
 
 Testing:
    read the .travis.yml file
