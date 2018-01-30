@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.4.1
+-----
+- Bug Fix: Fix skipping required question when two questions are in one step and one is required
+
 6.4.0
 -----
 - Add segment user count button to wagtail modeladmin create template and display the number of matched users
