@@ -48,7 +48,7 @@ def get_segment_user_count(request):
 
 
 class SurveySuccess(TemplateView):
-    template_name = "surveys/molo_survey_page_landing.html"
+    template_name = "surveys/molo_survey_page_success.html"
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
