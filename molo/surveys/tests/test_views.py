@@ -1091,4 +1091,17 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
         self.submit_survey(self.personalisable_survey, self.user)
         response = self.client.post('/surveys/count/', SEGMENT_FORM_DATA)
 
-        self.assertContains(response, '"segmentusercount": 1')
+        self.assertDictEqual(response.json(), {"segmentusercount": 1})
+
+    def test_segment_user_count_returns_errors(self):
+        self.submit_survey(self.personalisable_survey, self.user)
+        data = SEGMENT_FORM_DATA
+        data['name'] = [""]
+        data['surveys_surveyresponserule_related-0-survey'] = ['20']
+        response = self.client.post('/surveys/count/', data)
+
+        self.assertDictEqual(response.json(), {"errors": {
+            "surveys_surveyresponserule_related-0-survey": [
+                "Select a valid choice. That choice is not one of the "
+                "available choices."],
+            "name": ["This field is required."]}})

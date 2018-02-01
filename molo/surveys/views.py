@@ -42,7 +42,18 @@ def get_segment_user_count(request):
             count = f.count_matching_users(rules, f.instance.match_any)
             context = {'segmentusercount': count}
         else:
-            context = {'error': f.errors}
+            errors = f.errors
+            # Get the errors for the Rules forms
+            for formset in f.formsets.values():
+                if formset.has_changed():
+                    for form in formset:
+                        if form.errors:
+                            id_prefix = form.prefix
+                            for name, error in form.errors.items():
+                                input_name = id_prefix + "-%s" % name
+                                errors[input_name] = error
+
+            context = {'errors': errors}
 
         return JsonResponse(context)
 
