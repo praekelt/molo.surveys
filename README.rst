@@ -17,13 +17,27 @@ Installation::
 
    pip install molo.surveys
 
+Testing:
+   read the .travis.yml file
+   follow the instructions under the scripts file
 
 Django setup::
 
    INSTALLED_APPS = (
       'wagtailsurveys',
-      'molo.surveys'
+      'wagtail_personalisation',
+      'wagtailfontawesome',
+
    )
+
+
+In your urls.py::
+
+    url(
+        r"^(?P<slug>[\w-]+)/success/$",
+        SurveySuccess.as_view(),
+        name="success"
+    ),
 
 
 In your main.html::

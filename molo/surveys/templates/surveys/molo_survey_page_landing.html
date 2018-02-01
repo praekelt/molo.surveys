@@ -18,7 +18,7 @@
 		<h3 class="surveys__question">{{ question }}</h3>
 		{% for answer, count in answers.items %}
 		  <div class="surveys__answer">
-			<span>{{ answer }}</span> {{ count }}
+			<span>{{ answer }}</span> {{ count }}{% if self.show_results_as_percentage %}%{% endif %}
 		  </div>
 		{% endfor %}
 	{% endfor %}

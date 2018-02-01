@@ -2,6 +2,7 @@ sudo: false
 language: python
 python:
   - "2.7"
+  - "3.6"
 cache:
   directories:
     - $HOME/.pip-cache/
@@ -18,11 +19,14 @@ install:
   - pip install -e . --cache-dir $HOME/.pip-cache/
 script:
   - flake8 molo
-  - pip install molo.profiles
-  - molo scaffold testapp --require molo.surveys --include molo.profiles ^profiles/
+  - molo scaffold testapp --require molo.surveys --include molo.surveys ^surveys/
   - cp local_test_settings.py testapp/testapp/settings/local.py
+  - mkdir testapp/testapp/templates/
+  - mkdir testapp/testapp/templates/core
   - cp molo/surveys/test_templates/*.html testapp/testapp/templates/core/
   - cp molo/surveys/test_templates/base.html testapp/testapp/templates/base.html
+  - mkdir testapp/testapp/templates/wagtailsurveys
+  - cp molo/surveys/test_templates/wagtailsurveys/*.html testapp/testapp/templates/wagtailsurveys/
   - flake8 testapp
   - pip install -e testapp
   - py.test --cov=molo.surveys --cov-report=term
