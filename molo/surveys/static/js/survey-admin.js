@@ -268,10 +268,10 @@ $(function(){
         $.post(url, send_data, function(data) {
           $(".error-message").remove();
           $(".error").removeClass("error");
-          if (data.error != undefined) {
-            for (key in data.error) {
+          if (data.errors != undefined) {
+            for (key in data.errors) {
               field = $("[name='" + key + "']");
-              field.after("<p class='error-message'><span>"+data.error[key]+"</span></p>");
+              field.closest("div.field-content").append("<p class='error-message'><span>"+data.errors[key]+"</span></p>");
               field.closest("li").addClass("error");
             }
             $("#count-result").html("Please correct errors.");
