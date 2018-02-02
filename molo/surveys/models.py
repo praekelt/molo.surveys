@@ -36,7 +36,6 @@ from wagtail.wagtailadmin.edit_handlers import (
 from wagtail.wagtailcore import blocks
 from wagtail.wagtailcore.fields import StreamField
 from wagtail.wagtailcore.models import Orderable, Page
-from wagtail.wagtailimages.blocks import ImageChooserBlock
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
 from wagtailsurveys import models as surveys_models
@@ -116,10 +115,6 @@ class MoloSurveyPage(
     content = StreamField([
         ('heading', blocks.CharBlock(classname="full title")),
         ('paragraph', MarkDownBlock()),
-        #('image', ImageChooserBlock()),
-        #('list', blocks.ListBlock(blocks.CharBlock(label="Item"))),
-        #('numbered_list', blocks.ListBlock(blocks.CharBlock(label="Item"))),
-        #('page', blocks.PageChooserBlock()),
     ], verbose_name="Description", null=True, blank=True)
 
     thank_you_text = TextField(blank=True)
@@ -166,7 +161,8 @@ class MoloSurveyPage(
     your_words_competition = BooleanField(
         default=False,
         verbose_name='GCN Yourwords Competition',
-        help_text='This will display the correct template for GCN (Girl Contributor Network) yourwords competition'
+        help_text='This will display the correct template for GCN'
+                  '(Girl Contributor Network) yourwords competition'
     )
     extra_style_hints = models.TextField(
         default='',
