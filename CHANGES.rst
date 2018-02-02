@@ -1,6 +1,14 @@
 CHANGE LOG
 ==========
 
+6.4.3
+-----
+- Bug Fix: Display Rule errors on Segment creation page when calculating the count
+
+6.4.3
+-----
+- Template name: Rename SurveySuccess template name from molo_survey_page_landing to molo_survey_page_success
+
 6.4.2
 -----
 - Bug Fix: Display errors for Segment creation form when calculating the count
