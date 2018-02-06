@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.4.5
+-----
+- Bug Fix: stop using private API self.build_attrs() on form fields
+
 6.4.3
 -----
 - Bug Fix: Display Rule errors on Segment creation page when calculating the count
