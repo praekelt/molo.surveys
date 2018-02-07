@@ -1,5 +1,12 @@
 CHANGE LOG
 ==========
+6.4.6
+-----
+- Upgrade wagtail-personalisation-molo to 0.10.6
+
+6.4.5
+-----
+- Bug Fix: stop using private API self.build_attrs() on form fields
 
 6.4.3
 -----
