@@ -24,6 +24,7 @@ from molo.core.models import (
     TranslatablePageMixinNotRoutable,
     index_pages_after_copy,
 )
+from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
 from wagtail.wagtailadmin.edit_handlers import (
     FieldPanel,
@@ -66,12 +67,12 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
 
 
-class SurveysIndexPage(Page, PreventDeleteMixin):
+class SurveysIndexPage(MoloPage, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
