@@ -7,7 +7,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from molo.core.models import Main, Languages, SiteLanguageRelation
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.models import (MoloSurveyPage, MoloSurveyFormField,
-                                 SurveysIndexPage)
+                                 SurveysIndexPage, PersonalisableSurvey)
 
 from molo.surveys.templatetags.molo_survey_tags import get_survey_list
 
@@ -44,6 +44,30 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
             required=True
         )
         return molo_survey_page, molo_survey_form_field
+
+    def create_personalisable_survey(self,
+                                parent,
+                                title="Test Survey",
+                                slug="test-survey",
+                                **kwargs):
+        personalisable_survey = PersonalisableSurvey(
+            title=title,
+            slug=slug,
+            intro='Introduction to Test Survey ...',
+            thank_you_text='Thank you for taking the Test Survey',
+            **kwargs
+        )
+
+        parent.add_child(instance=personalisable_survey)
+        personalisable_survey.save_revision().publish()
+        survey_form_field = MoloSurveyFormField.objects.create(
+            page=personalisable_survey,
+            sort_order=1,
+            label='Your favourite animal',
+            field_type='singleline',
+            required=True
+        )
+        return personalisable_survey, survey_form_field
 
     def setUp(self):
         self.mk_main()
@@ -105,6 +129,18 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         self.translated_linked_survey = MoloSurveyPage.objects.get(
             slug='french-translation-of-linked-survey-title')
         self.translated_linked_survey.save_revision().publish()
+
+        self.personalisable_survey, personalisable_survey_form_field = (
+            self.create_personalisable_survey(
+                parent=self.surveys_index,
+                title="personalisable survey title",
+                slug="personalisable_survey_title",
+            ))
+        self.client.post(reverse(
+            'add_translation', args=[self.personalisable_survey.id, 'fr']))
+        self.translated_personalisable_survey = PersonalisableSurvey.objects.get(
+            slug='french-translation-of-personalisable-survey-title')
+        self.translated_personalisable_survey.save_revision().publish()
 
     def test_get_survey_list_default(self):
         context = Context({
@@ -183,3 +219,22 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
             context = get_survey_list(context,
                                       only_linked_surveys=True,
                                       only_direct_surveys=True,)
+
+    def test_get_survey_list_personalisable_survey(self):
+        context = Context({
+            'locale_code': 'en',
+            'request': self.request,
+        })
+        context = get_survey_list(context, personalisable_survey=True)
+        self.assertEqual(len(context['surveys']), 1)
+        self.assertTrue(self.direct_molo_survey_page not in context['surveys'])
+        self.assertTrue(self.personalisable_survey in context['surveys'])
+        context = Context({
+            'locale_code': 'fr',
+            'request': self.request,
+        })
+        context = get_survey_list(context, personalisable_survey=True)
+        self.assertEqual(len(context['surveys']), 1)
+        self.assertTrue(
+            self.translated_direct_survey not in context['surveys'])
+        self.assertTrue(self.translated_personalisable_survey in context['surveys'])
