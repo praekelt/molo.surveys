@@ -1,6 +1,35 @@
 CHANGE LOG
 ==========
 
+6.6.0
+-----
+- Add personalisable_survey check to surveys list
+
+6.5.0
+-----
+- Replace Page with MoloPage proxy
+
+6.4.6
+-----
+- Upgrade wagtail-personalisation-molo to 0.10.6
+
+6.4.5
+-----
+- Bug Fix: stop using private API self.build_attrs() on form fields
+
+6.4.3
+-----
+- Bug Fix: Display Rule errors on Segment creation page when calculating the count
+
+6.4.3
+-----
+- Template name: Rename SurveySuccess template name from molo_survey_page_landing to molo_survey_page_success
+
+6.4.2
+-----
+- Bug Fix: Display errors for Segment creation form when calculating the count
+- Bug Fix: Remove extra Positive Number survey field option
+
 6.4.1
 -----
 - Bug Fix: Fix skipping required question when two questions are in one step and one is required

@@ -42,13 +42,24 @@ def get_segment_user_count(request):
             count = f.count_matching_users(rules, f.instance.match_any)
             context = {'segmentusercount': count}
         else:
-            context = {'error': f.errors}
+            errors = f.errors
+            # Get the errors for the Rules forms
+            for formset in f.formsets.values():
+                if formset.has_changed():
+                    for form in formset:
+                        if form.errors:
+                            id_prefix = form.prefix
+                            for name, error in form.errors.items():
+                                input_name = id_prefix + "-%s" % name
+                                errors[input_name] = error
+
+            context = {'errors': errors}
 
         return JsonResponse(context)
 
 
 class SurveySuccess(TemplateView):
-    template_name = "surveys/molo_survey_page_landing.html"
+    template_name = "surveys/molo_survey_page_success.html"
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
