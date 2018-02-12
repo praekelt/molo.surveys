@@ -97,7 +97,8 @@ def create_survey_index_pages(sender, instance, **kwargs):
 
 
 class MoloSurveyPage(
-        TranslatablePageMixinNotRoutable, surveys_models.AbstractSurvey):
+        TranslatablePageMixinNotRoutable, MoloPage,
+        surveys_models.AbstractSurvey):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
@@ -106,7 +107,7 @@ class MoloSurveyPage(
 
     base_form_class = MoloSurveyForm
 
-    intro = TextField(blank=True)
+    introduction = TextField(blank=True)
     image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -114,7 +115,7 @@ class MoloSurveyPage(
         on_delete=models.SET_NULL,
         related_name='+'
     )
-    content = StreamField([
+    description = StreamField([
         ('heading', blocks.CharBlock(classname="full title")),
         ('paragraph', MarkDownBlock()),
         ('image', ImageChooserBlock()),
@@ -175,13 +176,13 @@ class MoloSurveyPage(
             "Styling options that can be applied to this page "
             "and all its descendants"))
     content_panels = surveys_models.AbstractSurvey.content_panels + [
-        FieldPanel('intro', classname='full'),
         ImageChooserPanel('image'),
-        StreamFieldPanel('content'),
-        InlinePanel('survey_form_fields', label='Form fields'),
-        FieldPanel('thank_you_text', classname='full'),
-        FieldPanel('submit_text', classname='full'),
+        FieldPanel('introduction', classname='full'),
         FieldPanel('homepage_button_text', classname='full'),
+        StreamFieldPanel('description'),
+        InlinePanel('survey_form_fields', label='Form fields'),
+        FieldPanel('submit_text', classname='full'),
+        FieldPanel('thank_you_text', classname='full'),
         InlinePanel('terms_and_conditions', label="Terms and Conditions"),
     ]
 
