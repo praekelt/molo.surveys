@@ -1,8 +1,9 @@
 CHANGE LOG
 ==========
-6.4.7
+
+6.5.0
 -----
-- Upgrade wagtail-personalisation-molo to 0.10.7
+- Replace Page with MoloPage proxy
 
 6.4.6
 -----
