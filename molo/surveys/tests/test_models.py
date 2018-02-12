@@ -160,6 +160,7 @@ def create_molo_survey_page(parent, **kwargs):
     molo_survey_page = MoloSurveyPage(
         title='Test Survey', slug='test-survey',
         introduction='Introduction to Test Survey ...',
+        homepage_introduction='Shorter homepage introduction',
         thank_you_text='Thank you for taking the Test Survey',
         submit_text='survey submission text',
         **kwargs
@@ -179,6 +180,7 @@ def create_survey(fields={}, **kwargs):
         for index, field in enumerate(reversed(fields)):
             sort_order = num_questions - (index + 1)
             create_molo_survey_form_field(survey, sort_order, field)
+    return survey
 
 
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
@@ -203,6 +205,13 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         }, ])
 
         self.assertEquals(1, MoloSurveyPage.objects.count())
+
+    def test_homepage_introduction(self):
+        survey = create_survey()
+        survey.allow_anonymous_submissions = True
+        survey.save()
+        response = self.client.get('/')
+        self.assertContains(response, 'Shorter homepage introduction')
 
     def test_two_questions_in_one_step_when_one_required(self):
         create_survey([
