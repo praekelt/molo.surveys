@@ -29,7 +29,7 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         molo_survey_page = MoloSurveyPage(
             title=title,
             slug=slug,
-            intro='Introduction to Test Survey ...',
+            introduction='Introduction to Test Survey ...',
             thank_you_text='Thank you for taking the Test Survey',
             **kwargs
         )
@@ -54,7 +54,7 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         personalisable_survey = PersonalisableSurvey(
             title=title,
             slug=slug,
-            intro='Introduction to Test Survey ...',
+            introduction='Introduction to Test Survey ...',
             thank_you_text='Thank you for taking the Test Survey',
             **kwargs
         )

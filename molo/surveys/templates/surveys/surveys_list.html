@@ -7,7 +7,7 @@
 			<div class="surveys surveys{{survey.get_effective_extra_style_hints}}">
 				<div class="surveys__item">
 					<h1 class="surveys__title">{{ survey.title }}</h1>
-					<h4 class="surveys__intro">{{ survey.intro }}</h4>
+					<h4 class="surveys__intro">{{ survey.introduction }}</h4>
 
 					{% if not survey.display_survey_directly %}
 					{% trans "Take The Survey" as button_text %}
