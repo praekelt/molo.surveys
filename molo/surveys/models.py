@@ -24,6 +24,7 @@ from molo.core.models import (
     TranslatablePageMixinNotRoutable,
     index_pages_after_copy,
 )
+from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
 from wagtail.wagtailadmin.edit_handlers import (
     FieldPanel,
@@ -35,7 +36,7 @@ from wagtail.wagtailadmin.edit_handlers import (
 )
 from wagtail.wagtailcore import blocks
 from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.models import Orderable, Page
+from wagtail.wagtailcore.models import Orderable
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -66,12 +67,12 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
 
 
-class SurveysIndexPage(Page, PreventDeleteMixin):
+class SurveysIndexPage(MoloPage, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
