@@ -138,9 +138,9 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
             ))
         self.client.post(reverse(
             'add_translation', args=[self.personalisable_survey.id, 'fr']))
-        self.translated_personalisable_survey = PersonalisableSurvey.objects.get(
+        self.trans_personalisable_survey = PersonalisableSurvey.objects.get(
             slug='french-translation-of-personalisable-survey-title')
-        self.translated_personalisable_survey.save_revision().publish()
+        self.trans_personalisable_survey.save_revision().publish()
 
     def test_get_survey_list_default(self):
         context = Context({
@@ -227,7 +227,8 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         })
         context = get_survey_list(context, personalisable_survey=True)
         self.assertEqual(len(context['surveys']), 1)
-        self.assertTrue(self.direct_molo_survey_page not in context['surveys'])
+        self.assertTrue(
+            self.direct_molo_survey_page not in context['surveys'])
         self.assertTrue(self.personalisable_survey in context['surveys'])
         context = Context({
             'locale_code': 'fr',
@@ -237,4 +238,5 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         self.assertEqual(len(context['surveys']), 1)
         self.assertTrue(
             self.translated_direct_survey not in context['surveys'])
-        self.assertTrue(self.translated_personalisable_survey in context['surveys'])
+        self.assertTrue(
+            self.trans_personalisable_survey in context['surveys'])
