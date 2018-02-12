@@ -45,11 +45,12 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         )
         return molo_survey_page, molo_survey_form_field
 
-    def create_personalisable_survey(self,
-                                parent,
-                                title="Test Survey",
-                                slug="test-survey",
-                                **kwargs):
+    def create_personalisable_survey(
+            self,
+            parent,
+            title="Test Survey",
+            slug="test-survey",
+            **kwargs):
         personalisable_survey = PersonalisableSurvey(
             title=title,
             slug=slug,
