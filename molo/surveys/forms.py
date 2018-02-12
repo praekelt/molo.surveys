@@ -5,8 +5,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from django.forms.utils import ErrorList, flatatt
-from django.utils.encoding import force_text
+from django.forms.utils import ErrorList
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from django.utils import six
@@ -22,28 +21,22 @@ class CharacterCountWidget(forms.TextInput):
         js = ('js/widgets/character_count.js',)
 
     def render(self, name, value, attrs=None):
-        if value is None:
-            value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
-        max_length = final_attrs['maxlength']
+        max_length = self.attrs['maxlength']
         maximum_text = _('Maximum: {max_length}').format(max_length=max_length)
-        if value != '':
-            # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = force_text(self._format_value(value))
-        return format_html('<input {} /><span>{}</span>',
-                           flatatt(final_attrs),
-                           maximum_text)
+        return format_html(
+            u'{}<span>{}</span>',
+            super(CharacterCountWidget, self).render(name, value, attrs),
+            maximum_text,
+        )
 
 
 class MultiLineWidget(forms.Textarea):
     def render(self, name, value, attrs=None):
-        if value is None:
-            value = ''
-        final_attrs = self.build_attrs(attrs, name=name)
-        return format_html('<textarea{}>\r\n{}</textarea><span>{}</span>',
-                           flatatt(final_attrs),
-                           force_text(value),
-                           _('No limit'))
+        return format_html(
+            u'{}<span>{}</span>',
+            super(MultiLineWidget, self).render(name, value, attrs),
+            _('No limit'),
+        )
 
 
 class SurveysFormBuilder(FormBuilder):
@@ -56,6 +49,9 @@ class SurveysFormBuilder(FormBuilder):
         options['widget'] = MultiLineWidget
         return forms.CharField(**options)
 
+    def create_positive_number_field(self, field, options):
+        return forms.DecimalField(min_value=0, **options)
+
     @property
     def formfields(self):
         '''
@@ -64,6 +60,8 @@ class SurveysFormBuilder(FormBuilder):
         instead of the parent class methods.
         '''
         formfields = OrderedDict()
+        self.FIELD_TYPES.update({
+            'positive_number': self.create_positive_number_field})
 
         for field in self.fields:
             options = self.get_field_options(field)

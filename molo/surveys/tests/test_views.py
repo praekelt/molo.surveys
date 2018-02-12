@@ -1,3 +1,4 @@
+import json
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -10,9 +11,13 @@ from molo.surveys.models import (
     MoloSurveyFormField,
     MoloSurveyPage,
     SurveysIndexPage,
+    PersonalisableSurvey,
+    PersonalisableSurveyFormField
 )
 
 from .utils import skip_logic_data
+
+from .constants import SEGMENT_FORM_DATA
 
 User = get_user_model()
 
@@ -415,18 +420,22 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/')
         self.assertContains(
             response,
-            '<a href="/surveys-main-1/test-survey/" class="footer-link">'
-            '<img src="/static/img/clipboard.png" width="auto" '
-            'class="menu-list__item--icon" />Test Survey</a>', html=True)
+            '<a href="/surveys-main-1/test-survey/" class="footer-link"> '
+            '<div class="footer-link__thumbnail-icon"> '
+            '<img src="/static/img/clipboard.png" '
+            'class="menu-list__item--icon" /></div> '
+            '<span class="footer-link__title">Test Survey', html=True)
 
         self.client.get('/locale/fr/')
         response = self.client.get('/')
         self.assertContains(
             response,
-            '<a href="/surveys-main-1/french-translation-of-test-survey/" '
-            'class="footer-link"><img src="/static/img/clipboard.png" '
-            'width="auto" class="menu-list__item--icon" />'
-            'French translation of Test Survey</a>', html=True)
+            '<a href="/surveys-main-1/french-translation-of-test-survey/"'
+            'class="footer-link"> <div class="footer-link__thumbnail-icon"> '
+            '<img src="/static/img/clipboard.png" '
+            'class="menu-list__item--icon" /></div> '
+            '<span class="footer-link__title">'
+            'French translation of Test Survey', html=True)
 
     def test_survey_template_tag_on_section_page(self):
         molo_survey_page, molo_survey_form_field = \
@@ -909,7 +918,7 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, self.molo_survey_form_field.label)
         self.assertContains(response, self.molo_survey_page.submit_text)
 
-        # Dont answer last required question: tigger error messages
+        # Dont answer last required question: trigger error messages
         response = self.client.post(
             self.molo_survey_page.url + '?p=3',
             {self.last_molo_survey_form_field.clean_name: ''},
@@ -993,3 +1002,106 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'required')
         self.assertNotContains(response, second_field.label)
         self.assertContains(response, first_field.label)
+
+
+class TestPositiveNumberView(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.main = Main.objects.all().first()
+        self.language_setting = Languages.objects.create(
+            site_id=self.main.get_site().pk)
+        self.english = SiteLanguageRelation.objects.create(
+            language_setting=self.language_setting,
+            locale='en',
+            is_active=True)
+
+        self.surveys_index = SurveysIndexPage(
+            title='Surveys',
+            slug='surveys')
+        self.main.add_child(instance=self.surveys_index)
+        self.surveys_index.save_revision().publish()
+
+    def test_positive_number_field_validation(self):
+        self.user = User.objects.create_user(
+            username='tester',
+            email='tester@example.com',
+            password='tester')
+        self.client.login(username='tester', password='tester')
+        survey = MoloSurveyPage(
+            title='Test Survey With Positive Number',
+            slug='testw-survey-with-positive-number',
+            thank_you_text='Thank you for taking the survey',
+        )
+        self.surveys_index.add_child(instance=survey)
+        survey.save_revision().publish()
+
+        positive_number_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=1,
+            label='Your lucky number?',
+            field_type='positive_number',
+            required=True
+        )
+
+        response = self.client.post(
+            survey.url + '?p=2',
+            {positive_number_field.clean_name: '-1'},
+            follow=True,
+        )
+
+        self.assertContains(response, positive_number_field.label)
+        self.assertContains(
+            response, 'Ensure this value is greater than or equal to 0')
+
+        response = self.client.post(
+            survey.url + '?p=2',
+            {positive_number_field.clean_name: '1'},
+            follow=True,
+        )
+
+        self.assertContains(
+            response, survey.thank_you_text)
+
+
+class SegmentCountView(TestCase, MoloTestCaseMixin):
+
+    def setUp(self):
+        self.mk_main()
+        self.user = User.objects.create_user(
+            username='tester', email='tester@example.com', password='tester')
+        # Create survey
+        self.personalisable_survey = PersonalisableSurvey(title='Test Survey')
+        SurveysIndexPage.objects.first().add_child(
+            instance=self.personalisable_survey
+        )
+        self.personalisable_survey.save_revision()
+        PersonalisableSurveyFormField.objects.create(
+            field_type='singleline', label='Singleline Text',
+            page=self.personalisable_survey
+        )
+
+    def submit_survey(self, survey, user):
+        submission = survey.get_submission_class()
+        data = {field.clean_name: 'super random text'
+                for field in survey.get_form_fields()}
+        submission.objects.create(user=user, page=self.personalisable_survey,
+                                  form_data=json.dumps(data))
+
+    def test_segment_user_count(self):
+        self.submit_survey(self.personalisable_survey, self.user)
+        response = self.client.post('/surveys/count/', SEGMENT_FORM_DATA)
+
+        self.assertDictEqual(response.json(), {"segmentusercount": 1})
+
+    def test_segment_user_count_returns_errors(self):
+        self.submit_survey(self.personalisable_survey, self.user)
+        data = SEGMENT_FORM_DATA
+        data['name'] = [""]
+        data['surveys_surveyresponserule_related-0-survey'] = ['20']
+        response = self.client.post('/surveys/count/', data)
+
+        self.assertDictEqual(response.json(), {"errors": {
+            "surveys_surveyresponserule_related-0-survey": [
+                "Select a valid choice. That choice is not one of the "
+                "available choices."],
+            "name": ["This field is required."]}})

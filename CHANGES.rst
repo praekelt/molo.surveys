@@ -1,6 +1,53 @@
 CHANGE LOG
 ==========
 
+6.5.0
+-----
+- Replace Page with MoloPage proxy
+
+6.4.6
+-----
+- Upgrade wagtail-personalisation-molo to 0.10.6
+
+6.4.5
+-----
+- Bug Fix: stop using private API self.build_attrs() on form fields
+
+6.4.3
+-----
+- Bug Fix: Display Rule errors on Segment creation page when calculating the count
+
+6.4.3
+-----
+- Template name: Rename SurveySuccess template name from molo_survey_page_landing to molo_survey_page_success
+
+6.4.2
+-----
+- Bug Fix: Display errors for Segment creation form when calculating the count
+- Bug Fix: Remove extra Positive Number survey field option
+
+6.4.1
+-----
+- Bug Fix: Fix skipping required question when two questions are in one step and one is required
+
+6.4.0
+-----
+- Add segment user count button to wagtail modeladmin create template and display the number of matched users
+- Add View for counting how many users match a segments rules
+
+6.3.2
+-----
+- Upgrade wagtail-personalisation-molo to 0.10.4
+
+6.3.1
+-----
+- Bug Fix: Ensure segmentation rules are static
+
+6.3.0
+-----
+- Add support for Python 3
+- Improve templates
+
 6.2.0
 -----
 - add support for Django 1.11
@@ -126,7 +173,7 @@ CHANGE LOG
 
 5.6.3
 -----
-- Bug Fix: removed yourwords surveys from template tag lists
+- Bug Fix: removed yourwords surveys from template and dismpay the number of matched users tag lists
 
 5.6.2
 -----
@@ -189,7 +236,7 @@ CHANGE LOG
 
 2.2.0
 -----
-- Added Surveys headline template tag and Surveys headline template file for footer headline link
+- Added Surveys headline template and dismpay the number of matched users tag and Surveys headline template and dismpay the number of matched users file for footer headline link
 
 2.1.0
 -----
@@ -217,7 +264,7 @@ CHANGE LOG
 
 1.1.0
 -----
-- Adding BEM rules to the template
+- Adding BEM rules to the template and dismpay the number of matched users
 
 1.0.0
 -----

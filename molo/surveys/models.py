@@ -24,6 +24,7 @@ from molo.core.models import (
     TranslatablePageMixinNotRoutable,
     index_pages_after_copy,
 )
+from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
 from wagtail.wagtailadmin.edit_handlers import (
     FieldPanel,
@@ -35,7 +36,7 @@ from wagtail.wagtailadmin.edit_handlers import (
 )
 from wagtail.wagtailcore import blocks
 from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.models import Orderable, Page
+from wagtail.wagtailcore.models import Orderable
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -66,12 +67,12 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
 
 
-class SurveysIndexPage(Page, PreventDeleteMixin):
+class SurveysIndexPage(MoloPage, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
@@ -260,6 +261,17 @@ class MoloSurveyPage(
     def get_form_class_for_step(self, step):
         return self.form_builder(step.object_list).get_form_class()
 
+    @property
+    def session_key_data(self):
+        return 'survey_data-{}'.format(self.pk)
+
+    def load_data(self, request):
+        return json.loads(request.session.get(self.session_key_data, '{}'))
+
+    def save_data(self, request, data):
+        request.session[self.session_key_data] = json.dumps(
+            data, cls=DjangoJSONEncoder)
+
     def serve_questions(self, request):
         """
         Implements a simple multi-step form.
@@ -268,8 +280,7 @@ class MoloSurveyPage(
         When the last step is submitted correctly, the whole form is saved in
         the DB.
         """
-        session_key_data = 'survey_data-{}'.format(self.pk)
-        survey_data = json.loads(request.session.get(session_key_data, '{}'))
+        survey_data = self.load_data(request)
 
         paginator = SkipLogicPaginator(
             self.get_form_fields(),
@@ -297,13 +308,15 @@ class MoloSurveyPage(
 
             # Create a form only for submitted step
             prev_form_class = self.get_form_class_for_step(prev_step)
-            prev_form = prev_form_class(paginator.new_answers, page=self,
-                                        user=request.user)
+            prev_form = prev_form_class(
+                paginator.new_answers,
+                page=self,
+                user=request.user,
+            )
             if prev_form.is_valid():
                 # If data for step is valid, update the session
                 survey_data.update(prev_form.cleaned_data)
-                request.session[session_key_data] = json.dumps(
-                    survey_data, cls=DjangoJSONEncoder)
+                self.save_data(request, survey_data)
 
                 if prev_step.has_next():
                     # Create a new form for a following step, if the following
@@ -312,7 +325,7 @@ class MoloSurveyPage(
                     form = form_class(page=self, user=request.user)
                 else:
                     # If there is no more steps, create form for all fields
-                    data = json.loads(request.session[session_key_data])
+                    data = self.load_data(request)
                     form = self.get_form(
                         data,
                         page=self,
@@ -333,7 +346,7 @@ class MoloSurveyPage(
                                 form.cleaned_data[question.clean_name] = SKIP
 
                         self.process_form_submission(form)
-                        del request.session[session_key_data]
+                        del request.session[self.session_key_data]
 
                         return prev_step.success(self.slug)
 
@@ -511,6 +524,11 @@ class SkipLogicMixin(models.Model):
 
 class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                           QuestionPaginationMixin, AbstractFormField):
+    AbstractFormField.FORM_FIELD_CHOICES += (
+        ('positive_number', _("Positive Number")),)
+    field_type = models.CharField(
+        verbose_name=_('field type'),
+        max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
     page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
 
     class Meta(AbstractFormField.Meta):
@@ -645,6 +663,9 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     """
     Form field that has a segment assigned.
     """
+    field_type = models.CharField(
+        verbose_name=_('field type'),
+        max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
     page = ParentalKey(PersonalisableSurvey, on_delete=models.CASCADE,
                        related_name='personalisable_survey_form_fields')
     segment = models.ForeignKey(

@@ -1,0 +1,72 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+
+{% block titletag %}{{ view.get_meta_title }}{% endblock %}
+{% block extra_css %}
+    {% include "wagtailadmin/pages/_editor_css.html" %}
+    {{ view.media.css }}
+    <style type="text/css">
+        .matching-users-result__result {
+            margin-left: 1.5%;
+        }
+        .matching-users-result__label {
+            font-weight: bold;
+            margin: 0;
+        }
+        .matching-users__button {
+            background-color:#808080;
+            border-color: #808080;
+        }
+        #segmentcountbutton:hover {
+            background-color: #fba7a7;
+            border-color: #fba7a7;
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+    {% include "wagtailadmin/pages/_editor_js.html" %}
+    {{ view.media.js }}
+{% endblock %}
+
+{% block content %}
+
+    {% block header %}
+        {% include "wagtailadmin/shared/header.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon tabbed=1 merged=1 %}
+    {% endblock %}
+
+    <form id="create_form" action="{% block form_action %}{{ view.create_url }}{% endblock %}"{% if is_multipart %} enctype="multipart/form-data"{% endif %} method="POST" novalidate>
+        {% csrf_token %}
+
+        {% block form %}{{ edit_handler.render_form_content }}{% endblock %}
+
+        {% block footer %}
+            <footer>
+                <ul>
+                    <li class="actions">
+                        {% block form_actions %}
+                            <div class="dropdown dropup dropdown-button match-width">
+                                <button type="submit" class="button action-save button-longrunning" tabindex="3" data-clicked-text="{% trans 'Saving...' %}">
+                                    <span class="icon icon-spinner"></span><em>{% trans 'Save' %}</em>
+                                </button>
+                            </div>
+                        {% endblock %}
+                    </li>
+
+                    <li class="preview">
+                        <div class="dropup dropdown-button match-width">
+                            <button id="segmentcountbutton" class="button icon" tabindex="3" count-href="{% url 'molo.surveys:segmentusercount' %} " data-clicked-text="{% trans 'counting...' %}">
+                                {% trans 'count matching users' %}
+                            </button>
+                        </div>
+                    </li>
+                    <li class="matching-users-result__result actions">
+                        <p class="matching-users-result__label"><em>{% trans 'Users matching static rules:' %}</em></p>
+                        <p id="count-result">-</p>
+                    </li>
+                </ul>
+            </footer>
+        {% endblock %}
+    </form>
+
+{% endblock %}

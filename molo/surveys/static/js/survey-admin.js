@@ -258,6 +258,35 @@ $(function(){
       });
     }
   }
+
+
+  $('#segmentcountbutton').on('click',function(event){
+        event.preventDefault();
+        var elem = $(this);
+        var url = elem.attr("count-href");
+        var send_data = $("#create_form").serializeArray();
+        $.post(url, send_data, function(data) {
+          $(".error-message").remove();
+          $(".error").removeClass("error");
+          if (data.errors != undefined) {
+            for (key in data.errors) {
+              field = $("[name='" + key + "']");
+              field.closest("div.field-content").append("<p class='error-message'><span>"+data.errors[key]+"</span></p>");
+              field.closest("li").addClass("error");
+            }
+            $("#count-result").html("Please correct errors.");
+          } else {
+            $("#count-result").html(data.segmentusercount);
+          }
+      }, 'json');
+
+      elem.css({'backgroundColor':'#f37e77','borderColor':'#f37e77'});
+      setTimeout(function(){
+          elem.css({'backgroundColor':'','borderColor':''})
+      }, 2000);
+    });
+
+
   addHideToRuleCombinationFunctionality();
 
   initRuleIndex();

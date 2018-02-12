@@ -17,6 +17,9 @@ Installation::
 
    pip install molo.surveys
 
+Testing:
+   read the .travis.yml file
+   follow the instructions under the scripts file
 
 Django setup::
 
