@@ -105,7 +105,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.client.login(username='tester', password='tester')
         response = self.client.get('/')
         self.assertContains(response, 'Shorter homepage introduction')
-        self.assertNotContains(response, 'Introduction to Test Survey ...')
+        self.assertNotContains(response, 'Take the Survey')
 
     def test_anonymous_submissions_not_allowed_by_default(self):
         molo_survey_page, molo_survey_form_field = \
@@ -124,6 +124,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
         response = self.client.get(molo_survey_page.url)
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
         self.assertContains(response, molo_survey_page.submit_text)
 
@@ -146,6 +147,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = self.client.get(molo_survey_page.url)
 
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
         response = self.client.post(molo_survey_page.url, {
             molo_survey_form_field.label.lower().replace(' ', '-'): 'python'
@@ -186,6 +188,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             response = self.client.get(molo_survey_page.url)
 
             self.assertContains(response, molo_survey_page.title)
+            self.assertContains(response, molo_survey_page.introduction)
             self.assertContains(response, molo_survey_form_field.label)
 
             response = self.client.post(molo_survey_page.url, {
@@ -208,6 +211,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
         response = self.client.get(molo_survey_page.url)
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
 
         response = self.client.post(molo_survey_page.url, {
@@ -230,6 +234,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
         response = self.client.get(molo_survey_page.url)
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
 
         response = self.client.post(molo_survey_page.url, {
@@ -267,6 +272,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = self.client.get(molo_survey_page.url)
 
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
         self.assertNotContains(response, extra_molo_survey_form_field.label)
         self.assertContains(response, 'Next Question')
@@ -276,6 +282,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         })
 
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertNotContains(response, molo_survey_form_field.label)
         self.assertContains(response, extra_molo_survey_form_field.label)
         self.assertContains(response, molo_survey_page.submit_text)
@@ -300,6 +307,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = self.client.get(molo_survey_page.url)
 
         self.assertContains(response, molo_survey_page.title)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
 
         response = self.client.post(molo_survey_page.url, {})
@@ -329,6 +337,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             self.create_molo_survey_page(parent=self.surveys_index)
         response = self.client.get("/")
         self.assertContains(response, 'Take The Survey</a>')
+        self.assertContains(response, molo_survey_page.homepage_introduction)
         user = User.objects.create_superuser(
             username='testuser', password='password', email='test@email.com')
         self.client2.login(user=user)
@@ -340,6 +349,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             self.create_molo_survey_page(parent=self.surveys_index)
         response = self.client.get("/")
         self.assertContains(response, 'Take The Survey</a>')
+        self.assertContains(response, molo_survey_page.homepage_introduction)
         user = User.objects.create_superuser(
             username='testuser', password='password', email='test@email.com')
         self.client2.login(user=user)
@@ -444,6 +454,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
         response = self.client.get(self.section.url)
         self.assertContains(response, 'Take The Survey</a>')
+        self.assertContains(response, molo_survey_page.homepage_introduction)
 
     def test_translated_survey_on_section_page(self):
         self.user = self.login()
@@ -481,6 +492,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response,
                             'Take The Survey</a>'.format(
                                 molo_survey_page.url))
+        self.assertContains(response, molo_survey_page.homepage_introduction)
 
     def test_survey_list_display_direct_logged_out(self):
         molo_survey_page, molo_survey_form_field = \
