@@ -108,6 +108,7 @@ class MoloSurveyPage(
     base_form_class = MoloSurveyForm
 
     introduction = TextField(blank=True)
+    homepage_introduction = TextField(blank=True)
     image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -178,6 +179,7 @@ class MoloSurveyPage(
     content_panels = surveys_models.AbstractSurvey.content_panels + [
         ImageChooserPanel('image'),
         FieldPanel('introduction', classname='full'),
+        FieldPanel('homepage_introduction', classname='full'),
         FieldPanel('homepage_button_text', classname='full'),
         StreamFieldPanel('description'),
         InlinePanel('survey_form_fields', label='Form fields'),

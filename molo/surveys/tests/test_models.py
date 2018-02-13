@@ -179,6 +179,7 @@ def create_survey(fields={}, **kwargs):
         for index, field in enumerate(reversed(fields)):
             sort_order = num_questions - (index + 1)
             create_molo_survey_form_field(survey, sort_order, field)
+    return survey
 
 
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
