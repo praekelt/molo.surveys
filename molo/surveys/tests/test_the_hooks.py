@@ -57,7 +57,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
     def create_molo_survey_page(self, parent, **kwargs):
         molo_survey_page = MoloSurveyPage(
             title='Test Survey', slug='test-survey',
-            intro='Introduction to Test Survey ...',
+            introduction='Introduction to Test Survey ...',
             thank_you_text='Thank you for taking the Test Survey',
             submit_text='survey submission text',
             **kwargs

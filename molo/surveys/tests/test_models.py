@@ -159,7 +159,7 @@ def create_molo_survey_form_field(survey, sort_order, obj):
 def create_molo_survey_page(parent, **kwargs):
     molo_survey_page = MoloSurveyPage(
         title='Test Survey', slug='test-survey',
-        intro='Introduction to Test Survey ...',
+        introduction='Introduction to Test Survey ...',
         thank_you_text='Thank you for taking the Test Survey',
         submit_text='survey submission text',
         **kwargs
@@ -179,6 +179,7 @@ def create_survey(fields={}, **kwargs):
         for index, field in enumerate(reversed(fields)):
             sort_order = num_questions - (index + 1)
             create_molo_survey_form_field(survey, sort_order, field)
+    return survey
 
 
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):

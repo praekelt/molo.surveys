@@ -1,6 +1,15 @@
 CHANGE LOG
 ==========
 
+6.6.1
+-----
+- Add Homepage Introduction
+- Reorder ContentPanels
+
+6.6.0
+-----
+- Add personalisable_survey check to surveys list
+
 6.5.0
 -----
 - Replace Page with MoloPage proxy

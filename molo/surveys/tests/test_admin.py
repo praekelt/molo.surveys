@@ -53,7 +53,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
     def create_molo_survey_page(self, parent, **kwargs):
         molo_survey_page = MoloSurveyPage(
             title='Test Survey', slug='test-survey',
-            intro='Introduction to Test Survey ...',
+            introduction='Introduction to Test Survey ...',
             thank_you_text='Thank you for taking the Test Survey',
             **kwargs
         )
@@ -79,7 +79,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         personalisable_survey = PersonalisableSurvey(
             title='Test Survey', slug='test-survey',
-            intro='Introduction to Test Survey ...',
+            introduction='Introduction to Test Survey ...',
             thank_you_text='Thank you for taking the Test Survey',
             **kwargs
         )
@@ -103,7 +103,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.client.login(username='tester', password='tester')
         response = self.client.get(molo_survey_page.url)
         self.assertContains(response, molo_survey_page.title)
-        self.assertContains(response, molo_survey_page.intro)
+        self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
         response = self.client.post(molo_survey_page.url, {
             molo_survey_form_field.label.lower().replace(' ', '-'): 'python'
