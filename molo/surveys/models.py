@@ -412,12 +412,6 @@ class MoloSurveyPageView(models.Model):
         null=True,
     )
 
-    tag = models.ForeignKey(
-        'core.Tag',
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-
     page = models.ForeignKey(
         'core.ArticlePage',
         on_delete=models.SET_NULL,

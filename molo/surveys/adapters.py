@@ -7,7 +7,7 @@ from django.db.models import Count
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 
-from molo.core.models import ArticlePage
+from molo.core.models import ArticlePage, ArticlePageTags
 from .rules import CombinationRule
 
 
@@ -201,13 +201,11 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
             user = self.request.user
 
             if user.is_authenticated():
-                for navigation_tag in page.nav_tags.all():
-                    pageview = MoloSurveyPageView.objects.create(
-                        user=user,
-                        tag=navigation_tag.tag.specific,
-                        page=page.specific,
-                    )
-                    pageview.save()
+                pageview = MoloSurveyPageView.objects.create(
+                    user=user,
+                    page=page.specific,
+                )
+                pageview.save()
 
     def get_tag_count(self, tag, date_from=None, date_to=None):
         '''
@@ -224,9 +222,11 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
 
         MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
 
+        page_ids = ArticlePageTags.objects.filter(tag=tag).values('page_id')
+
         query_parameters = {
             'user': user,
-            'tag': tag.specific,
+            'page_id__in': page_ids,
         }
 
         if date_from:
