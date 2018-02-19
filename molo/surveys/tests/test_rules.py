@@ -356,6 +356,14 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         rule = GroupMembershipRule(group=self.group)
         self.assertFalse(rule.test_user(None))
 
+    def test_get_column_header(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertEqual(rule.get_column_header(), 'Super Test Group!')
+
+    def test_get_user_info_returns_true(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertEqual(rule.get_user_info_string(self.request.user), 'True')
+
 
 class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
     def setUp(self):

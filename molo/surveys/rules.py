@@ -327,6 +327,11 @@ class GroupMembershipRule(AbstractBaseRule):
         # Check whether user is part of a group
         return user.segment_groups.filter(id=self.group_id).exists()
 
+    def get_column_header(self):
+        return self.group.name
+
+    def get_user_info_string(self, user):
+        return str(user.segment_groups.filter(id=self.group_id).exists())
 
 class ArticleTagRule(AbstractBaseRule):
     static = True
