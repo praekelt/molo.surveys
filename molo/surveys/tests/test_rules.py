@@ -212,14 +212,14 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.request.user = AnonymousUser()
         self.assertFalse(rule.test_user(self.request))
 
-    def test_test_user_without_request(self):
+    def test_call_test_user_without_request(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='er ra',
             field_name=self.singleline_text.clean_name)
         self.assertTrue(rule.test_user(None, self.request.user))
 
-    def test_test_user_without_user_or_request(self):
+    def test_call_test_user_without_user_or_request(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='er ra',
@@ -292,12 +292,12 @@ class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
         self.request.user = new_user
         self.assertTrue(rule.test_user(self.request))
 
-    def test_test_user_without_request(self):
+    def test_call_test_user_without_request(self):
         self.submit_survey(self.survey, self.user)
         rule = SurveyResponseRule(survey=self.survey)
         self.assertTrue(rule.test_user(None, self.request.user))
 
-    def test_test_user_without_user_or_request(self):
+    def test_call_test_user_without_user_or_request(self):
         self.submit_survey(self.survey, self.user)
         rule = SurveyResponseRule(survey=self.survey)
         self.assertFalse(rule.test_user(None))
@@ -338,11 +338,11 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.assertFalse(rule.test_user(self.request))
 
-    def test_test_user_without_request(self):
+    def test_call_test_user_without_request(self):
         rule = GroupMembershipRule(group=self.group)
         self.assertTrue(rule.test_user(None, self.request.user))
 
-    def test_test_user_without_user_or_request(self):
+    def test_call_test_user_without_user_or_request(self):
         rule = GroupMembershipRule(group=self.group)
         self.assertFalse(rule.test_user(None))
 
