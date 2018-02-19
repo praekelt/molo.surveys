@@ -4,7 +4,7 @@ from django import forms
 from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import six
+from django.utils import six, timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
@@ -280,6 +280,20 @@ class SurveyResponseRule(AbstractBaseRule):
                 self.survey,
             )
         }
+
+    def get_column_header(self):
+        return self.survey.title
+
+    def get_user_info_string(self, user):
+        submission_class = self.survey.get_submission_class()
+        submission = submission_class.objects.filter(
+            user=user,
+            page=self.survey,
+        ).last()
+        response_date = submission.created_at
+        if timezone.is_naive(response_date):
+            response_date = timezone.make_aware(related_field_value)
+        return response_date.strftime("%Y-%m-%d %H:%M")
 
 
 class GroupMembershipRule(AbstractBaseRule):

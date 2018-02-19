@@ -302,6 +302,16 @@ class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
         rule = SurveyResponseRule(survey=self.survey)
         self.assertFalse(rule.test_user(None))
 
+    def test_get_column_header(self):
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertEqual(rule.get_column_header(), 'Other Survey')
+
+    def test_get_user_info_returns_submission_date(self):
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertEqual(rule.get_user_info_string(self.user), current_date)
+
 
 class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
     def setUp(self):
