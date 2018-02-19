@@ -243,6 +243,22 @@ class SurveySubmissionDataRule(AbstractBaseRule):
             )
         }
 
+    def get_column_header(self):
+        try:
+            field_name = self.get_expected_field().label
+        except self.field_model.DoesNotExist:
+            field_name = self.field_name
+
+        return '%s - %s' % (self.survey, field_name)
+
+    def get_user_info_string(self, user):
+        survey_submission = self.get_survey_submission_of_user(user)
+
+        user_response = survey_submission.get_data().get(self.field_name)
+        if isinstance(user_response, list):
+            user_response = ", ".join(user_response)
+        return str(user_response)
+
 
 class SurveyResponseRule(AbstractBaseRule):
     static = True

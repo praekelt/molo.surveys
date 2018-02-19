@@ -226,6 +226,59 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             field_name=self.singleline_text.clean_name)
         self.assertFalse(rule.test_user(None))
 
+    def test_get_column_header(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='er ra',
+            field_name=self.singleline_text.clean_name)
+
+        self.assertEqual(rule.get_column_header(), 'Test Survey - Singleline Text')
+
+    def test_get_user_info_string_returns_string_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='er ra',
+            field_name=self.singleline_text.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'super random text')
+
+    def test_get_user_info_string_returns_checkboxes_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='choice1',
+            field_name=self.checkboxes.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'choice 3, choice 1')
+
+    def test_get_user_info_string_returns_checkbox_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='1',
+            field_name=self.checkbox.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'True')
+
+    def test_get_user_info_string_returns_number_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='5',
+            field_name=self.number.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         '5')
+
+    def test_get_user_info_string_returns_positive_number_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='8',
+            field_name=self.positive_number.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         '8')
+
 
 class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
     def setUp(self):
