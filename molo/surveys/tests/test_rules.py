@@ -232,7 +232,8 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             expected_response='er ra',
             field_name=self.singleline_text.clean_name)
 
-        self.assertEqual(rule.get_column_header(), 'Test Survey - Singleline Text')
+        self.assertEqual(rule.get_column_header(),
+                         'Test Survey - Singleline Text')
 
     def test_get_user_info_string_returns_string_fields(self):
         rule = SurveySubmissionDataRule(

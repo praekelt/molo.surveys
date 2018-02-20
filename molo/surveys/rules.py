@@ -312,7 +312,7 @@ class SurveyResponseRule(AbstractBaseRule):
         ).last()
         response_date = submission.created_at
         if timezone.is_naive(response_date):
-            response_date = timezone.make_aware(related_field_value)
+            response_date = timezone.make_aware(response_date)
         return response_date.strftime("%Y-%m-%d %H:%M")
 
 
@@ -352,6 +352,7 @@ class GroupMembershipRule(AbstractBaseRule):
 
     def get_user_info_string(self, user):
         return str(user.segment_groups.filter(id=self.group_id).exists())
+
 
 class ArticleTagRule(AbstractBaseRule):
     static = True
@@ -488,6 +489,7 @@ class ArticleTagRule(AbstractBaseRule):
             self.date_to,
         )
         return str(visit_count)
+
 
 class CombinationRule(AbstractBaseRule):
     body = blocks.StreamField([
