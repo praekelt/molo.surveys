@@ -239,3 +239,24 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
         unique_pages = pageviews.values('page_id').annotate(Count('page_id'))
 
         return unique_pages.count()
+
+    def get_visit_count(self, page=None):
+        if not hasattr(self.request, 'user'):
+            return 0
+
+        user = self.request.user
+
+        if user.is_anonymous():
+            return 0
+
+        if page is None:
+            return 0
+
+        MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
+
+        query_parameters = {
+            'user': user,
+            'page_id': page.id,
+        }
+
+        return MoloSurveyPageView.objects.filter(**query_parameters).count()
