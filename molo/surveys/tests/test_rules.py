@@ -569,3 +569,21 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
     def test_visting_non_tagged_page_isnt_error(self):
         self.adapter.add_page_visit(self.main)
         self.assertFalse(self.request.session['tag_count'])
+
+    def test_call_test_user_without_request(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.adapter.add_page_visit(self.article)
+        self.assertTrue(rule.test_user(None, self.request.user))
+
+    def test_call_test_user_without_user_or_request(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.adapter.add_page_visit(self.article)
+        self.assertFalse(rule.test_user(None))

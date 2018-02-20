@@ -1,9 +1,12 @@
+from importlib import import_module
 from operator import attrgetter
 
 from django import forms
 from django.apps import apps
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.test.client import RequestFactory
 from django.utils import six, timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -23,6 +26,7 @@ from .edit_handlers import TagPanel
 
 from molo.surveys import blocks
 
+SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 # Filer the Visit Count Page only by articles
 VisitCountRule._meta.verbose_name = 'Page Visit Count Rule'
@@ -437,9 +441,12 @@ class ArticleTagRule(AbstractBaseRule):
 
     def test_user(self, request, user=None):
         if user:
-            # This rule currently does not support testing a user directly
-            # TODO: Make this test a user directly when the rule uses
-            # historical data
+            # Create a fake request so we can use the adapter
+            request = RequestFactory().get('/')
+            request.session = SessionStore()
+            request.user = user
+        elif not request:
+            # Return false if we don't have a user or a request
             return False
 
         from wagtail_personalisation.adapters import get_segment_adapter
