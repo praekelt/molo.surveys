@@ -587,3 +587,20 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         )
         self.adapter.add_page_visit(self.article)
         self.assertFalse(rule.test_user(None))
+
+    def test_get_column_header(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.assertEqual(rule.get_column_header(), 'Article Tag = test')
+
+    def test_get_user_info_returns_true(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.adapter.add_page_visit(self.article)
+        self.assertEqual(rule.get_user_info_string(self.request.user), '1')

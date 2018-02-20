@@ -471,6 +471,23 @@ class ArticleTagRule(AbstractBaseRule):
             ),
         }
 
+    def get_column_header(self):
+        return 'Article Tag = %s' % self.tag.title
+
+    def get_user_info_string(self, user):
+        # Create a fake request so we can use the adapter
+        request = RequestFactory().get('/')
+        request.session = SessionStore()
+        request.user = user
+
+        from wagtail_personalisation.adapters import get_segment_adapter
+        adapter = get_segment_adapter(request)
+        visit_count = adapter.get_tag_count(
+            self.tag,
+            self.date_from,
+            self.date_to,
+        )
+        return str(visit_count)
 
 class CombinationRule(AbstractBaseRule):
     body = blocks.StreamField([
