@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+6.6.2
+-----
+- Bugfix: only store one MoloSurveyPageView per page view
+- Add management command to deduplicate pageview data
+
 6.6.1
 -----
 - Add Homepage Introduction
