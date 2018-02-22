@@ -418,6 +418,10 @@ class MoloSurveyPageView(models.Model):
         null=True,
     )
 
+    def __str__(self):
+        return '{0} viewed {1} at {2}'.format(
+            self.user, self.page, self.visited_at)
+
 
 class SurveyTermsConditions(Orderable):
     page = ParentalKey(MoloSurveyPage, related_name='terms_and_conditions')

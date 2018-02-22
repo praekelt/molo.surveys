@@ -328,3 +328,21 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
             page=self.page,
         )
         self.assertEqual(self.adapter.get_tag_count(self.important_tag), 1)
+
+    def test_get_visit_count_zero_no_request_user(self):
+        del self.request.user
+        self.assertEqual(self.adapter.get_visit_count(self.page), 0)
+
+    def test_get_visit_count_zero_for_anonymous_user(self):
+        self.request.user = AnonymousUser()
+        self.assertEqual(self.adapter.get_visit_count(self.page), 0)
+
+    def test_get_visit_count_zero_if_page_not_provided(self):
+        self.assertEqual(self.adapter.get_visit_count(), 0)
+
+    def test_get_visit_counts_pageviews_for_user_and_page(self):
+        MoloSurveyPageView.objects.create(
+            user=self.request.user,
+            page=self.page,
+        )
+        self.assertEqual(self.adapter.get_visit_count(self.page), 1)
