@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+6.7.0
+-----
+- Add get_visit_count() for the PersistentSurveysSegmentsAdapter
+- Add get_column_header() and get_user_info_string() for rules
+
 6.6.2
 -----
 - Bugfix: only store one MoloSurveyPageView per page view
