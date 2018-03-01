@@ -307,7 +307,7 @@ class MoloSurveyPage(
             # so we need to get a from from previous step
             # Edge case - submission of the last step
             prev_step = step if is_last_step else paginator.page(
-                step.previous_page_number())
+                int(step_number) - 1)
 
             # Create a form only for submitted step
             prev_form_class = self.get_form_class_for_step(prev_step)
@@ -357,14 +357,8 @@ class MoloSurveyPage(
                 # If data for step is invalid
                 # we will need to display form again with errors,
                 # so restore previous state.
-                step_number = int(step_number) - 1
-                step = paginator.page(step_number)
-                form_class = self.get_form_class_for_step(step)
-                form = form_class(
-                    paginator.new_answers,
-                    page=self,
-                    user=request.user,
-                )
+                step = prev_step
+                form = prev_form
         else:
             # Create empty form for non-POST requests
             form_class = self.get_form_class_for_step(step)
