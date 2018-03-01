@@ -27,6 +27,14 @@ class TestNaturalDateInputWidget(TestCase):
             datetime(2018, 1, 1),
         )
 
+    def test_uses_dateparser_to_parse_datetimes(self):
+        data = {'name': '1 January 2018 5pm'}
+
+        self.assertEqual(
+            self.widget.value_from_datadict(data, None, 'name'),
+            datetime(2018, 1, 1, 17, 0),
+        )
+
     @patch('molo.surveys.widgets.NaturalDateInput._parse_date')
     def test_caches_expensive_result_of_dateparser(self, parse_date_mock):
         parse_date_mock.return_value = datetime(2018, 1, 1)

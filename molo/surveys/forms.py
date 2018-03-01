@@ -55,6 +55,11 @@ class SurveysFormBuilder(FormBuilder):
         return super(
             SurveysFormBuilder, self).create_date_field(field, options)
 
+    def create_datetime_field(self, field, options):
+        options['widget'] = NaturalDateInput
+        return super(
+            SurveysFormBuilder, self).create_datetime_field(field, options)
+
     def create_positive_number_field(self, field, options):
         return forms.DecimalField(min_value=0, **options)
 
