@@ -14,6 +14,7 @@ from wagtail.wagtailadmin.forms import WagtailAdminPageForm
 from wagtailsurveys.forms import FormBuilder
 
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
+from .widgets import NaturalDateInput
 
 
 class CharacterCountWidget(forms.TextInput):
@@ -48,6 +49,11 @@ class SurveysFormBuilder(FormBuilder):
     def create_multiline_field(self, field, options):
         options['widget'] = MultiLineWidget
         return forms.CharField(**options)
+
+    def create_date_field(self, field, options):
+        options['widget'] = NaturalDateInput
+        return super(
+            SurveysFormBuilder, self).create_date_field(field, options)
 
     def create_positive_number_field(self, field, options):
         return forms.DecimalField(min_value=0, **options)
