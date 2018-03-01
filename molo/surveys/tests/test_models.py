@@ -287,6 +287,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
 
         self.assertContains(response, field_1.label)
         self.assertContains(response, 'Next Question')
+        self.assertContains(response, 'action="' + survey.url + '?p=2"')
 
         response = self.client.post(survey.url + '?p=2', {
             field_1.clean_name:
@@ -300,6 +301,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         }, follow=True)
 
         self.assertContains(response, "This field is required")
+        self.assertContains(response, 'action="' + survey.url + '?p=3"')
 
         response = self.client.post(survey.url + '?p=3', {
             field_2.clean_name:

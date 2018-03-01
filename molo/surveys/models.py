@@ -357,8 +357,14 @@ class MoloSurveyPage(
                 # If data for step is invalid
                 # we will need to display form again with errors,
                 # so restore previous state.
-                form = prev_form
-                step = prev_step
+                step_number = int(step_number) - 1
+                step = paginator.page(step_number)
+                form_class = self.get_form_class_for_step(step)
+                form = form_class(
+                    paginator.new_answers,
+                    page=self,
+                    user=request.user,
+                )
         else:
             # Create empty form for non-POST requests
             form_class = self.get_form_class_for_step(step)
