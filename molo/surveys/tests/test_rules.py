@@ -59,7 +59,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.positive_number = PersonalisableSurveyFormField.objects.create(
             field_type='positive_number', label='Positive Number Field',
             page=self.survey)
-        self.not_required_number = PersonalisableSurveyFormField.objects.create(
+        self.not_required_field = PersonalisableSurveyFormField.objects.create(
             field_type='number', label='Not Required Field', page=self.survey,
             required=False)
 
@@ -210,7 +210,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertFalse(rule.test_user(self.request))
 
     def test_passing_not_required_rule(self):
-        self.data.update({self.not_required_number.clean_name: 5})
+        self.data.update({self.not_required_field.clean_name: 5})
         form = self.survey.get_form(
             self.data, page=self.survey, user=self.request.user)
         assert form.is_valid(), \
@@ -220,7 +220,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='5',
-            field_name=self.not_required_number.clean_name)
+            field_name=self.not_required_field.clean_name)
 
         self.assertFalse(rule.test_user(self.request))
 
@@ -228,7 +228,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='4',
-            field_name=self.not_required_number.clean_name)
+            field_name=self.not_required_field.clean_name)
 
         self.assertFalse(rule.test_user(self.request))
 
@@ -315,27 +315,28 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
     def test_get_user_info_string_returns_if_no_submission(self):
         user = get_user_model().objects.create_user(
-            username='another', email='another@example.com', password='another')
+            username='another', email='another@example.com',
+            password='another')
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='8',
             field_name=self.positive_number.clean_name)
-    
+
         self.assertEqual(rule.get_user_info_string(user),
                          'No submission')
-    
+
     def test_get_user_info_string_returns_if_multiple_submissions(self):
         form = self.survey.get_form(
             self.data, page=self.survey, user=self.request.user)
         assert form.is_valid(), \
             'Could not validate submission form. %s' % repr(form.errors)
         self.survey.process_form_submission(form)
-    
+
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='8',
             field_name=self.positive_number.clean_name)
-    
+
         self.assertEqual(rule.get_user_info_string(self.request.user),
                          'Too many submissions')
 
@@ -343,7 +344,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='4',
-            field_name=self.not_required_number.clean_name)
+            field_name=self.not_required_field.clean_name)
 
         self.assertEqual(rule.get_user_info_string(self.request.user),
                          'Not answered')
