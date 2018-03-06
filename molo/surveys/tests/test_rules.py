@@ -82,6 +82,13 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.survey.refresh_from_db()
 
+    def test_get_field_model(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name=self.singleline_text.clean_name)
+        self.assertEqual(rule.field_model, PersonalisableSurveyFormField)
+
     def test_survey_data_rule_is_static(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,

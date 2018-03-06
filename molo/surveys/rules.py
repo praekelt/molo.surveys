@@ -99,7 +99,7 @@ class SurveySubmissionDataRule(AbstractBaseRule):
 
     @cached_property
     def field_model(self):
-        return apps.get_model('personalise', 'PersonalisableSurveyFormField')
+        return apps.get_model('surveys', 'PersonalisableSurveyFormField')
 
     @property
     def survey_submission_model(self):
