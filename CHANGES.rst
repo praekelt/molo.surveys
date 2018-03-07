@@ -1,5 +1,8 @@
 CHANGE LOG
 ==========
+6.7.2
+-----
+- Upgrade wagtail-personalisation-molo to 0.11.1
 
 6.7.1
 -----
