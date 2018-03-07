@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+6.7.1
+-----
+- Bugfix: Fix skip logic handling of form errors
+- Bugfix: Fix survey rules validation and user_info_strings
+
 6.7.0
 -----
 - Add get_visit_count() for the PersistentSurveysSegmentsAdapter
