@@ -3,7 +3,8 @@ from django.forms.fields import MultipleChoiceField
 
 from copy import copy
 from wagtail.wagtailcore.models import Page
-from molo.surveys.models import MoloSurveyPage, SurveysIndexPage
+from molo.surveys.models import (
+    MoloSurveyPage, SurveysIndexPage, PersonalisableSurvey)
 
 from molo.core.templatetags.core_tags import get_pages
 from django.shortcuts import get_object_or_404
@@ -14,7 +15,8 @@ register = template.Library()
 def get_survey_list(context,
                     only_linked_surveys=False,
                     only_direct_surveys=False,
-                    only_yourwords=False):
+                    only_yourwords=False,
+                    personalisable_survey=False):
     if only_linked_surveys and only_direct_surveys:
         raise ValueError('arguments "only_linked_surveys" and '
                          '"only_direct_surveys" cannot both be True')
@@ -30,22 +32,26 @@ def get_survey_list(context,
                        .filter(languages__language__is_main_language=True,
                                display_survey_directly=False,
                                your_words_competition=False)
-                       .specific())
+                       .exact_type(MoloSurveyPage).specific())
         elif only_direct_surveys:
             surveys = (MoloSurveyPage.objects.child_of(page)
                        .filter(languages__language__is_main_language=True,
                                display_survey_directly=True,
                                your_words_competition=False)
-                       .specific())
+                       .exact_type(MoloSurveyPage).specific())
         elif only_yourwords:
             surveys = (MoloSurveyPage.objects.child_of(page)
                        .filter(languages__language__is_main_language=True,
                                your_words_competition=True)
-                       .specific())
+                       .exact_type(MoloSurveyPage).specific())
+        elif personalisable_survey:
+            surveys = (PersonalisableSurvey.objects.child_of(page)
+                       .filter(languages__language__is_main_language=True)
+                       .exact_type(PersonalisableSurvey).specific())
         else:
             surveys = (MoloSurveyPage.objects.child_of(page)
                        .filter(languages__language__is_main_language=True)
-                       .specific())
+                       .exact_type(MoloSurveyPage).specific())
     else:
         surveys = MoloSurveyPage.objects.none()
     context.update({
@@ -82,11 +88,13 @@ def surveys_list_headline(context):
 
 @register.inclusion_tag('surveys/surveys_list.html', takes_context=True)
 def surveys_list(context, pk=None, only_linked_surveys=False,
-                 only_direct_surveys=False, only_yourwords=False):
+                 only_direct_surveys=False, only_yourwords=False,
+                 personalisable_survey=False):
     context = get_survey_list(context,
                               only_linked_surveys=only_linked_surveys,
                               only_direct_surveys=only_direct_surveys,
-                              only_yourwords=only_yourwords)
+                              only_yourwords=only_yourwords,
+                              personalisable_survey=personalisable_survey)
     return add_form_objects_to_surveys(context)
 
 

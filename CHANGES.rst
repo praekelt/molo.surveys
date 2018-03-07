@@ -1,8 +1,33 @@
 CHANGE LOG
 ==========
-6.4.7
+
+6.7.1
 -----
-- Upgrade wagtail-personalisation-molo to 0.10.7
+- Bugfix: Fix skip logic handling of form errors
+- Bugfix: Fix survey rules validation and user_info_strings
+
+6.7.0
+-----
+- Add get_visit_count() for the PersistentSurveysSegmentsAdapter
+- Add get_column_header() and get_user_info_string() for rules
+
+6.6.2
+-----
+- Bugfix: only store one MoloSurveyPageView per page view
+- Add management command to deduplicate pageview data
+
+6.6.1
+-----
+- Add Homepage Introduction
+- Reorder ContentPanels
+
+6.6.0
+-----
+- Add personalisable_survey check to surveys list
+
+6.5.0
+-----
+- Replace Page with MoloPage proxy
 
 6.4.6
 -----

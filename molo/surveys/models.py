@@ -24,6 +24,7 @@ from molo.core.models import (
     TranslatablePageMixinNotRoutable,
     index_pages_after_copy,
 )
+from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
 from wagtail.wagtailadmin.edit_handlers import (
     FieldPanel,
@@ -35,7 +36,7 @@ from wagtail.wagtailadmin.edit_handlers import (
 )
 from wagtail.wagtailcore import blocks
 from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.models import Orderable, Page
+from wagtail.wagtailcore.models import Orderable
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -66,12 +67,12 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
 
 
-class SurveysIndexPage(Page, PreventDeleteMixin):
+class SurveysIndexPage(MoloPage, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
@@ -96,7 +97,8 @@ def create_survey_index_pages(sender, instance, **kwargs):
 
 
 class MoloSurveyPage(
-        TranslatablePageMixinNotRoutable, surveys_models.AbstractSurvey):
+        TranslatablePageMixinNotRoutable, MoloPage,
+        surveys_models.AbstractSurvey):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
@@ -105,7 +107,8 @@ class MoloSurveyPage(
 
     base_form_class = MoloSurveyForm
 
-    intro = TextField(blank=True)
+    introduction = TextField(blank=True)
+    homepage_introduction = TextField(blank=True)
     image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -113,7 +116,7 @@ class MoloSurveyPage(
         on_delete=models.SET_NULL,
         related_name='+'
     )
-    content = StreamField([
+    description = StreamField([
         ('heading', blocks.CharBlock(classname="full title")),
         ('paragraph', MarkDownBlock()),
         ('image', ImageChooserBlock()),
@@ -174,13 +177,14 @@ class MoloSurveyPage(
             "Styling options that can be applied to this page "
             "and all its descendants"))
     content_panels = surveys_models.AbstractSurvey.content_panels + [
-        FieldPanel('intro', classname='full'),
         ImageChooserPanel('image'),
-        StreamFieldPanel('content'),
-        InlinePanel('survey_form_fields', label='Form fields'),
-        FieldPanel('thank_you_text', classname='full'),
-        FieldPanel('submit_text', classname='full'),
+        FieldPanel('introduction', classname='full'),
+        FieldPanel('homepage_introduction', classname='full'),
         FieldPanel('homepage_button_text', classname='full'),
+        StreamFieldPanel('description'),
+        InlinePanel('survey_form_fields', label='Form fields'),
+        FieldPanel('submit_text', classname='full'),
+        FieldPanel('thank_you_text', classname='full'),
         InlinePanel('terms_and_conditions', label="Terms and Conditions"),
     ]
 
@@ -303,7 +307,7 @@ class MoloSurveyPage(
             # so we need to get a from from previous step
             # Edge case - submission of the last step
             prev_step = step if is_last_step else paginator.page(
-                step.previous_page_number())
+                int(step_number) - 1)
 
             # Create a form only for submitted step
             prev_form_class = self.get_form_class_for_step(prev_step)
@@ -353,8 +357,8 @@ class MoloSurveyPage(
                 # If data for step is invalid
                 # we will need to display form again with errors,
                 # so restore previous state.
-                form = prev_form
                 step = prev_step
+                form = prev_form
         else:
             # Create empty form for non-POST requests
             form_class = self.get_form_class_for_step(step)
@@ -408,17 +412,15 @@ class MoloSurveyPageView(models.Model):
         null=True,
     )
 
-    tag = models.ForeignKey(
-        'core.Tag',
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-
     page = models.ForeignKey(
         'core.ArticlePage',
         on_delete=models.SET_NULL,
         null=True,
     )
+
+    def __str__(self):
+        return '{0} viewed {1} at {2}'.format(
+            self.user, self.page, self.visited_at)
 
 
 class SurveyTermsConditions(Orderable):

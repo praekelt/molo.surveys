@@ -1,10 +1,13 @@
+from importlib import import_module
 from operator import attrgetter
 
 from django import forms
 from django.apps import apps
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import six
+from django.test.client import RequestFactory
+from django.utils import six, timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
@@ -23,6 +26,7 @@ from .edit_handlers import TagPanel
 
 from molo.surveys import blocks
 
+SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 # Filer the Visit Count Page only by articles
 VisitCountRule._meta.verbose_name = 'Page Visit Count Rule'
@@ -95,7 +99,7 @@ class SurveySubmissionDataRule(AbstractBaseRule):
 
     @cached_property
     def field_model(self):
-        return apps.get_model('personalise', 'PersonalisableSurveyFormField')
+        return apps.get_model('surveys', 'PersonalisableSurveyFormField')
 
     @property
     def survey_submission_model(self):
@@ -243,6 +247,33 @@ class SurveySubmissionDataRule(AbstractBaseRule):
             )
         }
 
+    def get_column_header(self):
+        try:
+            field_name = self.get_expected_field().label
+        except self.field_model.DoesNotExist:
+            field_name = self.field_name
+
+        return '%s - %s' % (self.survey, field_name)
+
+    def get_user_info_string(self, user):
+        try:
+            survey_submission = self.get_survey_submission_of_user(user)
+        except self.survey_submission_model.DoesNotExist:
+            # No survey found so return false
+            return "No submission"
+        except self.survey_submission_model.MultipleObjectsReturned:
+            # There should not be two survey submissions, but just in case
+            # let's return false since we don't want to be guessing what user
+            # meant in their response.
+            return "Too many submissions"
+
+        user_response = survey_submission.get_data().get(self.field_name)
+        if not user_response:
+            return "Not answered"
+        if isinstance(user_response, list):
+            user_response = ", ".join(user_response)
+        return str(user_response)
+
 
 class SurveyResponseRule(AbstractBaseRule):
     static = True
@@ -281,6 +312,22 @@ class SurveyResponseRule(AbstractBaseRule):
             )
         }
 
+    def get_column_header(self):
+        return self.survey.title
+
+    def get_user_info_string(self, user):
+        submission_class = self.survey.get_submission_class()
+        submission = submission_class.objects.filter(
+            user=user,
+            page=self.survey,
+        ).last()
+        if not submission:
+            return "No submission"
+        response_date = submission.created_at
+        if timezone.is_naive(response_date):
+            response_date = timezone.make_aware(response_date)
+        return response_date.strftime("%Y-%m-%d %H:%M")
+
 
 class GroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
@@ -312,6 +359,12 @@ class GroupMembershipRule(AbstractBaseRule):
 
         # Check whether user is part of a group
         return user.segment_groups.filter(id=self.group_id).exists()
+
+    def get_column_header(self):
+        return self.group.name
+
+    def get_user_info_string(self, user):
+        return str(user.segment_groups.filter(id=self.group_id).exists())
 
 
 class ArticleTagRule(AbstractBaseRule):
@@ -402,9 +455,12 @@ class ArticleTagRule(AbstractBaseRule):
 
     def test_user(self, request, user=None):
         if user:
-            # This rule currently does not support testing a user directly
-            # TODO: Make this test a user directly when the rule uses
-            # historical data
+            # Create a fake request so we can use the adapter
+            request = RequestFactory().get('/')
+            request.session = SessionStore()
+            request.user = user
+        elif not request:
+            # Return false if we don't have a user or a request
             return False
 
         from wagtail_personalisation.adapters import get_segment_adapter
@@ -428,6 +484,24 @@ class ArticleTagRule(AbstractBaseRule):
                 self.count
             ),
         }
+
+    def get_column_header(self):
+        return 'Article Tag = %s' % self.tag.title
+
+    def get_user_info_string(self, user):
+        # Create a fake request so we can use the adapter
+        request = RequestFactory().get('/')
+        request.session = SessionStore()
+        request.user = user
+
+        from wagtail_personalisation.adapters import get_segment_adapter
+        adapter = get_segment_adapter(request)
+        visit_count = adapter.get_tag_count(
+            self.tag,
+            self.date_from,
+            self.date_to,
+        )
+        return str(visit_count)
 
 
 class CombinationRule(AbstractBaseRule):
