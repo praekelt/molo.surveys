@@ -99,7 +99,7 @@ class SurveySubmissionDataRule(AbstractBaseRule):
 
     @cached_property
     def field_model(self):
-        return apps.get_model('personalise', 'PersonalisableSurveyFormField')
+        return apps.get_model('surveys', 'PersonalisableSurveyFormField')
 
     @property
     def survey_submission_model(self):
@@ -256,9 +256,20 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         return '%s - %s' % (self.survey, field_name)
 
     def get_user_info_string(self, user):
-        survey_submission = self.get_survey_submission_of_user(user)
+        try:
+            survey_submission = self.get_survey_submission_of_user(user)
+        except self.survey_submission_model.DoesNotExist:
+            # No survey found so return false
+            return "No submission"
+        except self.survey_submission_model.MultipleObjectsReturned:
+            # There should not be two survey submissions, but just in case
+            # let's return false since we don't want to be guessing what user
+            # meant in their response.
+            return "Too many submissions"
 
         user_response = survey_submission.get_data().get(self.field_name)
+        if not user_response:
+            return "Not answered"
         if isinstance(user_response, list):
             user_response = ", ".join(user_response)
         return str(user_response)
@@ -310,6 +321,8 @@ class SurveyResponseRule(AbstractBaseRule):
             user=user,
             page=self.survey,
         ).last()
+        if not submission:
+            return "No submission"
         response_date = submission.created_at
         if timezone.is_naive(response_date):
             response_date = timezone.make_aware(response_date)
