@@ -442,6 +442,22 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             admin_label="birthday",
         )
 
+    def test_date_molo_form_fields_clean_if_blank(self):
+        field = self.create_molo_survey_form_field('date')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_date_molo_form_fields_clean_with_valid_default(self):
+        field = self.create_molo_survey_form_field('date')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
     def test_date_molo_form_fields_not_clean_with_invalid_default(self):
         field = self.create_molo_survey_form_field('date')
         field.default_value = "something that isn't a date"
@@ -449,6 +465,22 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             field.clean()
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_datetime_molo_form_fields_clean_if_blank(self):
+        field = self.create_molo_survey_form_field('datetime')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_datetime_molo_form_fields_clean_with_valid_default(self):
+        field = self.create_molo_survey_form_field('datetime')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
 
     def test_datetime_molo_form_fields_not_clean_with_invalid_default(self):
         field = self.create_molo_survey_form_field('datetime')
@@ -458,6 +490,22 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
+    def test_date_personalisabe_form_fields_clean_if_blank(self):
+        field = self.create_personalisable_survey_form_field('date')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_date_personalisabe_form_fields_clean_with_valid_default(self):
+        field = self.create_personalisable_survey_form_field('date')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
     def test_date_personalisable_fields_not_clean_with_invalid_default(self):
         field = self.create_personalisable_survey_form_field('date')
         field.default_value = "something that isn't a date"
@@ -465,6 +513,22 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             field.clean()
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_datetime_personalisabe_form_fields_clean_if_blank(self):
+        field = self.create_personalisable_survey_form_field('datetime')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_datetime_personalisabe_form_fields_clean_with_valid_default(self):
+        field = self.create_personalisable_survey_form_field('datetime')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
 
     def test_datetime_personalisable_fields_not_clean_with_invalid_default(
             self):
