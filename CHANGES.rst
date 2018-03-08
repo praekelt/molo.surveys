@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+6.7.4
+-----
+- Upgrade wagtail-personalisation-molo to 0.11.2
+
 6.7.3
 -----
 - Accept a wide range of date formats for date and datetime survey fields
