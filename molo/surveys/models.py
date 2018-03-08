@@ -542,10 +542,11 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
             if self.default_value:
                 widget = NaturalDateInput()
                 parsed_date = widget.value_from_datadict({
-                        'default_value': self.default_value
-                    }, None, 'default_value')
+                    'default_value': self.default_value
+                }, None, 'default_value')
                 if not isinstance(parsed_date, datetime.datetime):
-                    raise ValidationError({'default_value': ["Must be a valid date",]})
+                    raise ValidationError(
+                        {'default_value': ["Must be a valid date", ]})
 
 
 surveys_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
@@ -701,10 +702,11 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
             if self.default_value:
                 widget = NaturalDateInput()
                 parsed_date = widget.value_from_datadict({
-                        'default_value': self.default_value
-                    }, None, 'default_value')
+                    'default_value': self.default_value
+                }, None, 'default_value')
                 if not isinstance(parsed_date, datetime.datetime):
-                    raise ValidationError({'default_value': ["Must be a valid date",]})
+                    raise ValidationError(
+                        {'default_value': ["Must be a valid date", ]})
 
 
 class SegmentUserGroup(models.Model):
