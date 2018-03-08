@@ -7,6 +7,8 @@ from molo.surveys.models import (
     MoloSurveyPage,
     MoloSurveySubmission,
     SurveysIndexPage,
+    PersonalisableSurvey,
+    PersonalisableSurveyFormField
 )
 
 from .utils import skip_logic_block_data, skip_logic_data
@@ -402,3 +404,73 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
             field_3.clean_name: 'because ;)',
         }, follow=True)
         self.assertContains(response, survey.thank_you_text)
+
+
+class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.login()
+
+    def create_molo_survey_form_field(self, field_type):
+        survey = MoloSurveyPage(
+            title='Test Survey',
+            introduction='Introduction to Test Survey ...',
+        )
+        SurveysIndexPage.objects.first().add_child(instance=survey)
+        survey.save_revision().publish()
+
+        return MoloSurveyFormField.objects.create(
+            page=survey,
+            label="When is your birthday",
+            field_type=field_type,
+            admin_label="birthday",
+        )
+
+    def create_personalisable_survey_form_field(self, field_type):
+        survey = PersonalisableSurvey(
+            title='Test Survey',
+            introduction='Introduction to Test Survey ...',
+        )
+
+        SurveysIndexPage.objects.first().add_child(instance=survey)
+        survey.save_revision().publish()
+
+        return PersonalisableSurveyFormField.objects.create(
+            page=survey,
+            label="When is your birthday",
+            field_type=field_type,
+            admin_label="birthday",
+        )
+
+    def test_date_molo_form_fields_not_clean_with_invalid_default(self):
+        field = self.create_molo_survey_form_field('date')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_datetime_molo_form_fields_not_clean_with_invalid_default(self):
+        field = self.create_molo_survey_form_field('datetime')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_date_personalisable_fields_not_clean_with_invalid_default(self):
+        field = self.create_personalisable_survey_form_field('date')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_datetime_personalisable_fields_not_clean_with_invalid_default(
+            self):
+        field = self.create_personalisable_survey_form_field('datetime')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
