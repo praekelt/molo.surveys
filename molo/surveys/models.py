@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -56,6 +57,7 @@ from .rules import (  # noqa
     SurveyResponseRule
 )
 from .utils import SkipLogicPaginator
+from .widgets import NaturalDateInput
 
 
 SKIP = 'NA (Skipped)'
@@ -535,6 +537,17 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     class Meta(AbstractFormField.Meta):
         pass
 
+    def clean(self):
+        if self.field_type == 'date' or self.field_type == 'datetime':
+            if self.default_value:
+                widget = NaturalDateInput()
+                parsed_date = widget.value_from_datadict({
+                    'default_value': self.default_value
+                }, None, 'default_value')
+                if not isinstance(parsed_date, datetime.datetime):
+                    raise ValidationError(
+                        {'default_value': ["Must be a valid date", ]})
+
 
 surveys_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
 
@@ -683,6 +696,17 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
 
     class Meta(AbstractFormField.Meta):
         verbose_name = _('personalisable form field')
+
+    def clean(self):
+        if self.field_type == 'date' or self.field_type == 'datetime':
+            if self.default_value:
+                widget = NaturalDateInput()
+                parsed_date = widget.value_from_datadict({
+                    'default_value': self.default_value
+                }, None, 'default_value')
+                if not isinstance(parsed_date, datetime.datetime):
+                    raise ValidationError(
+                        {'default_value': ["Must be a valid date", ]})
 
 
 class SegmentUserGroup(models.Model):
