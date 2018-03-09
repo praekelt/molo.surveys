@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+6.7.5
+-----
+- Bugfix: Handle errors when testing invalid rules
+- Upgrade wagtail-personalisation-molo to 0.11.3
+
 6.7.4
 -----
 - Upgrade wagtail-personalisation-molo to 0.11.2
