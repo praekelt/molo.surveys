@@ -4,7 +4,7 @@ from operator import attrgetter
 from django import forms
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from django.test.client import RequestFactory
 from django.utils import six, timezone
@@ -297,7 +297,11 @@ class SurveyResponseRule(AbstractBaseRule):
         if not user:
             return False
 
-        submission_class = self.survey.get_submission_class()
+        # Django formsets don't honour 'required' fields so check rule is valid
+        try:
+            submission_class = self.survey.get_submission_class()
+        except ObjectDoesNotExist:
+            return False
 
         return submission_class.objects.filter(
             user=user,
@@ -461,6 +465,12 @@ class ArticleTagRule(AbstractBaseRule):
             request.user = user
         elif not request:
             # Return false if we don't have a user or a request
+            return False
+
+        # Django formsets don't honour 'required' fields so check rule is valid
+        try:
+            self.tag
+        except ObjectDoesNotExist:
             return False
 
         from wagtail_personalisation.adapters import get_segment_adapter
