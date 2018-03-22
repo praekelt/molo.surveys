@@ -99,18 +99,6 @@ def surveys_list(context, pk=None, only_linked_surveys=False,
 
 
 @register.simple_tag(takes_context=True)
-def get_survey_list_for_site(context):
-    context = copy(context)
-    main = context['request'].site.root_page
-    page = SurveysIndexPage.objects.child_of(main).live().first()
-    if page:
-        return (
-            MoloSurveyPage.objects.child_of(page).filter(
-                languages__language__is_main_language=True).specific())
-    return None
-
-
-@register.simple_tag(takes_context=True)
 def submission_has_article(context, survey_id, submission_id):
     survey_page = get_object_or_404(Page, id=survey_id).specific
     SubmissionClass = survey_page.get_submission_class()

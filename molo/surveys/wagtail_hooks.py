@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.conf.urls import include, url
 from django.utils.html import format_html_join
 from django.contrib.auth.models import User
 
@@ -6,6 +7,7 @@ from wagtail.contrib.modeladmin.options import modeladmin_register
 from wagtail.wagtailcore import hooks
 
 from molo.surveys.models import MoloSurveyPage, SurveyTermsConditions
+from molo.surveys import admin_urls
 from molo.core.models import ArticlePage
 
 from .admin import SegmentUserGroupAdmin
@@ -52,3 +54,12 @@ def create_new_page_relations(request, page, new_page):
                             .first()
                         relation.terms_and_conditions = new_article
                         relation.save()
+
+
+# This overrwrites the wagtailsuveys admin urls in order to use custom
+# survey index view
+@hooks.register('register_admin_urls')
+def register_admin_urls():
+    return [
+        url(r'^surveys/', include(admin_urls)),
+    ]

@@ -12,6 +12,7 @@ from molo.surveys.models import (
 )
 
 from .utils import skip_logic_block_data, skip_logic_data
+from .base import create_survey
 
 
 class TestSurveyModels(TestCase, MoloTestCaseMixin):
@@ -138,50 +139,6 @@ class TestSkipLogicBlock(TestCase, MoloTestCaseMixin):
         cleaned_data = block.clean(data)
         self.assertEqual(cleaned_data['skip_logic'], SkipState.QUESTION)
         self.assertEqual(cleaned_data['question'], 1)
-
-
-def create_molo_survey_form_field(survey, sort_order, obj):
-    if obj['type'] == 'radio':
-        skip_logic = skip_logic_data(choices=obj['choices'])
-    else:
-        skip_logic = None
-
-    return MoloSurveyFormField.objects.create(
-        page=survey,
-        sort_order=sort_order,
-        label=obj["question"],
-        field_type=obj["type"],
-        required=obj["required"],
-        page_break=obj["page_break"],
-        admin_label=obj["question"].lower().replace(" ", "_"),
-        skip_logic=skip_logic
-    )
-
-
-def create_molo_survey_page(parent, **kwargs):
-    molo_survey_page = MoloSurveyPage(
-        title='Test Survey', slug='test-survey',
-        introduction='Introduction to Test Survey ...',
-        thank_you_text='Thank you for taking the Test Survey',
-        submit_text='survey submission text',
-        **kwargs
-    )
-
-    parent.add_child(instance=molo_survey_page)
-    molo_survey_page.save_revision().publish()
-
-    return molo_survey_page
-
-
-def create_survey(fields={}, **kwargs):
-    survey = create_molo_survey_page(SurveysIndexPage.objects.first())
-
-    if not fields == {}:
-        num_questions = len(fields)
-        for index, field in enumerate(reversed(fields)):
-            sort_order = num_questions - (index + 1)
-            create_molo_survey_form_field(survey, sort_order, field)
-    return survey
 
 
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):

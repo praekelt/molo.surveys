@@ -15,13 +15,30 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils.translation import ugettext as _
+from wagtail.utils.pagination import paginate
 
 from wagtail.wagtailadmin import messages
 from wagtail.wagtailadmin.utils import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
+from wagtailsurveys.models import get_surveys_for_user
+
 from .forms import CSVGroupCreationForm
+
+
+def index(request):
+    survey_pages = get_surveys_for_user(request.user)
+    survey_pages = (
+        survey_pages.descendant_of(request.site.root_page)
+                    .filter(languages__language__is_main_language=True)
+                    .specific()
+    )
+    paginator, survey_pages = paginate(request, survey_pages)
+
+    return render(request, 'wagtailsurveys/index.html', {
+        'survey_pages': survey_pages,
+    })
 
 
 class SegmentCountForm(SegmentAdminForm):

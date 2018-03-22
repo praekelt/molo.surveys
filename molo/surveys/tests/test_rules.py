@@ -415,6 +415,11 @@ class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
         self.request.user = new_user
         self.assertTrue(rule.test_user(self.request))
 
+    def test_call_test_user_on_invalid_rule_fails(self):
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule()
+        self.assertFalse(rule.test_user(None, self.request.user))
+
     def test_call_test_user_without_request(self):
         self.submit_survey(self.survey, self.user)
         rule = SurveyResponseRule(survey=self.survey)
@@ -643,6 +648,11 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
     def test_visting_non_tagged_page_isnt_error(self):
         self.adapter.add_page_visit(self.main)
         self.assertFalse(self.request.session['tag_count'])
+
+    def test_call_test_user_on_invalid_rule_fails(self):
+        rule = ArticleTagRule()
+        self.adapter.add_page_visit(self.article)
+        self.assertFalse(rule.test_user(None, self.request.user))
 
     def test_call_test_user_without_request(self):
         rule = ArticleTagRule(

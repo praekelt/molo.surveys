@@ -17,6 +17,8 @@ from molo.surveys.models import (
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
 
+from .base import create_molo_survey_page
+
 User = get_user_model()
 
 
@@ -219,3 +221,21 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         self.assertContains(response, self.user.username)
         self.assertContains(response, answer)
+
+    def test_survey_index_view_displays_all_surveys(self):
+        child_of_index_page = create_molo_survey_page(
+            self.surveys_index,
+            title="Child of SurveysIndexPage Survey",
+            slug="child-of-surveysindexpage-survey"
+        )
+
+        child_of_article_page = create_molo_survey_page(
+            self.article,
+            title="Child of Article Survey",
+            slug="child-of-article-survey"
+        )
+
+        self.client.force_login(self.super_user)
+        response = self.client.get('/admin/surveys/')
+        self.assertContains(response, child_of_index_page.title)
+        self.assertContains(response, child_of_article_page.title)
