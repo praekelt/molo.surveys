@@ -25,8 +25,6 @@ script:
   - mkdir testapp/testapp/templates/core
   - cp molo/surveys/test_templates/*.html testapp/testapp/templates/core/
   - cp molo/surveys/test_templates/base.html testapp/testapp/templates/base.html
-  - mkdir testapp/testapp/templates/wagtailsurveys
-  - cp molo/surveys/test_templates/wagtailsurveys/*.html testapp/testapp/templates/wagtailsurveys/
   - flake8 testapp
   - pip install -e testapp
   - py.test --cov=molo.surveys --cov-report=term
