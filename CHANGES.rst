@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+
+6.7.6
+-----
+- Bugfix: Ensure results of surveys, that are children of articles, pull through to the admin view
+
 6.7.5
 -----
 - Bugfix: Handle errors when testing invalid rules
