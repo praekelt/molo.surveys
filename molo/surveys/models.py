@@ -112,6 +112,7 @@ class MoloSurveyPage(
     introduction = TextField(blank=True)
     homepage_introduction = TextField(blank=True)
     image = models.ForeignKey(
+
         'wagtailimages.Image',
         null=True,
         blank=True,
@@ -388,7 +389,8 @@ class MoloSurveyPage(
                 self.has_user_submitted_survey(request, self.id)):
             return render(request, self.template, self.get_context(request))
 
-        if self.has_page_breaks or self.multi_step:
+        if ((self.has_page_breaks or self.multi_step) and
+                not self.display_survey_directly):
             return self.serve_questions(request)
 
         if request.method == 'POST':

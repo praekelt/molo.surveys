@@ -510,7 +510,7 @@ class TestPollsViaSurveys(TestCase, MoloTestCaseMixin):
 
     def test_molo_survey_poll(self):
         survey = MoloSurveyPage(
-            title='Molo Survey Poll ',
+            title='Molo Survey Poll',
             slug="molo-survey-poll",
             introduction='Introduction to Test Survey ...',
             allow_anonymous_submissions=True,
