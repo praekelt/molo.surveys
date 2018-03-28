@@ -505,10 +505,11 @@ class TestPollsViaSurveys(TestCase, MoloTestCaseMixin):
         self.login()
         self.client = Client()
         self.main = Main.objects.all().first()
+        self.choices = ['next', 'end', 'survey']
         self.language_setting = Languages.objects.create(
             site_id=self.main.get_site().pk)
 
-    def test_molo_survey_poll(self):
+    def create_molo_poll(self):
         survey = MoloSurveyPage(
             title='Molo Survey Poll',
             slug="molo-survey-poll",
@@ -521,27 +522,9 @@ class TestPollsViaSurveys(TestCase, MoloTestCaseMixin):
 
         SurveysIndexPage.objects.first().add_child(instance=survey)
         survey.save_revision().publish()
-        choices = ['next', 'end', 'survey']
+        return survey
 
-        drop_down_field = MoloSurveyFormField.objects.create(
-            page=survey,
-            sort_order=1,
-            admin_label="where",
-            label='Where should we go?',
-            field_type='dropdown',
-            skip_logic=skip_logic_data(choices),
-            required=True,
-            page_break=True
-        )
-        response = self.client.post(
-            survey.url + '?p=1',
-            {drop_down_field.clean_name: 'next'},
-            follow=True,
-        )
-        self.assertContains(response, survey.thank_you_text)
-        self.assertNotContains(response, 'That page number is less than 1')
-
-    def test_personalisable_survey_poll(self):
+    def create_personalisable_poll(self):
         survey = PersonalisableSurvey(
             title='Personalisable Survey Poll',
             slug="personalisable-survey-poll",
@@ -554,15 +537,77 @@ class TestPollsViaSurveys(TestCase, MoloTestCaseMixin):
 
         SurveysIndexPage.objects.first().add_child(instance=survey)
         survey.save_revision().publish()
-        choices = ['next', 'end', 'survey']
+        return survey
 
+    def test_molo_poll(self):
+        survey = self.create_molo_poll()
+        drop_down_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=1,
+            admin_label="where",
+            label='Where should we go?',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(self.choices),
+            required=True,
+            page_break=False
+        )
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')
+
+    def test_molo_poll_with_page_break(self):
+        survey = self.create_molo_poll()
+        drop_down_field = MoloSurveyFormField.objects.create(
+            page=survey,
+            sort_order=1,
+            admin_label="where",
+            label='Where should we go?',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(self.choices),
+            required=True,
+            page_break=True
+        )
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')
+
+    def test_personalisable_survey_poll(self):
+        survey = self.create_personalisable_poll()
         drop_down_field = PersonalisableSurveyFormField.objects.create(
             page=survey,
             sort_order=1,
             admin_label="where",
             label='Where should we go, in personsonalised style?',
             field_type='dropdown',
-            skip_logic=skip_logic_data(choices),
+            skip_logic=skip_logic_data(self.choices),
+            required=True,
+            page_break=False
+        )
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')
+
+    def test_personalisable_survey_poll_with_page_break(self):
+        survey = self.create_personalisable_poll()
+        drop_down_field = PersonalisableSurveyFormField.objects.create(
+            page=survey,
+            sort_order=1,
+            admin_label="where",
+            label='Where should we go, in personsonalised style?',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(self.choices),
             required=True,
             page_break=True
         )
