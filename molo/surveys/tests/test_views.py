@@ -19,8 +19,10 @@ from .utils import skip_logic_data
 from .base import (
     create_molo_poll,
     create_personalisable_poll,
-    molo_dropddown_field,
-    personalisable_dropddown_field
+    create_molo_dropddown_field,
+    create_personalisable_dropddown_field,
+    create_molo_survey_formfield,
+    create_molo_survey_page
 )
 
 from .constants import SEGMENT_FORM_DATA
@@ -72,30 +74,24 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.mk_main2(title='main3', slug='main3', path="00010003")
         self.client2 = Client(HTTP_HOST=self.main2.get_site().hostname)
 
-    def create_molo_survey_page(self, parent, **kwargs):
-        molo_survey_page = MoloSurveyPage(
-            title='Test Survey', slug='test-survey',
-            introduction='Introduction to Test Survey ...',
-            homepage_introduction='Shorter homepage introduction',
-            thank_you_text='Thank you for taking the Test Survey',
-            submit_text='survey submission text',
-            **kwargs
-        )
-
-        parent.add_child(instance=molo_survey_page)
+    def create_molo_survey_page_with_field(
+            self, parent, display_survey_directly=False,
+            allow_anonymous_submissions=False, **kwargs):
+        molo_survey_page = create_molo_survey_page(
+            parent,
+            display_survey_directly=display_survey_directly,
+            allow_anonymous_submissions=allow_anonymous_submissions, **kwargs)
         molo_survey_page.save_revision().publish()
-        molo_survey_form_field = MoloSurveyFormField.objects.create(
-            page=molo_survey_page,
-            sort_order=1,
-            label='Your favourite animal',
+        molo_survey_form_field = create_molo_survey_formfield(
+            survey=molo_survey_page,
             field_type='singleline',
-            required=True
-        )
-        return molo_survey_page, molo_survey_form_field
+            label="Your favourite animal",
+            required=True)
+        return (molo_survey_page, molo_survey_form_field)
 
     def test_homepage_button_text_customisable(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.surveys_index,
                 homepage_button_text='share your story yo')
         self.client.login(username='tester', password='tester')
@@ -105,7 +101,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_correct_intro_shows_on_homepage(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.surveys_index,
                 homepage_button_text='share your story yo')
         self.client.login(username='tester', password='tester')
@@ -115,7 +111,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_anonymous_submissions_not_allowed_by_default(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.section_index)
+            self.create_molo_survey_page_with_field(parent=self.section_index)
 
         response = self.client.get(molo_survey_page.url)
 
@@ -124,7 +120,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_submit_survey_as_logged_in_user(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.section_index)
+            self.create_molo_survey_page_with_field(parent=self.section_index)
 
         self.client.login(username='tester', password='tester')
 
@@ -144,14 +140,15 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         return molo_survey_page.url
 
     def test_anonymous_submissions_option(self):
-        molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
-                parent=self.section_index,
-                allow_anonymous_submissions=True
-            )
+        molo_survey_page = create_molo_survey_page(
+            parent=self.surveys_index,
+            allow_anonymous_submissions=True)
+        molo_survey_form_field = create_molo_survey_formfield(
+            survey=molo_survey_page,
+            field_type='singleline',
+            label="test label")
 
         response = self.client.get(molo_survey_page.url)
-
         self.assertContains(response, molo_survey_page.title)
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
@@ -181,7 +178,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_multiple_submissions_option(self, anonymous=False):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.section_index,
                 allow_multiple_submissions_per_user=True,
                 allow_anonymous_submissions=anonymous
@@ -209,7 +206,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_show_results_option(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.section_index,
                 allow_anonymous_submissions=True,
                 show_results=True
@@ -230,7 +227,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_show_results_as_percentage_option(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.section_index,
                 allow_anonymous_submissions=True,
                 allow_multiple_submissions_per_user=True,
@@ -261,7 +258,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_multi_step_option(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.section_index,
                 allow_anonymous_submissions=True,
                 multi_step=True
@@ -305,7 +302,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_can_submit_after_validation_error(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.section_index,
                 allow_anonymous_submissions=True
             )
@@ -340,7 +337,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_survey_template_tag_on_home_page_specific(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.surveys_index)
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
         response = self.client.get("/")
         self.assertContains(response, 'Take The Survey</a>')
         self.assertContains(response, molo_survey_page.homepage_introduction)
@@ -352,7 +349,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_can_only_see_sites_surveys_in_admin(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.surveys_index)
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
         response = self.client.get("/")
         self.assertContains(response, 'Take The Survey</a>')
         self.assertContains(response, molo_survey_page.homepage_introduction)
@@ -397,7 +394,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
     def test_translated_survey(self):
         self.user = self.login()
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.surveys_index)
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
 
         self.client.post(reverse(
             'add_translation', args=[molo_survey_page.id, 'fr']))
@@ -426,7 +423,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
     def test_survey_template_tag_on_footer(self):
         self.user = self.login()
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.surveys_index)
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
 
         self.client.post(reverse(
             'add_translation', args=[molo_survey_page.id, 'fr']))
@@ -456,7 +453,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_survey_template_tag_on_section_page(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.section)
+            self.create_molo_survey_page_with_field(parent=self.section)
 
         response = self.client.get(self.section.url)
         self.assertContains(response, 'Take The Survey</a>')
@@ -465,7 +462,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
     def test_translated_survey_on_section_page(self):
         self.user = self.login()
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.section)
+            self.create_molo_survey_page_with_field(parent=self.section)
 
         self.client.post(reverse(
             'add_translation', args=[molo_survey_page.id, 'fr']))
@@ -493,7 +490,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_survey_template_tag_on_article_page(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(parent=self.article)
+            self.create_molo_survey_page_with_field(parent=self.article)
         response = self.client.get(self.article.url)
         self.assertContains(response,
                             'Take The Survey</a>'.format(
@@ -502,7 +499,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_survey_list_display_direct_logged_out(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.surveys_index,
                 display_survey_directly=True)
         response = self.client.get('/')
@@ -512,7 +509,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_survey_list_display_direct_logged_in(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.surveys_index,
                 display_survey_directly=True)
 
@@ -535,7 +532,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_anonymous_submissions_option_display_direct(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.surveys_index,
                 display_survey_directly=True,
                 allow_anonymous_submissions=True,
@@ -556,7 +553,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
     def test_multiple_submissions_display_direct(self):
         molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
+            self.create_molo_survey_page_with_field(
                 parent=self.surveys_index,
                 display_survey_directly=True,
                 allow_multiple_submissions_per_user=True,
@@ -1138,7 +1135,7 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
 
     def test_molo_poll(self):
         survey = create_molo_poll(self.surveys_index)
-        drop_down_field = molo_dropddown_field(
+        drop_down_field = create_molo_dropddown_field(
             self.surveys_index, survey, self.choices)
         response = self.client.post(
             survey.url + '?p=1',
@@ -1150,7 +1147,7 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
 
     def test_molo_poll_with_page_break(self):
         survey = create_molo_poll(self.surveys_index)
-        drop_down_field = molo_dropddown_field(
+        drop_down_field = create_molo_dropddown_field(
             self.surveys_index, survey, self.choices, page_break=True)
         response = self.client.post(
             survey.url + '?p=1',
@@ -1162,7 +1159,7 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
 
     def test_personalisable_survey_poll(self):
         survey = create_personalisable_poll(self.surveys_index)
-        drop_down_field = personalisable_dropddown_field(
+        drop_down_field = create_personalisable_dropddown_field(
             self.surveys_index, survey, self.choices)
         response = self.client.post(
             survey.url + '?p=1',
@@ -1174,7 +1171,7 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
 
     def test_personalisable_survey_poll_with_page_break(self):
         survey = create_personalisable_poll(self.surveys_index)
-        drop_down_field = personalisable_dropddown_field(
+        drop_down_field = create_personalisable_dropddown_field(
             self.surveys_index, survey, self.choices, page_break=True)
         response = self.client.post(
             survey.url + '?p=1',

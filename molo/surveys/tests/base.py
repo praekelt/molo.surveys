@@ -81,7 +81,7 @@ def create_molo_poll(parent, **kwargs):
         title="Molo Survey Poll",
         slug="molo-survey-poll",
         display_survey_directly=True,
-        allow_anonymous_submissions=True,
+        allow_anonymous_submissions=False,
         allow_multiple_submissions_per_user=True,
         thank_you_text='Thank you for taking the Molo Poll',
     )
@@ -100,7 +100,7 @@ def create_personalisable_poll(parent, **kwargs):
     return survey
 
 
-def molo_dropddown_field(
+def create_molo_dropddown_field(
         parent, survey, choices, page_break=False,
         sort_order=1, label="Is this a dropdown?", **kwargs):
     return MoloSurveyFormField.objects.create(
@@ -115,7 +115,7 @@ def molo_dropddown_field(
     )
 
 
-def personalisable_dropddown_field(
+def create_personalisable_dropddown_field(
         parent, survey, choices, page_break=False,
         sort_order=1, label="Is this a dropdown?", **kwargs):
     return PersonalisableSurveyFormField.objects.create(
@@ -127,4 +127,16 @@ def personalisable_dropddown_field(
         skip_logic=skip_logic_data(choices),
         required=True,
         page_break=page_break
+    )
+
+
+def create_molo_survey_formfield(
+        survey, field_type, label="Your favourite animal",
+        required=False, sort_order=1):
+    return MoloSurveyFormField.objects.create(
+        page=survey,
+        sort_order=sort_order,
+        label=label,
+        field_type=field_type,
+        required=required
     )
