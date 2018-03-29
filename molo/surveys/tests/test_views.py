@@ -16,6 +16,12 @@ from molo.surveys.models import (
 )
 
 from .utils import skip_logic_data
+from .base import (
+    create_molo_poll,
+    create_personalisable_poll,
+    molo_dropddown_field,
+    personalisable_dropddown_field
+)
 
 from .constants import SEGMENT_FORM_DATA
 
@@ -1116,3 +1122,64 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
                 "Select a valid choice. That choice is not one of the "
                 "available choices."],
             "name": ["This field is required."]}})
+
+
+class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
+
+    """
+    Tests to check if polls are not
+    being paginated when they include fields with skip_logic_data.
+    Also test that page_break is not causing any pagination on the surveys
+    """
+    def setUp(self):
+        self.mk_main()
+        self.choices = ['next', 'end', 'survey']
+        self.surveys_index = SurveysIndexPage.objects.first()
+
+    def test_molo_poll(self):
+        survey = create_molo_poll(self.surveys_index)
+        drop_down_field = molo_dropddown_field(
+            self.surveys_index, survey, self.choices)
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')
+
+    def test_molo_poll_with_page_break(self):
+        survey = create_molo_poll(self.surveys_index)
+        drop_down_field = molo_dropddown_field(
+            self.surveys_index, survey, self.choices, page_break=True)
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')
+
+    def test_personalisable_survey_poll(self):
+        survey = create_personalisable_poll(self.surveys_index)
+        drop_down_field = personalisable_dropddown_field(
+            self.surveys_index, survey, self.choices)
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')
+
+    def test_personalisable_survey_poll_with_page_break(self):
+        survey = create_personalisable_poll(self.surveys_index)
+        drop_down_field = personalisable_dropddown_field(
+            self.surveys_index, survey, self.choices, page_break=True)
+        response = self.client.post(
+            survey.url + '?p=1',
+            {drop_down_field.clean_name: 'next'},
+            follow=True,
+        )
+        self.assertContains(response, survey.thank_you_text)
+        self.assertNotContains(response, 'That page number is less than 1')

@@ -1,7 +1,9 @@
 from molo.surveys.models import (
     MoloSurveyFormField,
     MoloSurveyPage,
+    PersonalisableSurvey,
     SurveysIndexPage,
+    PersonalisableSurveyFormField
 )
 from .utils import skip_logic_data
 
@@ -25,19 +27,41 @@ def create_molo_survey_form_field(survey, sort_order, obj):
 
 
 def create_molo_survey_page(
-        parent, title="Test Survey", slug='test-survey', **kwargs):
+        parent, title="Test Survey", slug='test-survey',
+        thank_you_text='Thank you for taking the Test Survey',
+        homepage_introduction='Shorter homepage introduction',
+        **kwargs):
     molo_survey_page = MoloSurveyPage(
         title=title, slug=slug,
         introduction='Introduction to Test Survey ...',
-        thank_you_text='Thank you for taking the Test Survey',
+        thank_you_text=thank_you_text,
         submit_text='survey submission text',
-        **kwargs
+        homepage_introduction=homepage_introduction, **kwargs
     )
 
     parent.add_child(instance=molo_survey_page)
     molo_survey_page.save_revision().publish()
 
     return molo_survey_page
+
+
+def create_personalisable_survey_page(
+        parent, title="Test Personalisable Survey",
+        slug='test-personalisable-survey',
+        thank_you_text='Thank you for taking the Personalisable Survey',
+        **kwargs):
+    personalisable_survey_page = PersonalisableSurvey(
+        title=title, slug=slug,
+        introduction='Introduction to Test Personalisable Survey ...',
+        thank_you_text=thank_you_text,
+        submit_text='personalisable survey submission text',
+        **kwargs
+    )
+
+    parent.add_child(instance=personalisable_survey_page)
+    personalisable_survey_page.save_revision().publish()
+
+    return personalisable_survey_page
 
 
 def create_survey(fields={}, **kwargs):
@@ -49,3 +73,58 @@ def create_survey(fields={}, **kwargs):
             sort_order = num_questions - (index + 1)
             create_molo_survey_form_field(survey, sort_order, field)
     return survey
+
+
+def create_molo_poll(parent, **kwargs):
+    return create_molo_survey_page(
+        parent=parent,
+        title="Molo Survey Poll",
+        slug="molo-survey-poll",
+        display_survey_directly=True,
+        allow_anonymous_submissions=True,
+        allow_multiple_submissions_per_user=True,
+        thank_you_text='Thank you for taking the Molo Poll',
+    )
+
+
+def create_personalisable_poll(parent, **kwargs):
+    survey = create_personalisable_survey_page(
+        parent=parent,
+        title='Personalisable Survey Poll',
+        slug="personalisable-survey-poll",
+        allow_anonymous_submissions=True,
+        display_survey_directly=True,
+        allow_multiple_submissions_per_user=True,
+        thank_you_text='Thank you for taking the Personalisable Poll',
+    )
+    return survey
+
+
+def molo_dropddown_field(
+        parent, survey, choices, page_break=False,
+        sort_order=1, label="Is this a dropdown?", **kwargs):
+    return MoloSurveyFormField.objects.create(
+        page=survey,
+        sort_order=sort_order,
+        admin_label="is-this-a-drop-down",
+        label=label,
+        field_type='dropdown',
+        skip_logic=skip_logic_data(choices),
+        required=True,
+        page_break=page_break
+    )
+
+
+def personalisable_dropddown_field(
+        parent, survey, choices, page_break=False,
+        sort_order=1, label="Is this a dropdown?", **kwargs):
+    return PersonalisableSurveyFormField.objects.create(
+        page=survey,
+        sort_order=sort_order,
+        admin_label="is-this-a-drop-down",
+        label=label,
+        field_type='dropdown',
+        skip_logic=skip_logic_data(choices),
+        required=True,
+        page_break=page_break
+    )
