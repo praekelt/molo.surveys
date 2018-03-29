@@ -17,8 +17,7 @@ from molo.surveys.models import (
 
 from .utils import skip_logic_data
 from .base import (
-    create_molo_poll,
-    create_personalisable_poll,
+    create_personalisable_survey_page,
     create_molo_dropddown_field,
     create_personalisable_dropddown_field,
     create_molo_survey_formfield,
@@ -1134,7 +1133,8 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
         self.surveys_index = SurveysIndexPage.objects.first()
 
     def test_molo_poll(self):
-        survey = create_molo_poll(self.surveys_index)
+        survey = create_molo_survey_page(
+            self.surveys_index, display_survey_directly=True)
         drop_down_field = create_molo_dropddown_field(
             self.surveys_index, survey, self.choices)
         response = self.client.post(
@@ -1146,7 +1146,8 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, 'That page number is less than 1')
 
     def test_molo_poll_with_page_break(self):
-        survey = create_molo_poll(self.surveys_index)
+        survey = create_molo_survey_page(
+            self.surveys_index, display_survey_directly=True)
         drop_down_field = create_molo_dropddown_field(
             self.surveys_index, survey, self.choices, page_break=True)
         response = self.client.post(
@@ -1158,7 +1159,9 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, 'That page number is less than 1')
 
     def test_personalisable_survey_poll(self):
-        survey = create_personalisable_poll(self.surveys_index)
+        survey = create_personalisable_survey_page(
+            self.surveys_index,
+            display_survey_directly=True)
         drop_down_field = create_personalisable_dropddown_field(
             self.surveys_index, survey, self.choices)
         response = self.client.post(
@@ -1170,7 +1173,8 @@ class TestPollsViaSurveysView(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, 'That page number is less than 1')
 
     def test_personalisable_survey_poll_with_page_break(self):
-        survey = create_personalisable_poll(self.surveys_index)
+        survey = create_personalisable_survey_page(
+            self.surveys_index, display_survey_directly=True)
         drop_down_field = create_personalisable_dropddown_field(
             self.surveys_index, survey, self.choices, page_break=True)
         response = self.client.post(

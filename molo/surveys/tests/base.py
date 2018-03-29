@@ -75,31 +75,6 @@ def create_survey(fields={}, **kwargs):
     return survey
 
 
-def create_molo_poll(parent, **kwargs):
-    return create_molo_survey_page(
-        parent=parent,
-        title="Molo Survey Poll",
-        slug="molo-survey-poll",
-        display_survey_directly=True,
-        allow_anonymous_submissions=False,
-        allow_multiple_submissions_per_user=True,
-        thank_you_text='Thank you for taking the Molo Poll',
-    )
-
-
-def create_personalisable_poll(parent, **kwargs):
-    survey = create_personalisable_survey_page(
-        parent=parent,
-        title='Personalisable Survey Poll',
-        slug="personalisable-survey-poll",
-        allow_anonymous_submissions=True,
-        display_survey_directly=True,
-        allow_multiple_submissions_per_user=True,
-        thank_you_text='Thank you for taking the Personalisable Poll',
-    )
-    return survey
-
-
 def create_molo_dropddown_field(
         parent, survey, choices, page_break=False,
         sort_order=1, label="Is this a dropdown?", **kwargs):
