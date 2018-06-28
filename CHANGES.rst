@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.8.1
+-----
+- Ensure translated surveys are also pulled through to the admin view
+
 6.8.0
 -----
 - Remove hardcoded groups for displaying the surveys in wagtail menu
