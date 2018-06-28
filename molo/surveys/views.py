@@ -31,7 +31,6 @@ def index(request):
     survey_pages = get_surveys_for_user(request.user)
     survey_pages = (
         survey_pages.descendant_of(request.site.root_page)
-                    .filter(languages__language__is_main_language=True)
                     .specific()
     )
     paginator, survey_pages = paginate(request, survey_pages)
