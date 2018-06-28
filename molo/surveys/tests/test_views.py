@@ -374,6 +374,49 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             '<h2><a href="/admin/surveys/submissions/%s/">'
             'Test Survey</a></h2>' % molo_survey_page.pk)
 
+    def test_can_see_translated_survey_submissions_in_admin(self):
+        """ Test that submissions to translated surveys can be seen in the
+            admin
+        """
+        # Create a survey
+        self.user = self.login()
+        molo_survey_page, molo_survey_form_field = \
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
+        # Create a translated survey
+        response = self.client.post(reverse(
+            'add_translation', args=[molo_survey_page.id, 'fr']))
+        translated_survey = MoloSurveyPage.objects.get(
+            slug='french-translation-of-test-survey')
+        translated_survey.save_revision().publish()
+        translated_survey_form_field = create_molo_survey_formfield(
+            survey=translated_survey, field_type='singleline',
+            label="Your favourite animal in french", required=True)
+
+        # Check both surveys are listed in the admin
+        response = self.client.get('/admin/surveys/')
+        self.assertContains(response, 'Test Survey')
+        self.assertContains(response, 'French translation of Test Survey')
+
+        # Submit responses to both surveys
+        self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'):
+                'an english answer'
+        })
+        self.client.post(translated_survey.url, {
+            translated_survey_form_field.label.lower().replace(' ', '-'):
+                'a french answer'
+        })
+
+        # Check the responses are shown on the submission pages
+        response = self.client.get('/admin/surveys/submissions/%s/' %
+                                   molo_survey_page.pk)
+        self.assertContains(response, 'an english answer')
+        self.assertNotContains(response, 'a french answer')
+        response = self.client.get('/admin/surveys/submissions/%s/' %
+                                   translated_survey.pk)
+        self.assertNotContains(response, 'an english answer')
+        self.assertContains(response, 'a french answer')
+
     def test_no_duplicate_indexes(self):
         self.assertTrue(SurveysIndexPage.objects.child_of(self.main2).exists())
         self.assertEquals(
