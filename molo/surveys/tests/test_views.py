@@ -712,10 +712,6 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
             language_setting=self.language_setting,
             locale='en',
             is_active=True)
-        self.french = SiteLanguageRelation.objects.create(
-            language_setting=self.language_setting,
-            locale='fr',
-            is_active=True)
 
         self.molo_survey_page = self.new_survey('Test Survey')
         self.another_molo_survey_page = self.new_survey('Another Test Survey')
