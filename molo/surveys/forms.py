@@ -123,8 +123,12 @@ class SurveysFormBuilder(FormBuilder):
         return CharacterCountChoiceField(widget=forms.RadioSelect, **options)
 
     def create_checkboxes_field(self, field, options):
-        options['choices'] = [(x.strip(), x.strip()) for x in field.choices.split(',')]
-        options['initial'] = [x.strip() for x in field.default_value.split(',')]
+        options['choices'] = [
+            (x.strip(), x.strip()) for x in field.choices.split(',')
+        ]
+        options['initial'] = [
+            x.strip() for x in field.default_value.split(',')
+        ]
         return CharacterCountMultipleChoiceField(
             widget=forms.CheckboxSelectMultiple, **options)
 
