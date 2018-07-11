@@ -554,7 +554,8 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
         if self.choices and len(self.choices) > CHARACTER_COUNT_CHOICE_LIMIT:
             raise ValidationError(
                 {'field_type': _(
-                    'The maximum character(s) limit exceeded ({max_limit}). '
+                    'The combined choices\' maximum characters'
+                    ' limit has been exceeded ({max_limit} character(s)).'
                 ).format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT)}
             )
 
