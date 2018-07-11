@@ -286,6 +286,13 @@ class MoloSurveyPage(
         When the last step is submitted correctly, the whole form is saved in
         the DB.
         """
+        context = self.get_context(request)
+        # this will only return a page if there is a translation
+        page = context['page'].get_translation_for(
+            locale=request.LANGUAGE_CODE, site=request.site)
+        if page:
+            # if there is a translation, redirect to the translated page
+            return redirect(page.url)
         survey_data = self.load_data(request)
 
         paginator = SkipLogicPaginator(
@@ -366,7 +373,7 @@ class MoloSurveyPage(
             # Create empty form for non-POST requests
             form_class = self.get_form_class_for_step(step)
             form = form_class(page=self, user=request.user)
-        context = self.get_context(request)
+
         context['form'] = form
         context['fields_step'] = step
         context['is_intermediate_step'] = step.possibly_has_next()
