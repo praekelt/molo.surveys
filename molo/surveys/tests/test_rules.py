@@ -59,9 +59,12 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.positive_number = PersonalisableSurveyFormField.objects.create(
             field_type='positive_number', label='Positive Number Field',
             page=self.survey)
+        self.not_required_field = PersonalisableSurveyFormField.objects.create(
+            field_type='number', label='Not Required Field', page=self.survey,
+            required=False)
 
         # Create survey submission
-        data = {
+        self.data = {
             self.singleline_text.clean_name: 'super random text',
             self.checkboxes.clean_name: ['choice 3', 'choice 1'],
             self.checkbox.clean_name: True,
@@ -70,7 +73,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         }
         form = self.survey.get_form(
-            data, page=self.survey, user=self.request.user)
+            self.data, page=self.survey, user=self.request.user)
 
         assert form.is_valid(), \
             'Could not validate submission form. %s' % repr(form.errors)
@@ -78,6 +81,13 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.survey.process_form_submission(form)
 
         self.survey.refresh_from_db()
+
+    def test_get_field_model(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name=self.singleline_text.clean_name)
+        self.assertEqual(rule.field_model, PersonalisableSurveyFormField)
 
     def test_survey_data_rule_is_static(self):
         rule = SurveySubmissionDataRule(
@@ -199,6 +209,29 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.assertFalse(rule.test_user(self.request))
 
+    def test_passing_not_required_rule(self):
+        self.data.update({self.not_required_field.clean_name: 5})
+        form = self.survey.get_form(
+            self.data, page=self.survey, user=self.request.user)
+        assert form.is_valid(), \
+            'Could not validate submission form. %s' % repr(form.errors)
+        self.survey.process_form_submission(form)
+
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='5',
+            field_name=self.not_required_field.clean_name)
+
+        self.assertFalse(rule.test_user(self.request))
+
+    def test_failing_not_required_rule(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='4',
+            field_name=self.not_required_field.clean_name)
+
+        self.assertFalse(rule.test_user(self.request))
+
     def test_not_logged_in_user_fails(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
@@ -212,19 +245,109 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.request.user = AnonymousUser()
         self.assertFalse(rule.test_user(self.request))
 
-    def test_test_user_without_request(self):
+    def test_call_test_user_without_request(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='er ra',
             field_name=self.singleline_text.clean_name)
         self.assertTrue(rule.test_user(None, self.request.user))
 
-    def test_test_user_without_user_or_request(self):
+    def test_call_test_user_without_user_or_request(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
             expected_response='er ra',
             field_name=self.singleline_text.clean_name)
         self.assertFalse(rule.test_user(None))
+
+    def test_get_column_header(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='er ra',
+            field_name=self.singleline_text.clean_name)
+
+        self.assertEqual(rule.get_column_header(),
+                         'Test Survey - Singleline Text')
+
+    def test_get_user_info_string_returns_string_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='er ra',
+            field_name=self.singleline_text.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'super random text')
+
+    def test_get_user_info_string_returns_checkboxes_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='choice1',
+            field_name=self.checkboxes.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'choice 3, choice 1')
+
+    def test_get_user_info_string_returns_checkbox_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='1',
+            field_name=self.checkbox.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'True')
+
+    def test_get_user_info_string_returns_number_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='5',
+            field_name=self.number.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         '5')
+
+    def test_get_user_info_string_returns_positive_number_fields(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='8',
+            field_name=self.positive_number.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         '8')
+
+    def test_get_user_info_string_returns_if_no_submission(self):
+        user = get_user_model().objects.create_user(
+            username='another', email='another@example.com',
+            password='another')
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='8',
+            field_name=self.positive_number.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(user),
+                         'No submission')
+
+    def test_get_user_info_string_returns_if_multiple_submissions(self):
+        form = self.survey.get_form(
+            self.data, page=self.survey, user=self.request.user)
+        assert form.is_valid(), \
+            'Could not validate submission form. %s' % repr(form.errors)
+        self.survey.process_form_submission(form)
+
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='8',
+            field_name=self.positive_number.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'Too many submissions')
+
+    def test_get_user_info_string_returns_if_field_not_answered(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            expected_response='4',
+            field_name=self.not_required_field.clean_name)
+
+        self.assertEqual(rule.get_user_info_string(self.request.user),
+                         'Not answered')
 
 
 class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
@@ -292,15 +415,34 @@ class TestSurveyResponseRule(TestCase, MoloTestCaseMixin):
         self.request.user = new_user
         self.assertTrue(rule.test_user(self.request))
 
-    def test_test_user_without_request(self):
+    def test_call_test_user_on_invalid_rule_fails(self):
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule()
+        self.assertFalse(rule.test_user(None, self.request.user))
+
+    def test_call_test_user_without_request(self):
         self.submit_survey(self.survey, self.user)
         rule = SurveyResponseRule(survey=self.survey)
         self.assertTrue(rule.test_user(None, self.request.user))
 
-    def test_test_user_without_user_or_request(self):
+    def test_call_test_user_without_user_or_request(self):
         self.submit_survey(self.survey, self.user)
         rule = SurveyResponseRule(survey=self.survey)
         self.assertFalse(rule.test_user(None))
+
+    def test_get_column_header(self):
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertEqual(rule.get_column_header(), 'Other Survey')
+
+    def test_get_user_info_returns_submission_date(self):
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        self.submit_survey(self.survey, self.user)
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertEqual(rule.get_user_info_string(self.user), current_date)
+
+    def test_get_user_info_returns_if_no_submission(self):
+        rule = SurveyResponseRule(survey=self.survey)
+        self.assertEqual(rule.get_user_info_string(self.user), "No submission")
 
 
 class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
@@ -338,13 +480,21 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.assertFalse(rule.test_user(self.request))
 
-    def test_test_user_without_request(self):
+    def test_call_test_user_without_request(self):
         rule = GroupMembershipRule(group=self.group)
         self.assertTrue(rule.test_user(None, self.request.user))
 
-    def test_test_user_without_user_or_request(self):
+    def test_call_test_user_without_user_or_request(self):
         rule = GroupMembershipRule(group=self.group)
         self.assertFalse(rule.test_user(None))
+
+    def test_get_column_header(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertEqual(rule.get_column_header(), 'Super Test Group!')
+
+    def test_get_user_info_returns_true(self):
+        rule = GroupMembershipRule(group=self.group)
+        self.assertEqual(rule.get_user_info_string(self.request.user), 'True')
 
 
 class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
@@ -498,3 +648,43 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
     def test_visting_non_tagged_page_isnt_error(self):
         self.adapter.add_page_visit(self.main)
         self.assertFalse(self.request.session['tag_count'])
+
+    def test_call_test_user_on_invalid_rule_fails(self):
+        rule = ArticleTagRule()
+        self.adapter.add_page_visit(self.article)
+        self.assertFalse(rule.test_user(None, self.request.user))
+
+    def test_call_test_user_without_request(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.adapter.add_page_visit(self.article)
+        self.assertTrue(rule.test_user(None, self.request.user))
+
+    def test_call_test_user_without_user_or_request(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.adapter.add_page_visit(self.article)
+        self.assertFalse(rule.test_user(None))
+
+    def test_get_column_header(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.assertEqual(rule.get_column_header(), 'Article Tag = test')
+
+    def test_get_user_info_returns_true(self):
+        rule = ArticleTagRule(
+            tag=self.tag,
+            count=0,
+            operator=ArticleTagRule.GREATER_THAN,
+        )
+        self.adapter.add_page_visit(self.article)
+        self.assertEqual(rule.get_user_info_string(self.request.user), '1')

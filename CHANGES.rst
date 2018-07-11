@@ -1,6 +1,55 @@
 CHANGE LOG
 ==========
 
+6.8.2
+-----
+- Bug Fix: redirect to translated surveys when another language is selected
+
+6.8.1
+-----
+- Ensure translated surveys are also pulled through to the admin view
+
+6.8.0
+-----
+- Remove hardcoded groups for displaying the surveys in wagtail menu
+
+6.7.6
+-----
+- Bugfix: Ensure results of surveys, that are children of articles, pull through to the admin view
+
+6.7.5
+-----
+- Bugfix: Handle errors when testing invalid rules
+- Upgrade wagtail-personalisation-molo to 0.11.3
+
+6.7.4
+-----
+- Upgrade wagtail-personalisation-molo to 0.11.2
+
+6.7.3
+-----
+- Accept a wide range of date formats for date and datetime survey fields
+- Run validation on default values for date and datetime form fields
+
+6.7.2
+-----
+- Upgrade wagtail-personalisation-molo to 0.11.1
+
+6.7.1
+-----
+- Bugfix: Fix skip logic handling of form errors
+- Bugfix: Fix survey rules validation and user_info_strings
+
+6.7.0
+-----
+- Add get_visit_count() for the PersistentSurveysSegmentsAdapter
+- Add get_column_header() and get_user_info_string() for rules
+
+6.6.2
+-----
+- Bugfix: only store one MoloSurveyPageView per page view
+- Add management command to deduplicate pageview data
+
 6.6.1
 -----
 - Add Homepage Introduction

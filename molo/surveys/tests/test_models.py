@@ -7,9 +7,12 @@ from molo.surveys.models import (
     MoloSurveyPage,
     MoloSurveySubmission,
     SurveysIndexPage,
+    PersonalisableSurvey,
+    PersonalisableSurveyFormField
 )
 
 from .utils import skip_logic_block_data, skip_logic_data
+from .base import create_survey
 
 
 class TestSurveyModels(TestCase, MoloTestCaseMixin):
@@ -138,50 +141,6 @@ class TestSkipLogicBlock(TestCase, MoloTestCaseMixin):
         self.assertEqual(cleaned_data['question'], 1)
 
 
-def create_molo_survey_form_field(survey, sort_order, obj):
-    if obj['type'] == 'radio':
-        skip_logic = skip_logic_data(choices=obj['choices'])
-    else:
-        skip_logic = None
-
-    return MoloSurveyFormField.objects.create(
-        page=survey,
-        sort_order=sort_order,
-        label=obj["question"],
-        field_type=obj["type"],
-        required=obj["required"],
-        page_break=obj["page_break"],
-        admin_label=obj["question"].lower().replace(" ", "_"),
-        skip_logic=skip_logic
-    )
-
-
-def create_molo_survey_page(parent, **kwargs):
-    molo_survey_page = MoloSurveyPage(
-        title='Test Survey', slug='test-survey',
-        introduction='Introduction to Test Survey ...',
-        thank_you_text='Thank you for taking the Test Survey',
-        submit_text='survey submission text',
-        **kwargs
-    )
-
-    parent.add_child(instance=molo_survey_page)
-    molo_survey_page.save_revision().publish()
-
-    return molo_survey_page
-
-
-def create_survey(fields={}, **kwargs):
-    survey = create_molo_survey_page(SurveysIndexPage.objects.first())
-
-    if not fields == {}:
-        num_questions = len(fields)
-        for index, field in enumerate(reversed(fields)):
-            sort_order = num_questions - (index + 1)
-            create_molo_survey_form_field(survey, sort_order, field)
-    return survey
-
-
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
     def setUp(self):
         self.mk_main()
@@ -287,6 +246,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
 
         self.assertContains(response, field_1.label)
         self.assertContains(response, 'Next Question')
+        self.assertContains(response, 'action="' + survey.url + '?p=2"')
 
         response = self.client.post(survey.url + '?p=2', {
             field_1.clean_name:
@@ -300,6 +260,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         }, follow=True)
 
         self.assertContains(response, "This field is required")
+        self.assertContains(response, 'action="' + survey.url + '?p=3"')
 
         response = self.client.post(survey.url + '?p=3', {
             field_2.clean_name:
@@ -400,3 +361,137 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
             field_3.clean_name: 'because ;)',
         }, follow=True)
         self.assertContains(response, survey.thank_you_text)
+
+
+class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.login()
+
+    def create_molo_survey_form_field(self, field_type):
+        survey = MoloSurveyPage(
+            title='Test Survey',
+            introduction='Introduction to Test Survey ...',
+        )
+        SurveysIndexPage.objects.first().add_child(instance=survey)
+        survey.save_revision().publish()
+
+        return MoloSurveyFormField.objects.create(
+            page=survey,
+            label="When is your birthday",
+            field_type=field_type,
+            admin_label="birthday",
+        )
+
+    def create_personalisable_survey_form_field(self, field_type):
+        survey = PersonalisableSurvey(
+            title='Test Survey',
+            introduction='Introduction to Test Survey ...',
+        )
+
+        SurveysIndexPage.objects.first().add_child(instance=survey)
+        survey.save_revision().publish()
+
+        return PersonalisableSurveyFormField.objects.create(
+            page=survey,
+            label="When is your birthday",
+            field_type=field_type,
+            admin_label="birthday",
+        )
+
+    def test_date_molo_form_fields_clean_if_blank(self):
+        field = self.create_molo_survey_form_field('date')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_date_molo_form_fields_clean_with_valid_default(self):
+        field = self.create_molo_survey_form_field('date')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_date_molo_form_fields_not_clean_with_invalid_default(self):
+        field = self.create_molo_survey_form_field('date')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_datetime_molo_form_fields_clean_if_blank(self):
+        field = self.create_molo_survey_form_field('datetime')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_datetime_molo_form_fields_clean_with_valid_default(self):
+        field = self.create_molo_survey_form_field('datetime')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_datetime_molo_form_fields_not_clean_with_invalid_default(self):
+        field = self.create_molo_survey_form_field('datetime')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_date_personalisabe_form_fields_clean_if_blank(self):
+        field = self.create_personalisable_survey_form_field('date')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_date_personalisabe_form_fields_clean_with_valid_default(self):
+        field = self.create_personalisable_survey_form_field('date')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_date_personalisable_fields_not_clean_with_invalid_default(self):
+        field = self.create_personalisable_survey_form_field('date')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+    def test_datetime_personalisabe_form_fields_clean_if_blank(self):
+        field = self.create_personalisable_survey_form_field('datetime')
+        field.default_value = ""
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_datetime_personalisabe_form_fields_clean_with_valid_default(self):
+        field = self.create_personalisable_survey_form_field('datetime')
+        field.default_value = "2008-05-05"
+        try:
+            field.clean()
+        except ValidationError:
+            self.fail("clean() raised ValidationError with valid content!")
+
+    def test_datetime_personalisable_fields_not_clean_with_invalid_default(
+            self):
+        field = self.create_personalisable_survey_form_field('datetime')
+        field.default_value = "something that isn't a date"
+        with self.assertRaises(ValidationError) as e:
+            field.clean()
+
+        self.assertEqual(e.exception.messages, ['Must be a valid date'])

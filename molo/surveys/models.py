@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -56,6 +57,7 @@ from .rules import (  # noqa
     SurveyResponseRule
 )
 from .utils import SkipLogicPaginator
+from .widgets import NaturalDateInput
 
 
 SKIP = 'NA (Skipped)'
@@ -110,6 +112,7 @@ class MoloSurveyPage(
     introduction = TextField(blank=True)
     homepage_introduction = TextField(blank=True)
     image = models.ForeignKey(
+
         'wagtailimages.Image',
         null=True,
         blank=True,
@@ -283,6 +286,13 @@ class MoloSurveyPage(
         When the last step is submitted correctly, the whole form is saved in
         the DB.
         """
+        context = self.get_context(request)
+        # this will only return a page if there is a translation
+        page = context['page'].get_translation_for(
+            locale=request.LANGUAGE_CODE, site=request.site)
+        if page:
+            # if there is a translation, redirect to the translated page
+            return redirect(page.url)
         survey_data = self.load_data(request)
 
         paginator = SkipLogicPaginator(
@@ -307,7 +317,7 @@ class MoloSurveyPage(
             # so we need to get a from from previous step
             # Edge case - submission of the last step
             prev_step = step if is_last_step else paginator.page(
-                step.previous_page_number())
+                int(step_number) - 1)
 
             # Create a form only for submitted step
             prev_form_class = self.get_form_class_for_step(prev_step)
@@ -357,13 +367,13 @@ class MoloSurveyPage(
                 # If data for step is invalid
                 # we will need to display form again with errors,
                 # so restore previous state.
-                form = prev_form
                 step = prev_step
+                form = prev_form
         else:
             # Create empty form for non-POST requests
             form_class = self.get_form_class_for_step(step)
             form = form_class(page=self, user=request.user)
-        context = self.get_context(request)
+
         context['form'] = form
         context['fields_step'] = step
         context['is_intermediate_step'] = step.possibly_has_next()
@@ -386,7 +396,8 @@ class MoloSurveyPage(
                 self.has_user_submitted_survey(request, self.id)):
             return render(request, self.template, self.get_context(request))
 
-        if self.has_page_breaks or self.multi_step:
+        if ((self.has_page_breaks or self.multi_step) and
+                not self.display_survey_directly):
             return self.serve_questions(request)
 
         if request.method == 'POST':
@@ -412,17 +423,15 @@ class MoloSurveyPageView(models.Model):
         null=True,
     )
 
-    tag = models.ForeignKey(
-        'core.Tag',
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-
     page = models.ForeignKey(
         'core.ArticlePage',
         on_delete=models.SET_NULL,
         null=True,
     )
+
+    def __str__(self):
+        return '{0} viewed {1} at {2}'.format(
+            self.user, self.page, self.visited_at)
 
 
 class SurveyTermsConditions(Orderable):
@@ -536,6 +545,17 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
 
     class Meta(AbstractFormField.Meta):
         pass
+
+    def clean(self):
+        if self.field_type == 'date' or self.field_type == 'datetime':
+            if self.default_value:
+                widget = NaturalDateInput()
+                parsed_date = widget.value_from_datadict({
+                    'default_value': self.default_value
+                }, None, 'default_value')
+                if not isinstance(parsed_date, datetime.datetime):
+                    raise ValidationError(
+                        {'default_value': ["Must be a valid date", ]})
 
 
 surveys_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
@@ -685,6 +705,17 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
 
     class Meta(AbstractFormField.Meta):
         verbose_name = _('personalisable form field')
+
+    def clean(self):
+        if self.field_type == 'date' or self.field_type == 'datetime':
+            if self.default_value:
+                widget = NaturalDateInput()
+                parsed_date = widget.value_from_datadict({
+                    'default_value': self.default_value
+                }, None, 'default_value')
+                if not isinstance(parsed_date, datetime.datetime):
+                    raise ValidationError(
+                        {'default_value': ["Must be a valid date", ]})
 
 
 class SegmentUserGroup(models.Model):
