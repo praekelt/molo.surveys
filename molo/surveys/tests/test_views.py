@@ -2,7 +2,7 @@ import json
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.test.client import Client
 from django.utils.text import slugify
 from molo.core.models import Languages, Main, SiteLanguageRelation
@@ -373,6 +373,31 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             response,
             '<h2><a href="/admin/surveys/submissions/%s/">'
             'Test Survey</a></h2>' % molo_survey_page.pk)
+
+    def test_changing_languages_changes_survey(self):
+        # Create a survey
+        self.user = self.login()
+        molo_survey_page, molo_survey_form_field = \
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
+        # Create a translated survey
+        response = self.client.post(reverse(
+            'add_translation', args=[molo_survey_page.id, 'fr']))
+        translated_survey = MoloSurveyPage.objects.get(
+            slug='french-translation-of-test-survey')
+        translated_survey.save_revision().publish()
+        create_molo_survey_formfield(
+            survey=translated_survey, field_type='singleline',
+            label="Your favourite animal in french", required=True)
+
+        # when requesting the english survey with the french language code
+        # it should return the french survey
+        request = RequestFactory().get(molo_survey_page.url)
+        request.LANGUAGE_CODE = 'fr'
+        request.context = {'page': molo_survey_page}
+        request.site = self.main.get_site()
+        response = molo_survey_page.serve_questions(request)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response['location'], translated_survey.url)
 
     def test_can_see_translated_survey_submissions_in_admin(self):
         """ Test that submissions to translated surveys can be seen in the
