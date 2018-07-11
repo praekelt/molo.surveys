@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.8.2
+-----
+- Bug Fix: redirect to translated surveys when another language is selected
+
 6.8.1
 -----
 - Ensure translated surveys are also pulled through to the admin view
