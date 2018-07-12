@@ -61,6 +61,31 @@ class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
             required=True
         )
 
+    def test_survey_options_512_limit_overriden(self):
+        field_choices = [
+            'My favourite animal is a dog, because they bark',
+            'My favourite animal is a cat, because they meuow',
+            'My favourite animal is a bird, because they fly',
+            'My favourite animal is a lion, because that roar',
+            'My favourite animal is a hamster, because they have tiny legs',
+            'My favourite animal is a tiger, because they have stripes',
+            'My favourite animal is a frog, because they go crickit',
+            'My favourite animal is a fish, because they have nice eyes',
+            'My favourite animal is a chicken, because they cannot fly',
+            'My favourite animal is a duck, because they keep it down',
+            'My favourite animal is a wolf, because they howl',
+            'My favourite animal is a chamelion, because they fit in',
+        ]
+        choice_field = MoloSurveyFormField.objects.create(
+            page=self.survey,
+            sort_order=1,
+            label='Your favourite animal',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(field_choices),
+            required=True
+        )
+        self.assertTrue(len(choice_field.choices) > 512)
+
     def test_choices_updated_from_streamfield_on_save(self):
         self.assertEqual(
             ','.join(self.field_choices),
