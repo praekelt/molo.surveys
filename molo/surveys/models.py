@@ -538,6 +538,13 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                           QuestionPaginationMixin, AbstractFormField):
     AbstractFormField.FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
+    choices = models.TextField(
+        verbose_name=_('choices'),
+        blank=True,
+        help_text=_(
+            'Comma separated list of choices. Only applicable in checkboxes,'
+            'radio and dropdown.')
+    )
     field_type = models.CharField(
         verbose_name=_('field type'),
         max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
