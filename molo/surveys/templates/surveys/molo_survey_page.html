@@ -11,10 +11,44 @@
     <a href="{% pageurl page.terms_and_conditions.first.terms_and_conditions %}">{{page.terms_and_conditions.first.terms_and_conditions.title}}</a>
   {% endif %}
   {% if user.is_authenticated and user.is_active or request.is_preview or self.allow_anonymous_submissions %}
+
+    {% if page.survey_ga_analytics.exists %}
+    <!-- Survey Google Tag Manager -->
+      <noscript>
+          <iframe src="//www.googletagmanager.com/ns.html?id={{ page.survey_ga_analytics.first.ga_tag_manager_id || settings.core.SiteSettings.global_ga_tag_manager }}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe>
+      </noscript>
+      <script>
+          (function(w,d,s,l,i){
+            w[l]=w[l]||[];
+            w[l].push({
+                'gtm.start': new Date().getTime(),
+                event:'gtm.js',
+                ci: '{{ page.survey_ga_analytics.first.ci }}',
+                cn: '{{ page.survey_ga_analytics.first.cn }}',
+                cc: '{{ page.survey_ga_analytics.first.cc }}',
+                ck: '{{ page.survey_ga_analytics.first.ck }}',
+                cm: '{{ page.survey_ga_analytics.first.cm }}',
+                cs: '{{ page.survey_ga_analytics.first.cs }}'
+            });
+            var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })
+          (
+              window, document,'script', 'dataLayer',
+              '{{ page.survey_ga_analytics.first.ga_tag_manager_id || settings.core.SiteSettings.global_ga_tag_manager }}'
+          );
+
+      </script>
+    <!-- End Survey Google Tag Manager -->
+    {% endif %}
+
     {% if form %}
       <form class="surveys__form" action="{% pageurl self %}{% if self.multi_step or self.has_page_breaks %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
         {% csrf_token %}
         {{ form.media }}
+
         {% for field in form %}
           {% if fields_step %}
             <h4 class="surveys__question-title">
@@ -40,6 +74,7 @@
               </div>
           </fieldset>
         {% endfor %}
+
         {% trans "Submit Survey" as text %}
         <input type="submit" value="{% if is_intermediate_step %}{% trans 'Next Question' %}{% else %}{{self.submit_text|default:text }}{% endif %}" />
 

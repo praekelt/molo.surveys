@@ -3,6 +3,7 @@ from django.test import TestCase
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.blocks import SkipLogicBlock, SkipState
 from molo.surveys.models import (
+    GASurveySettings,
     MoloSurveyFormField,
     MoloSurveyPage,
     MoloSurveySubmission,
@@ -60,6 +61,14 @@ class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
             field_type='positive_number',
             required=True
         )
+
+    def test_ga_survey_analytics(self):
+        ga = GASurveySettings.objects.create(
+            survey=self.survey, ci='abc', cn='abc', ck='abc')
+        self.assertEquals(
+            ga.__str__(), '{} GA Settings'.format(self.survey))
+        self.assertEqual(ga.uri_params, dict(ci='abc', cn='abc', ck='abc'))
+        self.assertEqual(ga.uri_params_as_string, 'ck=abc&ci=abc&cn=abc&')
 
     def test_survey_options_512_limit_overriden(self):
         field_choices = [

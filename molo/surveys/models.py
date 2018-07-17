@@ -12,6 +12,7 @@ from django.db.models.fields import BooleanField, TextField
 from django.dispatch import receiver
 from django.http import Http404
 from django.shortcuts import redirect, render
+from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.fields import ParentalKey
@@ -203,8 +204,15 @@ class MoloSurveyPage(
         ], heading='Survey Settings'),
         MultiFieldPanel(
             [FieldRowPanel(
-                [FieldPanel('extra_style_hints')], classname="label-above")],
-            "Meta")
+                [FieldPanel('extra_style_hints')],
+                classname="label-above")],
+            "Meta"),
+
+        InlinePanel(
+            'survey_ga_analytics',
+            max_num=1,
+            label=_('Google Analytics Campaign')
+        ),
     ]
 
     def get_effective_extra_style_hints(self):
@@ -734,3 +742,55 @@ class SegmentUserGroup(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GASurveySettings(models.Model):
+    survey = ParentalKey(
+        MoloSurveyPage,
+        unique=True, related_name='survey_ga_analytics')
+
+    ga_tag_manager_id = models.CharField(
+        verbose_name=_('GA Tag Manager ID'),
+        blank=True, null=True, max_length=255)
+
+    ci = models.CharField(
+        verbose_name=_('Campaign ID'),
+        unique=True, max_length=255)
+
+    cn = models.CharField(
+        verbose_name=_('Name'), max_length=255)
+
+    cc = models.CharField(
+        verbose_name=_('Content'),
+        blank=True, null=True, max_length=255)
+
+    ck = models.CharField(
+        verbose_name=_('Keywords'),
+        blank=True, null=True, max_length=255)
+
+    cm = models.CharField(
+        verbose_name=_('Medium'),
+        blank=True, null=True, max_length=255)
+
+    cs = models.CharField(
+        verbose_name=_('Source'),
+        blank=True, null=True, max_length=255)
+
+    def __str__(self):
+        return '{} GA Settings'.format(self.survey)
+
+    @property
+    def uri_params(self):
+        params = {}
+        for i in ['ci', 'cn', 'cm', 'cs', 'ck', 'cc']:
+            val = getattr(self, i)
+            if val:
+                params.update({i: val})
+        return params
+
+    @property
+    def uri_params_as_string(self):
+        uri = ''
+        for key, val in self.uri_params.items():
+            uri += '{}={}&'.format(key, val)
+        return iri_to_uri(uri)
