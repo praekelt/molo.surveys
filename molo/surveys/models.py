@@ -1,6 +1,6 @@
 import json
 import datetime
-
+from urllib import urlencode
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -12,7 +12,6 @@ from django.db.models.fields import BooleanField, TextField
 from django.dispatch import receiver
 from django.http import Http404
 from django.shortcuts import redirect, render
-from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.fields import ParentalKey
@@ -790,7 +789,4 @@ class GASurveySettings(models.Model):
 
     @property
     def uri_params_as_string(self):
-        uri = ''
-        for key, val in self.uri_params.items():
-            uri += '{}={}&'.format(key, val)
-        return iri_to_uri(uri)
+        return urlencode(self.uri_params)
