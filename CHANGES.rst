@@ -1,5 +1,16 @@
 CHANGE LOG
 ==========
+6.9.1
+-----
+- Bug fix: add pk to session stored survey answers to prevent duplicate dict keys
+
+6.9.0
+-----
+- Override choice field to textfield from charfied with 512 limit
+
+6.8.2
+-----
+- Bug Fix: redirect to translated surveys when another language is selected
 
 6.8.1
 -----
