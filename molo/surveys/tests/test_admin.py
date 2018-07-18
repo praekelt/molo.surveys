@@ -107,9 +107,13 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_page.title)
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
-        response = self.client.post(molo_survey_page.url, {
-            molo_survey_form_field.label.lower().replace(' ', '-'): 'python'
-        }, follow=True)
+
+        key = '{}-{}'.format(
+            molo_survey_form_field.pk,
+            molo_survey_form_field.label.lower().replace(' ', '-')
+        )
+        response = self.client.post(
+            molo_survey_page.url, {key: 'python'}, follow=True)
         self.client.logout()
         self.client.login(
             username='testuser',
@@ -173,9 +177,12 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         self.client.force_login(self.user)
         answer = 'PYTHON'
-        response = self.client.post(molo_survey_page.url, {
-            molo_survey_form_field.label.lower().replace(' ', '-'): answer
-        })
+        key = '{}-{}'.format(
+            molo_survey_form_field.pk,
+            molo_survey_form_field.label.lower().replace(' ', '-')
+        )
+        response = self.client.post(molo_survey_page.url, {key: answer})
+        self.assertEqual(response.status_code, 302)
 
         self.client.force_login(self.super_user)
         response = self.client.get(
@@ -195,10 +202,15 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
                 parent=self.section_index))
 
         answer = 'PYTHON'
+        key = '{}-{}'.format(
+            molo_survey_page.get_form_fields().first().pk,
+            molo_survey_page.get_form_fields().first(
+            ).label.lower().replace(' ', '-')
+        )
 
         molo_survey_page.get_submission_class().objects.create(
-            form_data=json.dumps({"question-1": answer},
-                                 cls=DjangoJSONEncoder),
+            form_data=json.dumps(
+                {key: answer}, cls=DjangoJSONEncoder),
             page=molo_survey_page,
             user=self.user
         )

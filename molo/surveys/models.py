@@ -1,6 +1,6 @@
 import json
 import datetime
-
+from unidecode import unidecode
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -14,6 +14,8 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from django.utils.text import slugify
+from django.utils.six import text_type
 from modelcluster.fields import ParentalKey
 from molo.core.blocks import MarkDownBlock
 from molo.core.models import (
@@ -67,6 +69,17 @@ SKIP = 'NA (Skipped)'
 SectionPage.subpage_types += ['surveys.MoloSurveyPage']
 ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
+
+
+class SurveyAbstractFormField(AbstractFormField):
+    class Meta:
+        abstract = True
+        ordering = ['sort_order']
+
+    @property
+    def clean_name(self):
+        return str(slugify(text_type(unidecode(
+            '{} {}'.format(self.pk, self.label.lower())))))
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
@@ -460,7 +473,7 @@ class QuestionPaginationMixin(models.Model):
         abstract = True
 
 
-surveys_models.AbstractFormField.panels.append(FieldPanel('page_break'))
+SurveyAbstractFormField.panels.append(FieldPanel('page_break'))
 
 
 class AdminLabelMixin(models.Model):
@@ -475,8 +488,8 @@ class AdminLabelMixin(models.Model):
         abstract = True
 
 
-surveys_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
-surveys_models.AbstractFormField._meta.get_field('label').verbose_name = (
+SurveyAbstractFormField.panels.append(FieldPanel('admin_label'))
+SurveyAbstractFormField._meta.get_field('label').verbose_name = (
     'Question'
 )
 
@@ -535,8 +548,10 @@ class SkipLogicMixin(models.Model):
 
 
 class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
-                          QuestionPaginationMixin, AbstractFormField):
-    AbstractFormField.FORM_FIELD_CHOICES += (
+                          QuestionPaginationMixin, SurveyAbstractFormField):
+
+    page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
+    SurveyAbstractFormField.FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
     choices = models.TextField(
         verbose_name=_('choices'),
@@ -547,10 +562,12 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     )
     field_type = models.CharField(
         verbose_name=_('field type'),
-        max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
-    page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
+        max_length=16, choices=SurveyAbstractFormField.FORM_FIELD_CHOICES)
 
-    class Meta(AbstractFormField.Meta):
+    def __init__(self, *args, **kwargs):
+        super(MoloSurveyFormField, self).__init__(*args, **kwargs)
+
+    class Meta(SurveyAbstractFormField.Meta):
         pass
 
     def clean(self):
@@ -565,7 +582,7 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                         {'default_value': ["Must be a valid date", ]})
 
 
-surveys_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
+SurveyAbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
 
 
 class MoloSurveySubmission(surveys_models.AbstractFormSubmission):
@@ -689,7 +706,7 @@ class PersonalisableSurvey(MoloSurveyPage):
 
 class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                                     QuestionPaginationMixin,
-                                    AbstractFormField):
+                                    SurveyAbstractFormField):
     """
     Form field that has a segment assigned.
     """
@@ -705,12 +722,15 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
 
     panels = [
         FieldPanel('segment')
-    ] + AbstractFormField.panels
+    ] + SurveyAbstractFormField.panels
+
+    def __init__(self, *args, **kwargs):
+        super(PersonalisableSurveyFormField, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return '{} - {}'.format(self.page, self.label)
 
-    class Meta(AbstractFormField.Meta):
+    class Meta(SurveyAbstractFormField.Meta):
         verbose_name = _('personalisable form field')
 
     def clean(self):
