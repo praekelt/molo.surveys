@@ -15,7 +15,7 @@
     {% if page.survey_ga_analytics.exists %}
     <!-- Survey Google Tag Manager -->
       <noscript>
-          <iframe src="//www.googletagmanager.com/ns.html?id={{ page.survey_ga_analytics.first.ga_tag_manager_id || settings.core.SiteSettings.global_ga_tag_manager }}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"
+          <iframe src="//www.googletagmanager.com/ns.html?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"
                   height="0" width="0" style="display:none;visibility:hidden"></iframe>
       </noscript>
       <script>
@@ -37,7 +37,7 @@
           })
           (
               window, document,'script', 'dataLayer',
-              '{{ page.survey_ga_analytics.first.ga_tag_manager_id || settings.core.SiteSettings.global_ga_tag_manager }}'
+              '{% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}'
           );
 
       </script>
