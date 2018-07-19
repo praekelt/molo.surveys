@@ -1,7 +1,8 @@
 import json
 import datetime
-from urllib import urlencode
+
 from django.conf import settings
+from django.utils.http import urlencode
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.core.serializers.json import DjangoJSONEncoder
