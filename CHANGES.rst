@@ -1,5 +1,8 @@
 CHANGE LOG
 ==========
+6.9.1
+-----
+- Bug fix: add pk to session stored survey answers to prevent duplicate dict keys
 
 6.9.0
 -----
