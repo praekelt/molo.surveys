@@ -68,18 +68,21 @@ class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
         self.assertEquals(
             ga.__str__(), '{} GA Settings'.format(self.survey))
 
-        self.assertEqual(ga.params, {
+        params = {
             'id': ga.ci,
             'term': ga.ck,
             'source': '',
             'medium': '',
             'content': '',
             'name': ga.cn,
-        })
-        self.assertEqual(
-            ga.params_as_string,
-            'term=abc&medium=&name=abc&content=&source=&id=abc'
-        )
+        }
+
+        self.assertEqual(ga.params, params)
+        for k, v in params.items():
+            if v:
+                self.assertIn(
+                    '{}={}'.format(k, v), ga.params_as_string
+                )
 
     def test_survey_options_512_limit_overriden(self):
         field_choices = [
