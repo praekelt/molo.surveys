@@ -15,30 +15,31 @@
     {% if page.survey_ga_analytics.exists %}
     <!-- Survey Google Tag Manager -->
       <noscript>
-          <iframe src="//www.googletagmanager.com/ns.html?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"
+          <iframe src="https://www.googletagmanager.com/gtag/js?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&{{ page.survey_ga_analytics.first.uri_params_as_string }}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"
                   height="0" width="0" style="display:none;visibility:hidden"></iframe>
       </noscript>
+
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"></script>
       <script>
-          (function(w,d,s,l,i){
-            w[l]=w[l]||[];
-            w[l].push({
-                'gtm.start': new Date().getTime(),
-                event:'gtm.js',
-                ci: '{{ page.survey_ga_analytics.first.ci }}',
-                cn: '{{ page.survey_ga_analytics.first.cn }}',
-                cc: '{{ page.survey_ga_analytics.first.cc }}',
-                ck: '{{ page.survey_ga_analytics.first.ck }}',
-                cm: '{{ page.survey_ga_analytics.first.cm }}',
-                cs: '{{ page.survey_ga_analytics.first.cs }}'
-            });
-            var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })
-          (
-              window, document,'script', 'dataLayer',
-              '{% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}'
-          );
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        gtag('js', new Date());
+        gtag(
+            'config',
+            '{% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}',
+            {
+                campaign: {
+                  'id': '{{ page.survey_ga_analytics.first.params.id }}',
+                  'term': '{{ page.survey_ga_analytics.first.params.term }}',
+                  'source': '{{ page.survey_ga_analytics.first.params.source }}',
+                  'medium': '{{ page.survey_ga_analytics.first.params.medium }}',
+                  'content': '{{ page.survey_ga_analytics.first.params.content }}',
+                  'name': '{{ page.survey_ga_analytics.first.params.campaign }}'
+                }
+            }
+        );
 
       </script>
     <!-- End Survey Google Tag Manager -->

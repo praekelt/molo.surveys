@@ -780,14 +780,16 @@ class GASurveySettings(models.Model):
         return '{} GA Settings'.format(self.survey)
 
     @property
-    def uri_params(self):
-        params = {}
-        for i in ['ci', 'cn', 'cm', 'cs', 'ck', 'cc']:
-            val = getattr(self, i)
-            if val:
-                params.update({i: val})
-        return params
+    def params(self):
+        return {
+            'id': self.ci or '',
+            'term': self.ck or '',
+            'source': self.cs or '',
+            'medium': self.cm or '',
+            'content': self.cc or '',
+            'name': self.cn or '',
+        }
 
     @property
-    def uri_params_as_string(self):
-        return urlencode(self.uri_params)
+    def params_as_string(self):
+        return urlencode(self.params)
