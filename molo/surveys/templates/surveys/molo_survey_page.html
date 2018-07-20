@@ -15,12 +15,12 @@
     {% if page.survey_ga_analytics.exists %}
     <!-- Survey Google Tag Manager -->
       <noscript>
-          <iframe src="https://www.googletagmanager.com/gtag/js?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&{{ page.survey_ga_analytics.first.uri_params_as_string }}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"
+          <iframe src="https://www.googletagmanager.com/gtag/js?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&client_session_id={{request.session.MOLO_GA_SESSION_FOR_NOSCRIPT}}&{{ page.survey_ga_analytics.first.params_as_string }}"
                   height="0" width="0" style="display:none;visibility:hidden"></iframe>
       </noscript>
 
       <!-- Global site tag (gtag.js) - Google Analytics -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&{{ page.survey_ga_analytics.first.uri_params_as_string }}"></script>
+      <script async src="https://www.googletagmanager.com/gtag/js?id={% if page.survey_ga_analytics.first.ga_tag_manager_id %}{{ page.survey_ga_analytics.first.ga_tag_manager_id }}{% else %}{{ settings.core.SiteSettings.global_ga_tag_manager }}{% endif %}&{{ page.survey_ga_analytics.first.params_as_string }}"></script>
       <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
