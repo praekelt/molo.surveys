@@ -541,4 +541,4 @@ class TestMoloSurveyPageView(TestCase, MoloTestCaseMixin):
         )
         survey = ArticlePage(title='Test Survey', slug='test-survey')
         model = MoloSurveyPageView(user=user, page=survey)
-        self.assertEqual('superuser viewed Test Survey at' in model.__str__())
+        self.assertTrue('superuser viewed Test Survey at' in model.__str__())
