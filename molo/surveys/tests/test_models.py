@@ -2,9 +2,12 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.blocks import SkipLogicBlock, SkipState
+from django.contrib.auth import get_user_model
 from molo.surveys.models import (
     MoloSurveyFormField,
     MoloSurveyPage,
+    ArticlePage,
+    MoloSurveyPageView,
     MoloSurveySubmission,
     SurveysIndexPage,
     PersonalisableSurvey,
@@ -472,6 +475,11 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
+    def test_date_personalisabe_form_str_representation(self):
+        field = self.create_personalisable_survey_form_field('date')
+        self.assertEqual(
+            field.__str__(), 'Test Survey - When is your birthday')
+
     def test_date_personalisabe_form_fields_clean_if_blank(self):
         field = self.create_personalisable_survey_form_field('date')
         field.default_value = ""
@@ -520,3 +528,17 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             field.clean()
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+
+class TestMoloSurveyPageView(TestCase, MoloTestCaseMixin):
+    """ Test case """
+
+    def test_model(self):
+        self.mk_main()
+        user = get_user_model().objects.create_superuser(
+            username='superuser',
+            email='superuser@email.com', password='pass'
+        )
+        survey = ArticlePage(title='Test Survey', slug='test-survey')
+        model = MoloSurveyPageView(user=user, page=survey)
+        self.assertEqual('superuser viewed Test Survey at' in model.__str__())
