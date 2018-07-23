@@ -51,6 +51,7 @@ from .forms import (  # noqa
     MoloSurveyForm,
     PersonalisableMoloSurveyForm,
     SurveysFormBuilder,
+    CHARACTER_COUNT_CHOICE_LIMIT,
 )
 from .rules import (  # noqa
     ArticleTagRule,
@@ -580,6 +581,14 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                 if not isinstance(parsed_date, datetime.datetime):
                     raise ValidationError(
                         {'default_value': ["Must be a valid date", ]})
+
+        if self.choices and len(self.choices) > CHARACTER_COUNT_CHOICE_LIMIT:
+            raise ValidationError(
+                {'field_type': _(
+                    'The combined choices\' maximum characters'
+                    ' limit has been exceeded ({max_limit} character(s)).'
+                ).format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT)}
+            )
 
 
 SurveyAbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')

@@ -17,6 +17,9 @@ from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 from .widgets import NaturalDateInput
 
 
+CHARACTER_COUNT_CHOICE_LIMIT = 512
+
+
 class CharacterCountWidget(forms.TextInput):
     class Media:
         js = ('js/widgets/character_count.js',)
@@ -29,6 +32,50 @@ class CharacterCountWidget(forms.TextInput):
             super(CharacterCountWidget, self).render(name, value, attrs),
             maximum_text,
         )
+
+
+class CharacterCountMixin(object):
+    max_length = CHARACTER_COUNT_CHOICE_LIMIT
+
+    def __init__(self, *args, **kwargs):
+        self.max_length = kwargs.pop('max_length', self.max_length)
+        super(CharacterCountMixin, self).__init__(*args, **kwargs)
+
+        self.error_messages['max_length'] = _(
+            'This field can not be more than {max_length} characters long'
+        ).format(max_length=self.max_length)
+
+    def validate(self, value):
+        super(CharacterCountMixin, self).validate(value)
+        if len(value) > self.max_length:
+            raise ValidationError(
+                self.error_messages['max_length'],
+                code='max_length', params={'value': value},
+            )
+
+
+class CharacterCountMultipleChoiceField(
+    CharacterCountMixin, forms.MultipleChoiceField
+):
+    """ Limit character count for Multi choice fields """
+
+
+class CharacterCountChoiceField(
+    CharacterCountMixin, forms.ChoiceField
+):
+    """ Limit character count for choice fields """
+
+
+class CharacterCountCheckboxSelectMultiple(
+    CharacterCountMixin, forms.CheckboxSelectMultiple
+):
+    """ Limit character count for checkbox fields """
+
+
+class CharacterCountCheckboxInput(
+    CharacterCountMixin, forms.CheckboxInput
+):
+    """ Limit character count for checkbox fields """
 
 
 class MultiLineWidget(forms.Textarea):
@@ -63,6 +110,28 @@ class SurveysFormBuilder(FormBuilder):
     def create_positive_number_field(self, field, options):
         return forms.DecimalField(min_value=0, **options)
 
+    def create_dropdown_field(self, field, options):
+        options['choices'] = map(
+            lambda x: (x.strip(), x.strip()),
+            field.choices.split(','))
+        return CharacterCountChoiceField(**options)
+
+    def create_radio_field(self, field, options):
+        options['choices'] = map(
+            lambda x: (x.strip(), x.strip()),
+            field.choices.split(','))
+        return CharacterCountChoiceField(widget=forms.RadioSelect, **options)
+
+    def create_checkboxes_field(self, field, options):
+        options['choices'] = [
+            (x.strip(), x.strip()) for x in field.choices.split(',')
+        ]
+        options['initial'] = [
+            x.strip() for x in field.default_value.split(',')
+        ]
+        return CharacterCountMultipleChoiceField(
+            widget=forms.CheckboxSelectMultiple, **options)
+
     @property
     def formfields(self):
         '''
@@ -76,7 +145,6 @@ class SurveysFormBuilder(FormBuilder):
 
         for field in self.fields:
             options = self.get_field_options(field)
-
             if field.field_type in self.FIELD_TYPES:
                 method = getattr(self,
                                  self.FIELD_TYPES[field.field_type].__name__)
@@ -163,6 +231,7 @@ class CSVGroupCreationForm(forms.ModelForm):
 
 
 class BaseMoloSurveyForm(WagtailAdminPageForm):
+
     def clean(self):
         cleaned_data = super(BaseMoloSurveyForm, self).clean()
 
