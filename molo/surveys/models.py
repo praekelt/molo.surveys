@@ -13,7 +13,6 @@ from django.dispatch import receiver
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.functional import cached_property
-from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.utils.six import text_type
@@ -80,7 +79,7 @@ class SurveyAbstractFormField(AbstractFormField):
     @property
     def clean_name(self):
         return str(slugify(text_type(unidecode(
-            u'{} {}'.format(self.pk, smart_str(self.label))))))
+            u'{} {}'.format(self.pk, self.label)))))
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
