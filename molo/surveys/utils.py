@@ -35,7 +35,7 @@ class SkipLogicPaginator(Paginator):
         if self.page_breaks:
             # Always have a break at start to create first page
             self.page_breaks.insert(0, 0)
-            if self.page_breaks[len(self.page_breaks) - 1] != num_questions:
+            if self.page_breaks[-1] != num_questions:
                 # Must break for last page
                 self.page_breaks.append(num_questions)
         else:
