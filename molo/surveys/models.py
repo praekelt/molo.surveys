@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 import datetime
 from unidecode import unidecode
@@ -15,6 +17,7 @@ from django.shortcuts import redirect, render
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
+from django.utils.encoding import smart_str
 from django.utils.six import text_type
 from modelcluster.fields import ParentalKey
 from molo.core.blocks import MarkDownBlock
@@ -80,7 +83,7 @@ class SurveyAbstractFormField(AbstractFormField):
     @property
     def clean_name(self):
         return str(slugify(text_type(unidecode(
-            '{} {}'.format(self.pk, self.label.lower())))))
+            u'{} {}'.format(self.pk, smart_str(self.label))))))
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
