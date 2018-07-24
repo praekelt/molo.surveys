@@ -413,7 +413,8 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             admin_label="birthday",
         )
 
-    def create_personalisable_survey_form_field(self, field_type, label="When is your birthday"):
+    def create_personalisable_survey_form_field(
+            self, field_type, label="When is your birthday"):
         survey = PersonalisableSurvey(
             title='Test Survey',
             introduction='Introduction to Test Survey ...',
