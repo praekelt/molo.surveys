@@ -1,6 +1,6 @@
 CHANGE LOG
 ==========
-6.9.2
+6.9.3
 -----
 - Bug fix: unicode support for SurveyAbstractFormField's clean_name attribute
 
