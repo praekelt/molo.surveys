@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+6.9.2
+-----
+- Bug fix: unicode support for SurveyAbstractFormField's clean_name attribute
+
 6.9.1
 -----
 - Bug fix: add pk to session stored survey answers to prevent duplicate dict keys
