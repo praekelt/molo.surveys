@@ -430,6 +430,13 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             admin_label="birthday",
         )
 
+    def test_unicode_in_form_field_label(self):
+        field = self.create_personalisable_survey_form_field(
+            'date', label="I would like to know more about…")
+
+        self.assertEquals(field.clean_name, '{}-{}'.format(
+            field.pk, 'i-would-like-to-know-more-abouta'))
+
     def test_date_molo_form_fields_clean_if_blank(self):
         field = self.create_molo_survey_form_field('date')
         field.default_value = ""
@@ -478,7 +485,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
-    def test_date_personalisabe_form_str_representation(self):
+    def test_date_personalisable_form_str_representation(self):
         field = self.create_personalisable_survey_form_field(
             'date', label="When is your birthdáy")
 
