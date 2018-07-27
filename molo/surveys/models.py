@@ -83,7 +83,7 @@ class SurveyAbstractFormField(AbstractFormField):
     @property
     def clean_name(self):
         return str(slugify(text_type(unidecode(
-            u'{} {}'.format(self.pk, smart_str(self.label))))))
+            '{} {}'.format(self.pk, smart_str(self.label))))))
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
