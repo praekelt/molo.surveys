@@ -273,19 +273,19 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         data.update({u'description-count': 0})
         # import ipdb; ipdb.set_trace()
         data.update({
-            'survey_form_fields-0-admin_label':	'a',
+            'survey_form_fields-0-admin_label': 'a',
             'survey_form_fields-0-label': 'a',
             'survey_form_fields-0-default_value': 'a',
-            'survey_form_fields-0-field_type':	form_field.field_type,
+            'survey_form_fields-0-field_type': form_field.field_type,
             'survey_form_fields-0-help_text': 'a',
-            'survey_form_fields-0-id':	form_field.pk,
+            'survey_form_fields-0-id': form_field.pk,
             'go_live_at': '',
             'expire_at': '',
             'image': '',
             'survey_form_fields-0-ORDER': 1,
             'survey_form_fields-0-required': 'on',
             'survey_form_fields-0-skip_logic-0-deleted': '',
-            'survey_form_fields-0-skip_logic-0-id':	'None',
+            'survey_form_fields-0-skip_logic-0-id': 'None',
             'survey_form_fields-0-skip_logic-0-order': 0,
             'survey_form_fields-0-skip_logic-0-type': 'skip_logic',
             'survey_form_fields-0-skip_logic-0-value-choice': 'a',
@@ -293,14 +293,14 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
             'survey_form_fields-0-skip_logic-0-value-skip_logic': 'next',
             'survey_form_fields-0-skip_logic-0-value-survey': '',
             'survey_form_fields-0-skip_logic-count': 1,
-            'survey_form_fields-INITIAL_FORMS':	1,
-            'survey_form_fields-MAX_NUM_FORMS':	1000,
-            'survey_form_fields-MIN_NUM_FORMS':	0,
+            'survey_form_fields-INITIAL_FORMS': 1,
+            'survey_form_fields-MAX_NUM_FORMS': 1000,
+            'survey_form_fields-MIN_NUM_FORMS': 0,
             'survey_form_fields-TOTAL_FORMS': 1,
             'terms_and_conditions-INITIAL_FORMS': 0,
             'terms_and_conditions-MAX_NUM_FORMS': 1000,
             'terms_and_conditions-MIN_NUM_FORMS': 0,
-            'terms_and_conditions-TOTAL_FORMS':	0,
+            'terms_and_conditions-TOTAL_FORMS': 0,
         })
         response = self.client.post(
             '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
@@ -308,4 +308,3 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
             response.context['message'],
             u"Page 'Child of SurveysIndexPage Survey' has been updated."
         )
-
