@@ -264,12 +264,14 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                             choice_max_length += len(logic.value['choice'])
 
                     if choice_max_length > CHARACTER_COUNT_CHOICE_LIMIT:
+                        err = 'The combined choices\' maximum characters ' \
+                              'limit has been exceeded ({max_limit} '\
+                              'character(s)).'
+
                         self.add_form_field_error(
                             'field_type',
-                            _(
-                                'The combined choices\' maximum characters '
-                                'limit has been exceeded ({max_limit} character(s)).'
-                            ).format(max_length=CHARACTER_COUNT_CHOICE_LIMIT),
+                            _(err).format(
+                                max_length=CHARACTER_COUNT_CHOICE_LIMIT),
                         )
 
                 for i, logic in enumerate(data['skip_logic']):
