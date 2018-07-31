@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+6.9.5
+-----
+- Bug fix: remove model validation for MoloSurveyFormField and move it to BaseMoloSurveyForm
+
 6.9.4
 -----
 - Bug fix: converting an already unicode str to unicode error in the clean_name attr
