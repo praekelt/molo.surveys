@@ -318,10 +318,11 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertEqual(response.status_code, 200)
 
         form = response.context['form'].formsets['survey_form_fields']
-        err = 'The combined choices\' maximum characters ' \
-              'limit has been exceeded ({max_limit} ' \
-              'character(s)).'
-        self.assertEqual(
-            form.errors[0]['field_type'][0][0],
-            unicode(err.format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT))
+        err = u'The combined choices\' maximum characters ' \
+              u'limit has been exceeded ({max_limit} ' \
+              u'character(s)).'
+
+        self.assertTrue(
+            err.format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT) in
+            form.errors[0]['field_type'].error_list[0].__str__()
         )
