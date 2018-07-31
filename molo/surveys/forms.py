@@ -252,6 +252,7 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                               'Options: a True and False'),
                         )
                 elif data['field_type'] in VALID_SKIP_LOGIC:
+                    choices_length = 0
                     for i, logic in enumerate(data['skip_logic']):
                         if not logic.value['choice']:
                             self.add_stream_field_error(
@@ -259,6 +260,19 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                                 'choice',
                                 _('This field is required.'),
                             )
+                        else:
+                            choices_length += len(logic.value['choice'])
+
+                    if choices_length > CHARACTER_COUNT_CHOICE_LIMIT:
+                        err = 'The combined choices\' maximum characters ' \
+                              'limit has been exceeded ({max_limit} '\
+                              'character(s)).'
+
+                        self.add_form_field_error(
+                            'field_type',
+                            _(err).format(
+                                max_limit=CHARACTER_COUNT_CHOICE_LIMIT),
+                        )
 
                 for i, logic in enumerate(data['skip_logic']):
                     if logic.value['skip_logic'] == SkipState.SURVEY:
