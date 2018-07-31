@@ -16,7 +16,7 @@ from molo.surveys.models import (
 )
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
-
+from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from .base import create_molo_survey_page
 
 User = get_user_model()
@@ -271,7 +271,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         data.update(
             form.formsets['survey_form_fields'].management_form.initial)
         data.update({u'description-count': 0})
-        # import ipdb; ipdb.set_trace()
+
         data.update({
             'survey_form_fields-0-admin_label': 'a',
             'survey_form_fields-0-label': 'a',
@@ -307,4 +307,21 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertEqual(
             response.context['message'],
             u"Page 'Child of SurveysIndexPage Survey' has been updated."
+        )
+
+        data.update({
+            'survey_form_fields-0-skip_logic-0-value-choice':
+                'a' + 'a' * CHARACTER_COUNT_CHOICE_LIMIT,
+        })
+        response = self.client.post(
+            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['form'].formsets['survey_form_fields']
+        err = 'The combined choices\' maximum characters ' \
+              'limit has been exceeded ({max_limit} ' \
+              'character(s)).'
+        self.assertEqual(
+            form.errors[0]['field_type'][0][0],
+            unicode(err.format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT))
         )

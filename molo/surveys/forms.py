@@ -271,7 +271,7 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                         self.add_form_field_error(
                             'field_type',
                             _(err).format(
-                                max_length=CHARACTER_COUNT_CHOICE_LIMIT),
+                                max_limit=CHARACTER_COUNT_CHOICE_LIMIT),
                         )
 
                 for i, logic in enumerate(data['skip_logic']):
