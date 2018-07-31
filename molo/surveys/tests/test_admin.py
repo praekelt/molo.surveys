@@ -324,5 +324,5 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         self.assertTrue(
             err.format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT) in
-            form.errors[0]['field_type'].error_list[0].__str__()
+            form.errors[0]['field_type'].error_list[0]
         )
