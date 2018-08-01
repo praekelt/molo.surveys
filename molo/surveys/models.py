@@ -604,6 +604,10 @@ class MoloSurveySubmission(surveys_models.AbstractFormSubmission):
 
     def get_data(self):
         form_data = super(MoloSurveySubmission, self).get_data()
+        for key, value in form_data.items():
+            # Convert lists to strings so they display properly in the view
+            if isinstance(value, list):
+                form_data[key] = u', '.join(value)
         form_data.update({
             'username': self.user.username if self.user else 'Anonymous',
         })
