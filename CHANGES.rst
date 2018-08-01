@@ -1,5 +1,32 @@
 CHANGE LOG
 ==========
+6.9.6
+-----
+- Bug fix: convert lists to strings when getting MoloSurveySubmission data
+
+6.9.5
+-----
+- Bug fix: remove model validation for MoloSurveyFormField and move it to BaseMoloSurveyForm
+
+6.9.4
+-----
+- Bug fix: converting an already unicode str to unicode error in the clean_name attr
+
+6.9.3
+-----
+- Bug fix: unicode support for SurveyAbstractFormField's clean_name attribute
+
+6.9.1
+-----
+- Bug fix: add pk to session stored survey answers to prevent duplicate dict keys
+
+6.9.0
+-----
+- Override choice field to textfield from charfied with 512 limit
+
+6.8.2
+-----
+- Bug Fix: redirect to translated surveys when another language is selected
 
 6.8.1
 -----

@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.blocks import SkipLogicBlock, SkipState
+from django.contrib.auth import get_user_model
 from molo.surveys.models import (
     MoloSurveyFormField,
     MoloSurveyPage,
+    ArticlePage,
+    MoloSurveyPageView,
     MoloSurveySubmission,
     SurveysIndexPage,
     PersonalisableSurvey,
@@ -26,6 +31,13 @@ class TestSurveyModels(TestCase, MoloTestCaseMixin):
             form_data='{}'
         ).get_data()
         self.assertIn('username', data)
+
+    def test_submission_class_get_data_converts_list_to_string(self):
+        data = MoloSurveyPage().get_submission_class()(
+            form_data='{"checkbox-question": ["option 1", "option 2"]}'
+        ).get_data()
+        self.assertIn('checkbox-question', data)
+        self.assertEqual(data['checkbox-question'], u"option 1, option 2")
 
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
@@ -60,6 +72,31 @@ class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
             field_type='positive_number',
             required=True
         )
+
+    def test_survey_options_512_limit_overriden(self):
+        field_choices = [
+            'My favourite animal is a dog, because they bark',
+            'My favourite animal is a cat, because they meuow',
+            'My favourite animal is a bird, because they fly',
+            'My favourite animal is a lion, because that roar',
+            'My favourite animal is a hamster, because they have tiny legs',
+            'My favourite animal is a tiger, because they have stripes',
+            'My favourite animal is a frog, because they go crickit',
+            'My favourite animal is a fish, because they have nice eyes',
+            'My favourite animal is a chicken, because they cannot fly',
+            'My favourite animal is a duck, because they keep it down',
+            'My favourite animal is a wolf, because they howl',
+            'My favourite animal is a chamelion, because they fit in',
+        ]
+        choice_field = MoloSurveyFormField.objects.create(
+            page=self.survey,
+            sort_order=1,
+            label='Your favourite animal',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(field_choices),
+            required=True
+        )
+        self.assertTrue(len(choice_field.choices) > 512)
 
     def test_choices_updated_from_streamfield_on_save(self):
         self.assertEqual(
@@ -383,7 +420,8 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             admin_label="birthday",
         )
 
-    def create_personalisable_survey_form_field(self, field_type):
+    def create_personalisable_survey_form_field(
+            self, field_type, label="When is your birthday"):
         survey = PersonalisableSurvey(
             title='Test Survey',
             introduction='Introduction to Test Survey ...',
@@ -394,7 +432,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         return PersonalisableSurveyFormField.objects.create(
             page=survey,
-            label="When is your birthday",
+            label=label,
             field_type=field_type,
             admin_label="birthday",
         )
@@ -447,6 +485,15 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
+    def test_date_personalisabe_form_str_representation(self):
+        field = self.create_personalisable_survey_form_field(
+            'date', label="When is your birthdáy")
+
+        self.assertTrue(
+            'Test Survey - When is your birthd' in
+            field.__str__()
+        )
+
     def test_date_personalisabe_form_fields_clean_if_blank(self):
         field = self.create_personalisable_survey_form_field('date')
         field.default_value = ""
@@ -495,3 +542,17 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             field.clean()
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+
+class TestMoloSurveyPageView(TestCase, MoloTestCaseMixin):
+    """ Test case """
+
+    def test_model(self):
+        self.mk_main()
+        user = get_user_model().objects.create_superuser(
+            username='superuser',
+            email='superuser@email.com', password='pass'
+        )
+        survey = ArticlePage(title='Test Survey', slug='test-survey')
+        model = MoloSurveyPageView(user=user, page=survey)
+        self.assertTrue('superuser viewed Test Survey at' in model.__str__())
