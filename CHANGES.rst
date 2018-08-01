@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+6.9.6
+-----
+- Bug fix: convert lists to strings when getting MoloSurveySubmission data
+
 6.9.5
 -----
 - Bug fix: remove model validation for MoloSurveyFormField and move it to BaseMoloSurveyForm
