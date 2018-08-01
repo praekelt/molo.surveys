@@ -22,7 +22,7 @@ class SkipLogicPaginator(Paginator):
         super(SkipLogicPaginator, self).__init__(object_list, per_page=1)
 
         self.question_labels = [
-            question.clean_name for question in self.object_list
+            question.pk_clean_name for question in self.object_list
         ]
 
         self.page_breaks = [
@@ -44,7 +44,7 @@ class SkipLogicPaginator(Paginator):
 
         # add the missing data
         self.new_answers.update({
-            checkbox.clean_name: 'off'
+            checkbox.pk_clean_name: 'off'
             for checkbox in self.missing_checkboxes
         })
 
@@ -145,7 +145,7 @@ class SkipLogicPaginator(Paginator):
                 self.first_question_index:self.last_question_index + 1
             ]
             if question.field_type == 'checkbox' and
-            question.clean_name not in self.new_answers
+            question.pk_clean_name not in self.new_answers
         ]
 
     def page(self, number):

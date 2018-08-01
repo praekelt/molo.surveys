@@ -82,8 +82,11 @@ class SurveyAbstractFormField(AbstractFormField):
 
     @property
     def clean_name(self):
-        return str(slugify(text_type(unidecode(
-            '{} {}'.format(self.pk, smart_str(self.label))))))
+        return str(slugify(text_type(unidecode(smart_str(self.label)))))
+
+    @property
+    def pk_clean_name(self):
+        return '{}-{}'.format(self.pk, self.clean_name)
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
@@ -344,8 +347,9 @@ class MoloSurveyPage(
                 user=request.user,
             )
             if prev_form.is_valid():
+                fields = self.get_form_fields()
                 # If data for step is valid, update the session
-                survey_data.update(prev_form.cleaned_data)
+                survey_data.update(prev_form.pk_cleaned_data(fields))
                 self.save_data(request, survey_data)
 
                 if prev_step.has_next():
@@ -371,9 +375,12 @@ class MoloSurveyPage(
 
                         # We fill in the missing fields which were skipped with
                         # a default value
-                        for question in self.get_form_fields():
-                            if question.clean_name not in data:
+                        for question in fields:
+                            if question.pk_clean_name not in data:
                                 form.cleaned_data[question.clean_name] = SKIP
+                            else:
+                                form.cleaned_data[question.clean_name]\
+                                    = data[question.pk_clean_name]
 
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]

@@ -108,8 +108,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -177,8 +176,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         self.client.force_login(self.user)
         answer = 'PYTHON'
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(molo_survey_page.url, {key: answer})
@@ -186,7 +184,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         self.client.force_login(self.super_user)
         response = self.client.get(
-            '/admin/surveys/submissions/%s/' % (molo_survey_page.id),
+            '/admin/surveys/submissions/%s/' % molo_survey_page.id,
             {'action': 'CSV'},
         )
         self.assertEquals(response.status_code, 200)
@@ -202,8 +200,7 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
                 parent=self.section_index))
 
         answer = 'PYTHON'
-        key = '{}-{}'.format(
-            molo_survey_page.get_form_fields().first().pk,
+        key = '{}'.format(
             molo_survey_page.get_form_fields().first(
             ).label.lower().replace(' ', '-')
         )
