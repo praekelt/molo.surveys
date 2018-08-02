@@ -81,10 +81,6 @@ class SurveyAbstractFormField(AbstractFormField):
         ordering = ['sort_order']
 
     @property
-    def clean_name(self):
-        return str(slugify(text_type(unidecode(smart_str(self.label)))))
-
-    @property
     def pk_clean_name(self):
         return '{}-{}'.format(self.pk, self.clean_name)
 
