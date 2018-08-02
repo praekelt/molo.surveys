@@ -16,9 +16,6 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
-from django.utils.text import slugify
-from django.utils.encoding import smart_str
-from django.utils.six import text_type
 from modelcluster.fields import ParentalKey
 from molo.core.blocks import MarkDownBlock
 from molo.core.models import (
