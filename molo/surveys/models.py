@@ -2,7 +2,6 @@
 
 import json
 import datetime
-from unidecode import unidecode
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger
