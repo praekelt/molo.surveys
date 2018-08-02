@@ -166,7 +166,8 @@ class SurveysFormBuilder(FormBuilder):
         return formfields
 
     def get_form_class(self):
-        return type(str('WagtailSurveysForm'), (SurveyBaseForm,), self.formfields)
+        return type(str(
+            'WagtailSurveysForm'), (SurveyBaseForm,), self.formfields)
 
 
 class CSVGroupCreationForm(forms.ModelForm):
