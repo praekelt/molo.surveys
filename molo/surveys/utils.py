@@ -47,6 +47,10 @@ class SkipLogicPaginator(Paginator):
             checkbox.pk_clean_name: 'off'
             for checkbox in self.missing_checkboxes
         })
+        self.new_answers.update({
+            checkbox.clean_name: 'off'
+            for checkbox in self.pk_cleaned_missing_checkboxes
+        })
 
     def _get_page(self, *args, **kwargs):
         return SkipLogicPage(*args, **kwargs)
@@ -146,6 +150,18 @@ class SkipLogicPaginator(Paginator):
             ]
             if question.field_type == 'checkbox' and
             question.pk_clean_name not in self.new_answers
+        ]
+
+    @cached_property
+    def pk_cleaned_missing_checkboxes(self):
+        return [
+            question
+            for question in self.object_list[
+                # Correct for the slice
+                self.first_question_index:self.last_question_index + 1
+            ]
+            if question.field_type == 'checkbox' and
+            question.clean_name not in self.new_answers
         ]
 
     def page(self, number):
