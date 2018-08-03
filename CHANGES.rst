@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+6.9.7
+-----
+- Bug fix: only use pk+name combo to answers stored in the session, not all field names
+
 6.9.6
 -----
 - Bug fix: convert lists to strings when getting MoloSurveySubmission data
