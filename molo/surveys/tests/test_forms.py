@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
 from django.test import TestCase
-
-from molo.surveys.forms import CharacterCountWidget, MultiLineWidget
+from django.forms import ValidationError
+from molo.surveys.forms import (
+    CharacterCountWidget, MultiLineWidget, CharacterCountMixin)
 
 
 class TestCharacterCountWidget(TestCase):
@@ -16,6 +17,24 @@ class TestCharacterCountWidget(TestCase):
         widget = CharacterCountWidget()
         with self.assertRaises(KeyError):
             widget.render('field-name', 'field-value')
+
+
+class TestCharacterCountMixin(TestCase):
+    def test_character_count_validation(self):
+        class SMixin(object):
+            error_messages = {}
+
+            def validate(self, val):
+                pass
+
+        class TMixin(CharacterCountMixin, SMixin):
+            pass
+        # garbage validate func
+        # garbage error message
+        # prevent super error messages
+        mixin = TMixin(max_length=2)
+        with self.assertRaises(ValidationError):
+            mixin.validate('maxlengthexceeded')
 
 
 class TestMultiLineWidget(TestCase):

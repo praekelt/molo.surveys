@@ -22,7 +22,7 @@ class SkipLogicPaginator(Paginator):
         super(SkipLogicPaginator, self).__init__(object_list, per_page=1)
 
         self.question_labels = [
-            question.clean_name for question in self.object_list
+            question.pk_clean_name for question in self.object_list
         ]
 
         self.page_breaks = [

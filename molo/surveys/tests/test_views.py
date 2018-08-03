@@ -129,8 +129,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_form_field.label)
         self.assertContains(response, molo_survey_page.submit_text)
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -154,8 +153,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -199,8 +197,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             self.assertContains(response, molo_survey_page.introduction)
             self.assertContains(response, molo_survey_form_field.label)
 
-            key = '{}-{}'.format(
-                molo_survey_form_field.pk,
+            key = '{}'.format(
                 molo_survey_form_field.label.lower().replace(' ', '-')
             )
             response = self.client.post(
@@ -222,8 +219,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_page.title)
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -247,8 +243,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_page.title)
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -258,8 +253,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_form_field.label)
         self.assertContains(response, 'python</span> 100%')
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -292,8 +286,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_form_field.label)
         self.assertNotContains(response, extra_molo_survey_form_field.label)
         self.assertContains(response, 'Next Question')
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(molo_survey_page.url + '?p=2', {
@@ -306,8 +299,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, extra_molo_survey_form_field.label)
         self.assertContains(response, molo_survey_page.submit_text)
 
-        key = '{}-{}'.format(
-            extra_molo_survey_form_field.pk,
+        key = '{}'.format(
             extra_molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -338,8 +330,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
         self.assertContains(response, 'This field is required.')
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -447,16 +438,14 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'French translation of Test Survey')
 
         # Submit responses to both surveys
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         self.client.post(molo_survey_page.url, {
             key: 'an english answer'
         })
 
-        key = '{}-{}'.format(
-            translated_survey_form_field.pk,
+        key = '{}'.format(
             translated_survey_form_field.label.lower().replace(' ', '-')
         )
         self.client.post(translated_survey.url, {
@@ -617,8 +606,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, 'Please log in to take this survey')
         self.assertContains(response, molo_survey_form_field.label)
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -642,8 +630,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/')
 
         self.assertContains(response, molo_survey_form_field.label)
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
@@ -665,8 +652,7 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
 
         self.user = self.login()
 
-        key = '{}-{}'.format(
-            molo_survey_form_field.pk,
+        key = '{}'.format(
             molo_survey_form_field.label.lower().replace(' ', '-')
         )
         response = self.client.post(
