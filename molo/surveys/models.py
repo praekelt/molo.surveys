@@ -290,6 +290,15 @@ class MoloSurveyPage(
         request.session[self.session_key_data] = json.dumps(
             data, cls=DjangoJSONEncoder)
 
+    @classmethod
+    def pk_cleaned_data(cls, fields, cleaned_data):
+        pk_cleaned_field_data = {}
+        for field in fields:
+            if field.clean_name in cleaned_data.keys():
+                pk_cleaned_field_data[field.pk_clean_name] \
+                    = cleaned_data.get(field.clean_name)
+        return pk_cleaned_field_data
+
     def serve_questions(self, request):
         """
         Implements a simple multi-step form.
@@ -341,7 +350,8 @@ class MoloSurveyPage(
             if prev_form.is_valid():
                 fields = self.get_form_fields()
                 # If data for step is valid, update the session
-                survey_data.update(prev_form.pk_cleaned_data(fields))
+                survey_data.update(
+                    self.pk_cleaned_data(fields, paginator.new_answers))
                 self.save_data(request, survey_data)
 
                 if prev_step.has_next():

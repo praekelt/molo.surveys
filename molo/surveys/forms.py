@@ -11,24 +11,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 
 from wagtail.wagtailadmin.forms import WagtailAdminPageForm
-from wagtailsurveys.forms import FormBuilder, BaseForm
+from wagtailsurveys.forms import FormBuilder
 
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 from .widgets import NaturalDateInput
 
 
 CHARACTER_COUNT_CHOICE_LIMIT = 512
-
-
-class SurveyBaseForm(BaseForm):
-
-    def pk_cleaned_data(self, fields):
-        pk_cleaned_field_data = {}
-        for field in fields:
-            if field.clean_name in self.cleaned_data.keys():
-                pk_cleaned_field_data[field.pk_clean_name] \
-                    = self.cleaned_data.get(field.clean_name)
-        return pk_cleaned_field_data
 
 
 class CharacterCountWidget(forms.TextInput):
@@ -164,10 +153,6 @@ class SurveysFormBuilder(FormBuilder):
                 raise Exception("Unrecognised field type: " + field.field_type)
 
         return formfields
-
-    def get_form_class(self):
-        return type(str(
-            'WagtailSurveysForm'), (SurveyBaseForm,), self.formfields)
 
 
 class CSVGroupCreationForm(forms.ModelForm):
