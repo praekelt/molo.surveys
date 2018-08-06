@@ -213,7 +213,13 @@ class SurveySubmissionDataRule(AbstractBaseRule):
 
                 if self.operator == self.EQUALS:
                     return set(python_value) == set(user_response)
-
+            if isinstance(python_value, list) \
+                    and isinstance(user_response, six.string_types):
+                user_response = user_response.split(u', ')
+                if self.operator == self.CONTAINS:
+                    return set(python_value).issubset(user_response)
+                if self.operator == self.EQUALS:
+                    return set(python_value) == set(user_response)
             if isinstance(python_value, six.string_types) \
                     and isinstance(user_response, six.string_types):
                 if self.operator == self.CONTAINS:

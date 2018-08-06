@@ -129,9 +129,9 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.assertFalse(rule.test_user(self.request))
 
-    def test_padding_checkboxes_rule_with_equal_operator(self):
+    def test_passing_checkboxes_rule_with_equal_operator(self):
         rule = SurveySubmissionDataRule(
-            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
             expected_response=' choice 3 , choice 1 ',
             field_name=self.checkboxes.clean_name)
 
@@ -139,7 +139,7 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
     def test_failing_checkboxes_rule_with_equal_operator(self):
         rule = SurveySubmissionDataRule(
-            survey=self.survey, operator=SurveySubmissionDataRule.CONTAINS,
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
             expected_response='choice2,choice1',
             field_name=self.checkboxes.clean_name)
 
