@@ -27,6 +27,13 @@ class TestSurveyModels(TestCase, MoloTestCaseMixin):
         ).get_data()
         self.assertIn('username', data)
 
+    def test_submission_class_get_data_converts_list_to_string(self):
+        data = MoloSurveyPage().get_submission_class()(
+            form_data='{"checkbox-question": ["option 1", "option 2"]}'
+        ).get_data()
+        self.assertIn('checkbox-question', data)
+        self.assertEqual(data['checkbox-question'], u"option 1, option 2")
+
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
     def setUp(self):
