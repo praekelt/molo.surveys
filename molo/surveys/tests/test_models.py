@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.blocks import SkipLogicBlock, SkipState
+from django.contrib.auth import get_user_model
 from molo.surveys.models import (
     MoloSurveyFormField,
     MoloSurveyPage,
+    ArticlePage,
+    MoloSurveyPageView,
     MoloSurveySubmission,
     SurveysIndexPage,
     PersonalisableSurvey,
@@ -26,6 +31,13 @@ class TestSurveyModels(TestCase, MoloTestCaseMixin):
             form_data='{}'
         ).get_data()
         self.assertIn('username', data)
+
+    def test_submission_class_get_data_converts_list_to_string(self):
+        data = MoloSurveyPage().get_submission_class()(
+            form_data='{"checkbox-question": ["option 1", "option 2"]}'
+        ).get_data()
+        self.assertIn('checkbox-question', data)
+        self.assertEqual(data['checkbox-question'], u"option 1, option 2")
 
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
@@ -408,7 +420,8 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             admin_label="birthday",
         )
 
-    def create_personalisable_survey_form_field(self, field_type):
+    def create_personalisable_survey_form_field(
+            self, field_type, label="When is your birthday"):
         survey = PersonalisableSurvey(
             title='Test Survey',
             introduction='Introduction to Test Survey ...',
@@ -419,7 +432,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         return PersonalisableSurveyFormField.objects.create(
             page=survey,
-            label="When is your birthday",
+            label=label,
             field_type=field_type,
             admin_label="birthday",
         )
@@ -472,6 +485,15 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
+    def test_date_personalisabe_form_str_representation(self):
+        field = self.create_personalisable_survey_form_field(
+            'date', label="When is your birthdáy")
+
+        self.assertTrue(
+            'Test Survey - When is your birthd' in
+            field.__str__()
+        )
+
     def test_date_personalisabe_form_fields_clean_if_blank(self):
         field = self.create_personalisable_survey_form_field('date')
         field.default_value = ""
@@ -520,3 +542,17 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             field.clean()
 
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
+
+
+class TestMoloSurveyPageView(TestCase, MoloTestCaseMixin):
+    """ Test case """
+
+    def test_model(self):
+        self.mk_main()
+        user = get_user_model().objects.create_superuser(
+            username='superuser',
+            email='superuser@email.com', password='pass'
+        )
+        survey = ArticlePage(title='Test Survey', slug='test-survey')
+        model = MoloSurveyPageView(user=user, page=survey)
+        self.assertTrue('superuser viewed Test Survey at' in model.__str__())

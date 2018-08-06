@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-
+import re
 from django.core.paginator import Page, Paginator
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
@@ -17,7 +17,10 @@ class SkipLogicPaginator(Paginator):
     def __init__(self, object_list, data=dict(), answered=dict()):
         # Create a mutatable version of the query data
         self.new_answers = data.copy()
-        self.previous_answers = answered
+        self.previous_answers = {}
+
+        for k, v in answered.items():
+            self.previous_answers[re.sub("^\d+-", "", k)] = v
 
         super(SkipLogicPaginator, self).__init__(object_list, per_page=1)
 
