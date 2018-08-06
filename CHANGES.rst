@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+
+6.9.8
+-----
+- Bug fix: revert survey indexing
+
 6.9.7
 -----
 - Bug fix: only use pk+name combo to answers stored in the session, not all field names
