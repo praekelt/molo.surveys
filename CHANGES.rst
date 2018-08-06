@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.9.9
+-----
+- Decode items in csv download list
+
 6.9.0
 -----
 - Override choice field to textfield from charfied with 512 limit
