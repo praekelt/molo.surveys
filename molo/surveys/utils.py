@@ -178,7 +178,7 @@ class SkipLogicPage(Page):
 
     @cached_property
     def last_question(self):
-        return self.object_list[len(self.object_list) - 1]
+        return self.object_list[-1]
 
     @cached_property
     def last_response(self):
