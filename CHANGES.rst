@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.9.10
+------
+- Add error validation for choice fields
+
 6.9.9
 -----
 - Decode items in csv download list
