@@ -16,6 +16,8 @@ from wagtailsurveys.forms import FormBuilder
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 from .widgets import NaturalDateInput
 
+CHARACTER_COUNT_CHOICE_LIMIT = 512
+
 
 CHARACTER_COUNT_CHOICE_LIMIT = 512
 
@@ -85,6 +87,45 @@ class MultiLineWidget(forms.Textarea):
             super(MultiLineWidget, self).render(name, value, attrs),
             _('No limit'),
         )
+
+
+class CharacterCountMixin(object):
+    max_length = CHARACTER_COUNT_CHOICE_LIMIT
+
+    def __init__(self, *args, **kwargs):
+        self.max_length = kwargs.pop('max_length', self.max_length)
+        super(CharacterCountMixin, self).__init__(*args, **kwargs)
+        self.error_messages['max_length'] = _(
+            'This field can not be more than {max_length} characters long'
+        ).format(max_length=self.max_length)
+
+    def validate(self, value):
+        super(CharacterCountMixin, self).validate(value)
+        if len(value) > self.max_length:
+            raise ValidationError(
+                self.error_messages['max_length'],
+                code='max_length', params={'value': value},
+            )
+
+
+class CharacterCountMultipleChoiceField(
+        CharacterCountMixin, forms.MultipleChoiceField):
+    """ Limit character count for Multi choice fields """
+
+
+class CharacterCountChoiceField(
+        CharacterCountMixin, forms.ChoiceField):
+    """ Limit character count for choice fields """
+
+
+class CharacterCountCheckboxSelectMultiple(
+        CharacterCountMixin, forms.CheckboxSelectMultiple):
+    """ Limit character count for checkbox fields """
+
+
+class CharacterCountCheckboxInput(
+        CharacterCountMixin, forms.CheckboxInput):
+    """ Limit character count for checkbox fields """
 
 
 class SurveysFormBuilder(FormBuilder):
@@ -266,8 +307,6 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                     if choices_length > CHARACTER_COUNT_CHOICE_LIMIT:
                         err = 'The combined choices\' maximum characters ' \
                               'limit has been exceeded ({max_limit} '\
-                              'character(s)).'
-
                         self.add_form_field_error(
                             'field_type',
                             _(err).format(
