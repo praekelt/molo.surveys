@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+6.9.11
+------
+- Update help text on field choices
+
 6.9.10
 ------
 - Add error validation for choice fields
