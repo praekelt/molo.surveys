@@ -543,7 +543,7 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
         blank=True,
         help_text=_(
             'Comma separated list of choices. Only applicable in checkboxes,'
-            'radio and dropdown. The full length of the choice list and the ',
+            'radio and dropdown. The full length of the choice list and the '
             'commas that separate them are resctricted to 512 characters.')
     )
     field_type = models.CharField(
