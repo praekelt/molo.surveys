@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+6.10.0
+------
+- Add the missing Migration
+- Fix the typo in the models help_text causing "TypeError: ugettext()"
+
 6.9.10
 ------
 - Add error validation for choice fields
