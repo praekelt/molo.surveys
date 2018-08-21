@@ -19,9 +19,6 @@ from .widgets import NaturalDateInput
 CHARACTER_COUNT_CHOICE_LIMIT = 512
 
 
-CHARACTER_COUNT_CHOICE_LIMIT = 512
-
-
 class CharacterCountWidget(forms.TextInput):
     class Media:
         js = ('js/widgets/character_count.js',)
@@ -106,26 +103,6 @@ class CharacterCountMixin(object):
                 self.error_messages['max_length'],
                 code='max_length', params={'value': value},
             )
-
-
-class CharacterCountMultipleChoiceField(
-        CharacterCountMixin, forms.MultipleChoiceField):
-    """ Limit character count for Multi choice fields """
-
-
-class CharacterCountChoiceField(
-        CharacterCountMixin, forms.ChoiceField):
-    """ Limit character count for choice fields """
-
-
-class CharacterCountCheckboxSelectMultiple(
-        CharacterCountMixin, forms.CheckboxSelectMultiple):
-    """ Limit character count for checkbox fields """
-
-
-class CharacterCountCheckboxInput(
-        CharacterCountMixin, forms.CheckboxInput):
-    """ Limit character count for checkbox fields """
 
 
 class SurveysFormBuilder(FormBuilder):
@@ -306,7 +283,7 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
 
                     if choices_length > CHARACTER_COUNT_CHOICE_LIMIT:
                         err = 'The combined choices\' maximum characters ' \
-                              'limit has been exceeded ({max_limit} '\
+                              'limit has been exceeded ({max_limit} '
                         self.add_form_field_error(
                             'field_type',
                             _(err).format(
