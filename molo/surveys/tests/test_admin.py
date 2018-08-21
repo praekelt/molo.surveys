@@ -17,7 +17,6 @@ from molo.surveys.models import (
 from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
-from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from .base import create_molo_survey_page
 
 User = get_user_model()
@@ -98,75 +97,6 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
             segment=test_segment)
 
         return personalisable_survey, molo_survey_form_field
-
-    def test_survey_edit_view(self):
-        self.client.force_login(self.super_user)
-        child_of_index_page = create_molo_survey_page(
-            self.surveys_index,
-            title="Child of SurveysIndexPage Survey",
-            slug="child-of-surveysindexpage-survey"
-        )
-        form_field = MoloSurveyFormField.objects.create(
-            page=child_of_index_page, field_type='radio', choices='a,b,c')
-        response = self.client.get(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk)
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        data = form.initial
-        data.update(
-            form.formsets['survey_form_fields'].management_form.initial)
-        data.update({u'description-count': 0})
-        data.update({
-            'survey_form_fields-0-admin_label': 'a',
-            'survey_form_fields-0-label': 'a',
-            'survey_form_fields-0-default_value': 'a',
-            'survey_form_fields-0-field_type': form_field.field_type,
-            'survey_form_fields-0-help_text': 'a',
-            'survey_form_fields-0-id': form_field.pk,
-            'go_live_at': '',
-            'expire_at': '',
-            'image': '',
-            'survey_form_fields-0-ORDER': 1,
-            'survey_form_fields-0-required': 'on',
-            'survey_form_fields-0-skip_logic-0-deleted': '',
-            'survey_form_fields-0-skip_logic-0-id': 'None',
-            'survey_form_fields-0-skip_logic-0-order': 0,
-            'survey_form_fields-0-skip_logic-0-type': 'skip_logic',
-            'survey_form_fields-0-skip_logic-0-value-choice': 'a',
-            'survey_form_fields-0-skip_logic-0-value-question_0': 'a',
-            'survey_form_fields-0-skip_logic-0-value-skip_logic': 'next',
-            'survey_form_fields-0-skip_logic-0-value-survey': '',
-            'survey_form_fields-0-skip_logic-count': 1,
-            'survey_form_fields-INITIAL_FORMS': 1,
-            'survey_form_fields-MAX_NUM_FORMS': 1000,
-            'survey_form_fields-MIN_NUM_FORMS': 0,
-            'survey_form_fields-TOTAL_FORMS': 1,
-            'terms_and_conditions-INITIAL_FORMS': 0,
-            'terms_and_conditions-MAX_NUM_FORMS': 1000,
-            'terms_and_conditions-MIN_NUM_FORMS': 0,
-            'terms_and_conditions-TOTAL_FORMS': 0,
-        })
-        response = self.client.post(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
-        self.assertEqual(
-            response.context['message'],
-            u"Page 'Child of SurveysIndexPage Survey' has been updated."
-        )
-        data.update({
-            'survey_form_fields-0-skip_logic-0-value-choice':
-                'a' + 'a' * CHARACTER_COUNT_CHOICE_LIMIT,
-        })
-        response = self.client.post(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form'].formsets['survey_form_fields']
-        err = u'The combined choices\' maximum characters ' \
-              u'limit has been exceeded ({max_limit} ' \
-              u'character(s)).'
-        self.assertTrue(
-            err.format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT) in
-            form.errors[0]['field_type'].error_list[0]
-        )
 
     def test_convert_to_article(self):
         molo_survey_page, molo_survey_form_field = \
