@@ -82,6 +82,40 @@ class TestSurveyDataRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.survey.refresh_from_db()
 
+    def test_rule_validates_with_correct_field_name(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name='incorrect-field-name')
+
+        with self.assertRaises(ValidationError):
+            rule.clean()
+
+        rule.field_name = 'singleline-text'
+        try:
+            rule.clean()
+        except ValidationError:
+            self.fail(
+                "SurveySubmissionDataRule.clean()raised ValidationError!")
+
+    def test_rule_validates_with_correct_label_name(self):
+        rule = SurveySubmissionDataRule(
+            survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name='Incorrect Field name!!')
+
+        with self.assertRaises(ValidationError):
+            rule.clean()
+
+        rule.field_name = 'Singleline Text'
+        try:
+            rule.clean()
+        except ValidationError:
+            self.fail(
+                "SurveySubmissionDataRule.clean()raised ValidationError!")
+        # check the field_name has been changed to the correct one
+        self.assertEqual(rule.field_name, 'singleline-text')
+
     def test_get_field_model(self):
         rule = SurveySubmissionDataRule(
             survey=self.survey, operator=SurveySubmissionDataRule.EQUALS,

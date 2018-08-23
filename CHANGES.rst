@@ -1,5 +1,8 @@
 CHANGE LOG
 ==========
+6.10.1
+------
+- Allow SurveySubmissionDataRule to be created using label or field_name
 
 6.10.0
 ------
