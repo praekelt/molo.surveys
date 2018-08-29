@@ -52,6 +52,12 @@ def __ordered_subclasses__(cls):
 AbstractBaseRule.__subclasses__ = classmethod(__ordered_subclasses__)
 
 
+class FieldNameField(models.CharField):
+    def value_from_object(self, obj):
+        """ Returns the field label for rendering"""
+        return obj.get_expected_field().label
+
+
 class SurveySubmissionDataRule(AbstractBaseRule):
     static = True
 
@@ -66,7 +72,7 @@ class SurveySubmissionDataRule(AbstractBaseRule):
     survey = models.ForeignKey('PersonalisableSurvey',
                                verbose_name=_('survey'),
                                on_delete=models.CASCADE)
-    field_name = models.CharField(
+    field_name = FieldNameField(
         _('field name'), max_length=255,
         help_text=_('Field\'s label. For possible choices '
                     'please input any text and save, '
