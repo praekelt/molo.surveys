@@ -14,6 +14,7 @@ from molo.surveys.models import (
     PersonalisableSurvey,
     PersonalisableSurveyFormField,
 )
+from molo.surveys.rules import SurveySubmissionDataRule
 from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
@@ -309,3 +310,26 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/admin/surveys/')
         self.assertContains(response, child_of_index_page.title)
         self.assertContains(response, child_of_article_page.title)
+
+    def test_segment_submission_rule_edit_shows_field_label(self):
+        # create survey page
+        molo_survey_page, molo_survey_form_field = (
+            self.create_personalisable_molo_survey_page(
+                parent=self.section_index))
+        # create segment and rule
+        test_segment = Segment.objects.create(name="Test Segment")
+        rule = SurveySubmissionDataRule(
+            segment=test_segment,
+            survey=molo_survey_page, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name='question-1')
+        rule.save()
+        test_segment.save()
+
+        self.client.force_login(self.super_user)
+        response = self.client.get(
+            '/admin/wagtail_personalisation/segment/edit/%d/' %
+            test_segment.pk)
+
+        self.assertNotContains(response, rule.field_name)
+        self.assertContains(response, molo_survey_form_field.label)
