@@ -84,6 +84,12 @@ class SurveyAbstractFormField(AbstractFormField):
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
+    language = models.ForeignKey('core.SiteLanguage',
+                                 blank=True,
+                                 null=True,
+                                 on_delete=models.SET_NULL,
+                                 )
+    translated_pages = models.ManyToManyField("self", blank=True)
 
 
 class SurveysIndexPage(MoloPage, PreventDeleteMixin):
@@ -116,6 +122,12 @@ class MoloSurveyPage(
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
+    language = models.ForeignKey('core.SiteLanguage',
+                                 blank=True,
+                                 null=True,
+                                 on_delete=models.SET_NULL,
+                                 )
+    translated_pages = models.ManyToManyField("self", blank=True)
 
     form_builder = SurveysFormBuilder
 
