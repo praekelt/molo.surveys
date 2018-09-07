@@ -4,6 +4,10 @@ CHANGE LOG
 ------
 - Use a custom model field for SurveySubmissionDataRule field_name
 
+6.10.2
+------
+- Use a custom model field for SurveySubmissionDataRule field_name
+
 6.10.1
 ------
 - Allow SurveySubmissionDataRule to be created using label or field_name
@@ -12,6 +16,10 @@ CHANGE LOG
 ------
 - Add the missing Migration
 - Fix the typo in the models help_text causing "TypeError: ugettext()"
+
+6.9.11
+------
+- Update help text on field choices
 
 6.9.10
 ------
