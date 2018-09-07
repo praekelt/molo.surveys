@@ -4,6 +4,10 @@ CHANGE LOG
 ------
 - Use a custom model field for SurveySubmissionDataRule field_name
 
+6.10.2
+------
+- Use a custom model field for SurveySubmissionDataRule field_name
+
 6.10.1
 ------
 - Allow SurveySubmissionDataRule to be created using label or field_name
