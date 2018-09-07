@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import json
 import datetime
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -49,6 +50,7 @@ from .forms import (  # noqa
     MoloSurveyForm,
     PersonalisableMoloSurveyForm,
     SurveysFormBuilder,
+    CHARACTER_COUNT_CHOICE_LIMIT,
 )
 from .rules import (  # noqa
     ArticleTagRule,
@@ -67,6 +69,16 @@ SKIP = 'NA (Skipped)'
 SectionPage.subpage_types += ['surveys.MoloSurveyPage']
 ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
+
+
+class SurveyAbstractFormField(AbstractFormField):
+    class Meta:
+        abstract = True
+        ordering = ['sort_order']
+
+    @property
+    def pk_clean_name(self):
+        return '{}-{}'.format(self.pk, self.clean_name)
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
@@ -290,6 +302,15 @@ class MoloSurveyPage(
         request.session[self.session_key_data] = json.dumps(
             data, cls=DjangoJSONEncoder)
 
+    @classmethod
+    def pk_cleaned_data(cls, fields, cleaned_data):
+        pk_cleaned_field_data = {}
+        for field in fields:
+            if field.clean_name in cleaned_data.keys():
+                pk_cleaned_field_data[field.pk_clean_name] \
+                    = cleaned_data.get(field.clean_name)
+        return pk_cleaned_field_data
+
     def serve_questions(self, request):
         """
         Implements a simple multi-step form.
@@ -339,8 +360,10 @@ class MoloSurveyPage(
                 user=request.user,
             )
             if prev_form.is_valid():
+                fields = self.get_form_fields()
                 # If data for step is valid, update the session
-                survey_data.update(prev_form.cleaned_data)
+                survey_data.update(
+                    self.pk_cleaned_data(fields, paginator.new_answers))
                 self.save_data(request, survey_data)
 
                 if prev_step.has_next():
@@ -366,9 +389,12 @@ class MoloSurveyPage(
 
                         # We fill in the missing fields which were skipped with
                         # a default value
-                        for question in self.get_form_fields():
-                            if question.clean_name not in data:
+                        for question in fields:
+                            if question.pk_clean_name not in data:
                                 form.cleaned_data[question.clean_name] = SKIP
+                            else:
+                                form.cleaned_data[question.clean_name]\
+                                    = data[question.pk_clean_name]
 
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
@@ -472,7 +498,7 @@ class QuestionPaginationMixin(models.Model):
         abstract = True
 
 
-surveys_models.AbstractFormField.panels.append(FieldPanel('page_break'))
+SurveyAbstractFormField.panels.append(FieldPanel('page_break'))
 
 
 class AdminLabelMixin(models.Model):
@@ -487,8 +513,8 @@ class AdminLabelMixin(models.Model):
         abstract = True
 
 
-surveys_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
-surveys_models.AbstractFormField._meta.get_field('label').verbose_name = (
+SurveyAbstractFormField.panels.append(FieldPanel('admin_label'))
+SurveyAbstractFormField._meta.get_field('label').verbose_name = (
     'Question'
 )
 
@@ -547,8 +573,10 @@ class SkipLogicMixin(models.Model):
 
 
 class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
-                          QuestionPaginationMixin, AbstractFormField):
-    AbstractFormField.FORM_FIELD_CHOICES += (
+                          QuestionPaginationMixin, SurveyAbstractFormField):
+
+    page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
+    SurveyAbstractFormField.FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
     choices = models.TextField(
         verbose_name=_('choices'),
@@ -560,10 +588,12 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     )
     field_type = models.CharField(
         verbose_name=_('field type'),
-        max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
-    page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
+        max_length=16, choices=SurveyAbstractFormField.FORM_FIELD_CHOICES)
 
-    class Meta(AbstractFormField.Meta):
+    def __init__(self, *args, **kwargs):
+        super(MoloSurveyFormField, self).__init__(*args, **kwargs)
+
+    class Meta(SurveyAbstractFormField.Meta):
         pass
 
     def clean(self):
@@ -578,7 +608,7 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                         {'default_value': ["Must be a valid date", ]})
 
 
-surveys_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
+SurveyAbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
 
 
 class MoloSurveySubmission(surveys_models.AbstractFormSubmission):
@@ -706,7 +736,7 @@ class PersonalisableSurvey(MoloSurveyPage):
 
 class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                                     QuestionPaginationMixin,
-                                    AbstractFormField):
+                                    SurveyAbstractFormField):
     """
     Form field that has a segment assigned.
     """
@@ -722,12 +752,15 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
 
     panels = [
         FieldPanel('segment')
-    ] + AbstractFormField.panels
+    ] + SurveyAbstractFormField.panels
+
+    def __init__(self, *args, **kwargs):
+        super(PersonalisableSurveyFormField, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return '{} - {}'.format(self.page, self.label)
 
-    class Meta(AbstractFormField.Meta):
+    class Meta(SurveyAbstractFormField.Meta):
         verbose_name = _('personalisable form field')
 
     def clean(self):
