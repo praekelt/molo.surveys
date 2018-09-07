@@ -14,10 +14,11 @@ from molo.surveys.models import (
     PersonalisableSurvey,
     PersonalisableSurveyFormField,
 )
+from molo.surveys.rules import SurveySubmissionDataRule
 from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
-from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
+
 from .base import create_molo_survey_page
 
 User = get_user_model()
@@ -177,12 +178,9 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_page.title)
         self.assertContains(response, molo_survey_page.introduction)
         self.assertContains(response, molo_survey_form_field.label)
-
-        key = '{}'.format(
-            molo_survey_form_field.label.lower().replace(' ', '-')
-        )
-        response = self.client.post(
-            molo_survey_page.url, {key: 'python'}, follow=True)
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'python'
+        }, follow=True)
         self.client.logout()
         self.client.login(
             username='testuser',
@@ -246,15 +244,13 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
 
         self.client.force_login(self.user)
         answer = 'PYTHON'
-        key = '{}'.format(
-            molo_survey_form_field.label.lower().replace(' ', '-')
-        )
-        response = self.client.post(molo_survey_page.url, {key: answer})
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): answer
+        })
 
         self.client.force_login(self.super_user)
         response = self.client.get(
-            '/admin/surveys/submissions/%s/' % molo_survey_page.id,
+            '/admin/surveys/submissions/%s/' % (molo_survey_page.id),
             {'action': 'CSV'},
         )
         self.assertEquals(response.status_code, 200)
@@ -270,14 +266,10 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
                 parent=self.section_index))
 
         answer = 'PYTHON'
-        key = '{}'.format(
-            molo_survey_page.get_form_fields().first(
-            ).label.lower().replace(' ', '-')
-        )
 
         molo_survey_page.get_submission_class().objects.create(
-            form_data=json.dumps(
-                {key: answer}, cls=DjangoJSONEncoder),
+            form_data=json.dumps({"question-1": answer},
+                                 cls=DjangoJSONEncoder),
             page=molo_survey_page,
             user=self.user
         )
@@ -319,134 +311,25 @@ class TestSurveyAdminViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, child_of_index_page.title)
         self.assertContains(response, child_of_article_page.title)
 
-    def test_survey_choices_edit_view(self):
+    def test_segment_submission_rule_edit_shows_field_label(self):
+        # create survey page
+        molo_survey_page, molo_survey_form_field = (
+            self.create_personalisable_molo_survey_page(
+                parent=self.section_index))
+        # create segment and rule
+        test_segment = Segment.objects.create(name="Test Segment")
+        rule = SurveySubmissionDataRule(
+            segment=test_segment,
+            survey=molo_survey_page, operator=SurveySubmissionDataRule.EQUALS,
+            expected_response='super random text',
+            field_name='question-1')
+        rule.save()
+        test_segment.save()
+
         self.client.force_login(self.super_user)
-        child_of_index_page = create_molo_survey_page(
-            self.surveys_index,
-            title="Child of SurveysIndexPage Survey",
-            slug="child-of-surveysindexpage-survey"
-        )
-        form_field = MoloSurveyFormField.objects.create(
-            page=child_of_index_page, field_type='checkbox', choices='')
-
         response = self.client.get(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk)
-        self.assertEqual(response.status_code, 200)
+            '/admin/wagtail_personalisation/segment/edit/%d/' %
+            test_segment.pk)
 
-        form = response.context['form']
-        data = form.initial
-        data.update(
-            form.formsets['survey_form_fields'].management_form.initial)
-        data.update({u'description-count': 0})
-
-        data.update({
-            'survey_form_fields-0-admin_label': 'a',
-            'survey_form_fields-0-label': 'a',
-            'survey_form_fields-0-default_value': 'a',
-            'survey_form_fields-0-field_type': form_field.field_type,
-            'survey_form_fields-0-help_text': 'a',
-            'survey_form_fields-0-id': form_field.pk,
-            'go_live_at': '',
-            'expire_at': '',
-            'image': '',
-            'survey_form_fields-0-ORDER': 1,
-            'survey_form_fields-0-required': 'on',
-            'survey_form_fields-0-skip_logic-0-deleted': '',
-            'survey_form_fields-0-skip_logic-0-id': 'None',
-            'survey_form_fields-0-skip_logic-0-order': 0,
-            'survey_form_fields-0-skip_logic-0-type': 'skip_logic',
-            'survey_form_fields-0-skip_logic-0-value-choice': 'a',
-            'survey_form_fields-0-skip_logic-0-value-question_0': 'a',
-            'survey_form_fields-0-skip_logic-0-value-skip_logic': 'next',
-            'survey_form_fields-0-skip_logic-0-value-survey': '',
-            'survey_form_fields-0-skip_logic-count': 1,
-            'survey_form_fields-INITIAL_FORMS': 1,
-            'survey_form_fields-MAX_NUM_FORMS': 1000,
-            'survey_form_fields-MIN_NUM_FORMS': 0,
-            'survey_form_fields-TOTAL_FORMS': 1,
-            'terms_and_conditions-INITIAL_FORMS': 0,
-            'terms_and_conditions-MAX_NUM_FORMS': 1000,
-            'terms_and_conditions-MIN_NUM_FORMS': 0,
-            'terms_and_conditions-TOTAL_FORMS': 0,
-        })
-        response = self.client.post(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['form'].formsets['survey_form_fields']
-        self.assertTrue(form.errors[0]['field_type'])
-
-    def test_survey_edit_view(self):
-        self.client.force_login(self.super_user)
-        child_of_index_page = create_molo_survey_page(
-            self.surveys_index,
-            title="Child of SurveysIndexPage Survey",
-            slug="child-of-surveysindexpage-survey"
-        )
-        form_field = MoloSurveyFormField.objects.create(
-            page=child_of_index_page, field_type='radio', choices='a,b,c')
-
-        response = self.client.get(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk)
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['form']
-        data = form.initial
-        data.update(
-            form.formsets['survey_form_fields'].management_form.initial)
-        data.update({u'description-count': 0})
-
-        data.update({
-            'survey_form_fields-0-admin_label': 'a',
-            'survey_form_fields-0-label': 'a',
-            'survey_form_fields-0-default_value': 'a',
-            'survey_form_fields-0-field_type': form_field.field_type,
-            'survey_form_fields-0-help_text': 'a',
-            'survey_form_fields-0-id': form_field.pk,
-            'go_live_at': '',
-            'expire_at': '',
-            'image': '',
-            'survey_form_fields-0-ORDER': 1,
-            'survey_form_fields-0-required': 'on',
-            'survey_form_fields-0-skip_logic-0-deleted': '',
-            'survey_form_fields-0-skip_logic-0-id': 'None',
-            'survey_form_fields-0-skip_logic-0-order': 0,
-            'survey_form_fields-0-skip_logic-0-type': 'skip_logic',
-            'survey_form_fields-0-skip_logic-0-value-choice': 'a',
-            'survey_form_fields-0-skip_logic-0-value-question_0': 'a',
-            'survey_form_fields-0-skip_logic-0-value-skip_logic': 'next',
-            'survey_form_fields-0-skip_logic-0-value-survey': '',
-            'survey_form_fields-0-skip_logic-count': 1,
-            'survey_form_fields-INITIAL_FORMS': 1,
-            'survey_form_fields-MAX_NUM_FORMS': 1000,
-            'survey_form_fields-MIN_NUM_FORMS': 0,
-            'survey_form_fields-TOTAL_FORMS': 1,
-            'terms_and_conditions-INITIAL_FORMS': 0,
-            'terms_and_conditions-MAX_NUM_FORMS': 1000,
-            'terms_and_conditions-MIN_NUM_FORMS': 0,
-            'terms_and_conditions-TOTAL_FORMS': 0,
-        })
-        response = self.client.post(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
-        self.assertEqual(
-            response.context['message'],
-            u"Page 'Child of SurveysIndexPage Survey' has been updated."
-        )
-
-        data.update({
-            'survey_form_fields-0-skip_logic-0-value-choice':
-                'a' + 'a' * CHARACTER_COUNT_CHOICE_LIMIT,
-        })
-        response = self.client.post(
-            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['form'].formsets['survey_form_fields']
-        err = u'The combined choices\' maximum characters ' \
-              u'limit has been exceeded ({max_limit} ' \
-              u'character(s)).'
-
-        self.assertTrue(
-            err.format(max_limit=CHARACTER_COUNT_CHOICE_LIMIT) in
-            form.errors[0]['field_type'].error_list[0]
-        )
+        self.assertNotContains(response, rule.field_name)
+        self.assertContains(response, molo_survey_form_field.label)

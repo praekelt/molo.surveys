@@ -1,5 +1,17 @@
 CHANGE LOG
 ==========
+6.10.2
+------
+- Use a custom model field for SurveySubmissionDataRule field_name
+
+6.10.1
+------
+- Allow SurveySubmissionDataRule to be created using label or field_name
+
+6.10.0
+------
+- Add the missing Migration
+- Fix the typo in the models help_text causing "TypeError: ugettext()"
 
 6.9.11
 ------

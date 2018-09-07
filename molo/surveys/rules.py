@@ -11,6 +11,10 @@ from django.utils import six, timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
+from django.utils.six import text_type
+from django.utils.text import slugify
+from unidecode import unidecode
+
 from wagtail.wagtailcore.blocks.stream_block import StreamBlockValidationError
 from wagtail.wagtailadmin.edit_handlers import (
     FieldPanel,
@@ -48,6 +52,12 @@ def __ordered_subclasses__(cls):
 AbstractBaseRule.__subclasses__ = classmethod(__ordered_subclasses__)
 
 
+class FieldNameField(models.CharField):
+    def value_from_object(self, obj):
+        """ Returns the field label for rendering"""
+        return obj.get_expected_field().label
+
+
 class SurveySubmissionDataRule(AbstractBaseRule):
     static = True
 
@@ -62,11 +72,9 @@ class SurveySubmissionDataRule(AbstractBaseRule):
     survey = models.ForeignKey('PersonalisableSurvey',
                                verbose_name=_('survey'),
                                on_delete=models.CASCADE)
-    field_name = models.CharField(
+    field_name = FieldNameField(
         _('field name'), max_length=255,
-        help_text=_('Field\'s label in a lower-case '
-                    'format with spaces replaced by '
-                    'dashes. For possible choices '
+        help_text=_('Field\'s label. For possible choices '
                     'please input any text and save, '
                     'so it will be displayed in the '
                     'error messages below the '
@@ -153,13 +161,17 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         if not self.survey_id:
             return
 
+        # Make sure field name is in correct format
+        self.field_name = str(slugify(text_type(unidecode(self.field_name))))
+
         # Make sure field name is a valid name
         field_names = [f.clean_name for f in self.survey.get_form_fields()]
 
         if self.field_name not in field_names:
+            field_labels = [f.label for f in self.survey.get_form_fields()]
             raise ValidationError({
                 'field_name': [_('You need to choose valid field name out '
-                                 'of: "%s".') % '", "'.join(field_names)]
+                                 'of: "%s".') % '", "'.join(field_labels)]
             })
 
         # Convert value from the rule into Python value.
