@@ -1,5 +1,6 @@
 import csv
 from collections import defaultdict, OrderedDict
+from unidecode import unidecode
 
 from django import forms
 from django.contrib.auth import get_user_model
@@ -7,6 +8,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.forms.utils import ErrorList
 from django.utils.html import format_html
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 
@@ -233,6 +235,18 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
         for form in self.formsets[self.form_field_name]:
             form.is_valid()
             question_data[form.cleaned_data['ORDER']] = form
+
+        field_names = []
+        for form in question_data.values():
+            data = form.cleaned_data
+            field_name = str(slugify(six.text_type(unidecode(data['label']))))
+            if field_name in field_names:
+                if 'label' not in form._errors:
+                    form._errors['label'] = []
+                form._errors['label'].append(_(
+                    "This question appears elsewhere in the survey. Please "
+                    "rephrase one of the questions."))
+            field_names.append(field_name)
 
         for form in question_data.values():
             self._clean_errors = {}
