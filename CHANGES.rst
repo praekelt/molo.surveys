@@ -1,5 +1,8 @@
 CHANGE LOG
 ==========
+6.10.4
+------
+- Add validation to prevent duplicate questions in surveys
 
 6.10.3
 ------
