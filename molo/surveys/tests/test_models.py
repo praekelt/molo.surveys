@@ -1,6 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from molo.core.tests.base import MoloTestCaseMixin
+from molo.core.models import (
+    Main, SiteLanguageRelation, Languages
+)
 from molo.surveys.blocks import SkipLogicBlock, SkipState
 from molo.surveys.models import (
     MoloSurveyFormField,
@@ -176,6 +179,13 @@ class TestSkipLogicBlock(TestCase, MoloTestCaseMixin):
 class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
     def setUp(self):
         self.mk_main()
+        self.main = Main.objects.all().first()
+        self.language_setting = Languages.objects.create(
+            site_id=self.main.get_site().pk)
+        self.english = SiteLanguageRelation.objects.create(
+            language_setting=self.language_setting,
+            locale='en',
+            is_active=True)
         self.login()
 
     def test_setup(self):
@@ -227,7 +237,8 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
                 "required": True,
                 "page_break": False,
             },
-        ])
+        ],
+            language=self.english)
 
         self.assertEquals(1, MoloSurveyPage.objects.count())
 

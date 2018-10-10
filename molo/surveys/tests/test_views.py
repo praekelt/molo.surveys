@@ -812,7 +812,6 @@ class TestSkipLogicSurveyView(TestCase, MoloTestCaseMixin):
 
     def test_skip_logic_to_end(self):
         response = self.client.get(self.molo_survey_page.url)
-
         self.assertSurveyAndQuestions(
             response,
             self.molo_survey_page,
