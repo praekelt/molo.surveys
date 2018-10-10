@@ -29,28 +29,28 @@ def get_survey_list(context,
         surveys = []
         if only_linked_surveys:
             surveys = (MoloSurveyPage.objects.child_of(page)
-                       .filter(languages__language__is_main_language=True,
+                       .filter(language__is_main_language=True,
                                display_survey_directly=False,
                                your_words_competition=False)
                        .exact_type(MoloSurveyPage).specific())
         elif only_direct_surveys:
             surveys = (MoloSurveyPage.objects.child_of(page)
-                       .filter(languages__language__is_main_language=True,
+                       .filter(language__is_main_language=True,
                                display_survey_directly=True,
                                your_words_competition=False)
                        .exact_type(MoloSurveyPage).specific())
         elif only_yourwords:
             surveys = (MoloSurveyPage.objects.child_of(page)
-                       .filter(languages__language__is_main_language=True,
+                       .filter(language__is_main_language=True,
                                your_words_competition=True)
                        .exact_type(MoloSurveyPage).specific())
         elif personalisable_survey:
             surveys = (PersonalisableSurvey.objects.child_of(page)
-                       .filter(languages__language__is_main_language=True)
+                       .filter(language__is_main_language=True)
                        .exact_type(PersonalisableSurvey).specific())
         else:
             surveys = (MoloSurveyPage.objects.child_of(page)
-                       .filter(languages__language__is_main_language=True)
+                       .filter(language__is_main_language=True)
                        .exact_type(MoloSurveyPage).specific())
     else:
         surveys = MoloSurveyPage.objects.none()
@@ -116,7 +116,7 @@ def surveys_list_for_pages(context, pk=None, page=None):
     if page:
         surveys = (
             MoloSurveyPage.objects.child_of(page).filter(
-                languages__language__is_main_language=True).specific())
+                language__is_main_language=True).specific())
     else:
         surveys = MoloSurveyPage.objects.none()
 
