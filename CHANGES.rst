@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+
+7.0.0
+------
+- Upgrade to molo 7
+
 6.10.4
 ------
 - Add validation to prevent duplicate questions in surveys
