@@ -37,6 +37,7 @@ def create_molo_survey_page(
         thank_you_text=thank_you_text,
         submit_text='survey submission text',
         homepage_introduction=homepage_introduction, **kwargs
+
     )
 
     parent.add_child(instance=molo_survey_page)

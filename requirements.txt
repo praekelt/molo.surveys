@@ -1,4 +1,4 @@
-molo.core<7.0.0,>=6.5.0
+molo.core<8.0.0,>=7.0.0
 celery<4.0
 dateparser>=0.7.0,<0.8.0
 django-celery
