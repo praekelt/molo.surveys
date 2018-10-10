@@ -303,7 +303,9 @@ class MoloSurveyPage(
         # this will only return a page if there is a translation
         page = get_translation_for(
             [context['page']],
-            locale=request.LANGUAGE_CODE, site=request.site)[0]
+            locale=request.LANGUAGE_CODE, site=request.site)
+        if page:
+            page = page[0]
         if not page.language.is_main_language:
             # if there is a translation, redirect to the translated page
             return redirect(page.url)
