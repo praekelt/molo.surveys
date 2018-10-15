@@ -5,7 +5,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 from django.test.client import Client
 from django.utils.text import slugify
-from molo.core.models import Languages, Main, SiteLanguageRelation
+from molo.core.models import (Languages, Main, SiteLanguageRelation,
+                              SiteSettings)
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.models import (
     MoloSurveyFormField,
@@ -398,6 +399,28 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         response = molo_survey_page.serve_questions(request)
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['location'], translated_survey.url)
+
+    def test_changing_languages_when_no_translation_stays_on_survey(self):
+        setting = SiteSettings.objects.create(site=self.main.get_site())
+        setting.show_only_translated_pages = True
+        setting.save()
+
+        # Create a survey
+        self.user = self.login()
+        molo_survey_page, molo_survey_form_field = \
+            self.create_molo_survey_page_with_field(parent=self.surveys_index)
+
+        # when requesting the english survey with the french language code
+        # it should return the english survey
+        request = RequestFactory().get(molo_survey_page.url)
+        request.LANGUAGE_CODE = 'fr'
+        request.context = {'page': molo_survey_page}
+        request.site = self.main.get_site()
+        request.session = {}
+        request.user = self.user
+        response = molo_survey_page.serve_questions(request)
+        self.assertEquals(response.status_code, 200)
+        self.assertContains(response, 'Test Survey')
 
     def test_can_see_translated_survey_submissions_in_admin(self):
         """ Test that submissions to translated surveys can be seen in the
