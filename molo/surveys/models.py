@@ -306,9 +306,9 @@ class MoloSurveyPage(
             locale=request.LANGUAGE_CODE, site=request.site)
         if page:
             page = page[0]
-        if not page.language.is_main_language:
-            # if there is a translation, redirect to the translated page
-            return redirect(page.url)
+            if not page.language.is_main_language:
+                # if there is a translation, redirect to the translated page
+                return redirect(page.url)
         survey_data = self.load_data(request)
 
         paginator = SkipLogicPaginator(
