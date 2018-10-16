@@ -1,5 +1,8 @@
 CHANGE LOG
 ==========
+7.0.1
+------
+- Bugfix: Prevent exception raised if survey does not have a translation
 
 7.0.0
 ------
