@@ -24,6 +24,7 @@ from molo.core.models import (
     SectionPage,
     TranslatablePageMixinNotRoutable,
     index_pages_after_copy,
+    get_translation_for
 )
 from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
@@ -300,11 +301,14 @@ class MoloSurveyPage(
         """
         context = self.get_context(request)
         # this will only return a page if there is a translation
-        page = context['page'].get_translation_for(
+        page = get_translation_for(
+            [context['page']],
             locale=request.LANGUAGE_CODE, site=request.site)
         if page:
-            # if there is a translation, redirect to the translated page
-            return redirect(page.url)
+            page = page[0]
+            if not page.language.is_main_language:
+                # if there is a translation, redirect to the translated page
+                return redirect(page.url)
         survey_data = self.load_data(request)
 
         paginator = SkipLogicPaginator(

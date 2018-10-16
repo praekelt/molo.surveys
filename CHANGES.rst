@@ -1,5 +1,13 @@
 CHANGE LOG
 ==========
+7.0.1
+------
+- Bugfix: Prevent exception raised if survey does not have a translation
+
+7.0.0
+------
+- Upgrade to molo 7
+
 6.10.4
 ------
 - Add validation to prevent duplicate questions in surveys
