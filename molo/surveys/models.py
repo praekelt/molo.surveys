@@ -373,7 +373,7 @@ class MoloSurveyPage(
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
 
-                        return prev_step.success(self.slug)
+                        return prev_step.success(self.pk)
 
             else:
                 # If data for step is invalid
@@ -421,7 +421,7 @@ class MoloSurveyPage(
 
                 # render the landing_page
                 return redirect(
-                    reverse('molo.surveys:success', args=(self.slug, )))
+                    reverse('molo.surveys:success', args=(self.pk, )))
 
         return super(MoloSurveyPage, self).serve(request, *args, **kwargs)
 

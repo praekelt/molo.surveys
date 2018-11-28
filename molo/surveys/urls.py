@@ -7,7 +7,7 @@ from molo.surveys.views import (
 
 urlpatterns = [
     url(
-        r"^(?P<slug>[\w-]+)/success/$",
+        r"^(?P<pk>[\d-]+)/success/$",
         SurveySuccess.as_view(),
         name="success"
     ),
