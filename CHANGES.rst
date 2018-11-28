@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+6.10.5
+------
+- Update survey submission success url and lookup to use pk instead of a slug
+
 6.10.4
 ------
 - Add validation to prevent duplicate questions in surveys
