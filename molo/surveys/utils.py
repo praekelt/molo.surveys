@@ -194,13 +194,13 @@ class SkipLogicPage(Page):
     def is_end(self):
         return self.is_next_action(SkipState.END, SkipState.SURVEY)
 
-    def success(self, slug):
+    def success(self, pk):
         if self.is_next_action(SkipState.SURVEY):
             return redirect(
                 self.last_question.next_page(self.last_response).url
             )
         return redirect(
-            reverse('molo.surveys:success', args=(slug, ))
+            reverse('molo.surveys:success', args=(pk, ))
         )
 
     def next_page_number(self):
