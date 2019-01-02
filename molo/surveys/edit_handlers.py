@@ -1,12 +1,12 @@
 from django.db.models import Count
-from wagtail.admin.edit_handlers import BaseFieldPanel, FieldPanel
+from wagtail.admin.edit_handlers import FieldPanel
 
 from molo.core.models import ArticlePageTags
 
 
-class BaseTagPanel(BaseFieldPanel):
-    def __init__(self, *args, **kwargs):
-        super(BaseTagPanel, self).__init__(*args, **kwargs)
+class TagPanel(FieldPanel):
+    def on_instance_bound(self):
+        super().on_instance_bound()
         target_model = self.bound_field.field.queryset.model
 
         data = ArticlePageTags.objects.values('tag').annotate(
@@ -21,17 +21,3 @@ class BaseTagPanel(BaseFieldPanel):
         self.bound_field.field.label_from_instance = (
             lambda obj: str(obj) + ' ({})'.format(tag_count[obj.id])
         )
-
-
-class TagPanel(FieldPanel):
-    def bind_to_model(self, model):
-        base = {
-            'model': model,
-            'field_name': self.field_name,
-            'classname': self.classname,
-        }
-
-        if self.widget:
-            base['widget'] = self.widget
-
-        return type(str('_BaseTagPanel'), (BaseTagPanel,), base)
