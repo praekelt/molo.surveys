@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from django.utils.html import format_html_join
 
 from wagtail.contrib.modeladmin.options import modeladmin_register
-from wagtail.wagtailcore import hooks
+from wagtail.core import hooks
 
 from molo.surveys.models import MoloSurveyPage, SurveyTermsConditions
 from molo.surveys import admin_urls

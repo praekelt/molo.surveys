@@ -1,14 +1,14 @@
 from __future__ import unicode_literals
 
 import json
-from wagtail.wagtailcore.models import Page
+from wagtail.core.models import Page
 
 from django.views.generic import TemplateView
 from molo.surveys.models import MoloSurveyPage, SurveysIndexPage
 from molo.core.models import ArticlePage
 from django.shortcuts import get_object_or_404, redirect
 
-from wagtail.wagtailcore.utils import cautious_slugify
+from wagtail.core.utils import cautious_slugify
 
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
@@ -17,8 +17,8 @@ from django.http import JsonResponse
 from django.utils.translation import ugettext as _
 from wagtail.utils.pagination import paginate
 
-from wagtail.wagtailadmin import messages
-from wagtail.wagtailadmin.utils import permission_required
+from wagtail.admin import messages
+from wagtail.admin.utils import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 

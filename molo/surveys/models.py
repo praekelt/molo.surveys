@@ -28,7 +28,7 @@ from molo.core.models import (
 )
 from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
-from wagtail.wagtailadmin.edit_handlers import (
+from wagtail.admin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
     InlinePanel,
@@ -36,11 +36,11 @@ from wagtail.wagtailadmin.edit_handlers import (
     PageChooserPanel,
     StreamFieldPanel,
 )
-from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.models import Orderable
-from wagtail.wagtailimages.blocks import ImageChooserBlock
-from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
+from wagtail.core import blocks
+from wagtail.core.fields import StreamField
+from wagtail.core.models import Orderable
+from wagtail.images.blocks import ImageChooserBlock
+from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
 from wagtailsurveys import models as surveys_models
 from wagtailsurveys.models import AbstractFormField

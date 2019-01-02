@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 import molo.surveys.blocks
-import wagtail.wagtailcore.blocks
+import wagtail.core.blocks
 
 
 class Migration(migrations.Migration):
@@ -25,11 +25,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='molosurveyformfield',
             name='skip_logic',
-            field=molo.surveys.blocks.SkipLogicField([(b'skip_logic', wagtail.wagtailcore.blocks.StructBlock([(b'choice', wagtail.wagtailcore.blocks.CharBlock()), (b'skip_logic', wagtail.wagtailcore.blocks.ChoiceBlock(choices=[(b'next', b'Next default question'), (b'end', b'End of survey'), (b'question', b'Another question'), (b'survey', b'Another survey')])), (b'survey', wagtail.wagtailcore.blocks.PageChooserBlock(required=False, target_model='surveys.MoloSurveyPage')), (b'question', molo.surveys.blocks.QuestionSelectBlock(help_text=b'Please save the survey as a draft to populate or update the list of questions.', required=False))]))], blank=True, verbose_name=b'Answer options'),
+            field=molo.surveys.blocks.SkipLogicField([(b'skip_logic', wagtail.core.blocks.StructBlock([(b'choice', wagtail.core.blocks.CharBlock()), (b'skip_logic', wagtail.core.blocks.ChoiceBlock(choices=[(b'next', b'Next default question'), (b'end', b'End of survey'), (b'question', b'Another question'), (b'survey', b'Another survey')])), (b'survey', wagtail.core.blocks.PageChooserBlock(required=False, target_model='surveys.MoloSurveyPage')), (b'question', molo.surveys.blocks.QuestionSelectBlock(help_text=b'Please save the survey as a draft to populate or update the list of questions.', required=False))]))], blank=True, verbose_name=b'Answer options'),
         ),
         migrations.AlterField(
             model_name='personalisablesurveyformfield',
             name='skip_logic',
-            field=molo.surveys.blocks.SkipLogicField([(b'skip_logic', wagtail.wagtailcore.blocks.StructBlock([(b'choice', wagtail.wagtailcore.blocks.CharBlock()), (b'skip_logic', wagtail.wagtailcore.blocks.ChoiceBlock(choices=[(b'next', b'Next default question'), (b'end', b'End of survey'), (b'question', b'Another question'), (b'survey', b'Another survey')])), (b'survey', wagtail.wagtailcore.blocks.PageChooserBlock(required=False, target_model='surveys.MoloSurveyPage')), (b'question', molo.surveys.blocks.QuestionSelectBlock(help_text=b'Please save the survey as a draft to populate or update the list of questions.', required=False))]))], blank=True, verbose_name=b'Answer options'),
+            field=molo.surveys.blocks.SkipLogicField([(b'skip_logic', wagtail.core.blocks.StructBlock([(b'choice', wagtail.core.blocks.CharBlock()), (b'skip_logic', wagtail.core.blocks.ChoiceBlock(choices=[(b'next', b'Next default question'), (b'end', b'End of survey'), (b'question', b'Another question'), (b'survey', b'Another survey')])), (b'survey', wagtail.core.blocks.PageChooserBlock(required=False, target_model='surveys.MoloSurveyPage')), (b'question', molo.surveys.blocks.QuestionSelectBlock(help_text=b'Please save the survey as a draft to populate or update the list of questions.', required=False))]))], blank=True, verbose_name=b'Answer options'),
         ),
     ]

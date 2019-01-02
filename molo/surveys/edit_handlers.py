@@ -1,5 +1,5 @@
 from django.db.models import Count
-from wagtail.wagtailadmin.edit_handlers import BaseFieldPanel, FieldPanel
+from wagtail.admin.edit_handlers import BaseFieldPanel, FieldPanel
 
 from molo.core.models import ArticlePageTags
 
