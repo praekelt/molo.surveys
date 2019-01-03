@@ -15,8 +15,8 @@ from django.utils.six import text_type
 from django.utils.text import slugify
 from unidecode import unidecode
 
-from wagtail.wagtailcore.blocks.stream_block import StreamBlockValidationError
-from wagtail.wagtailadmin.edit_handlers import (
+from wagtail.core.blocks.stream_block import StreamBlockValidationError
+from wagtail.admin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
     PageChooserPanel,

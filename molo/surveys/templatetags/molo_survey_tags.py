@@ -2,7 +2,7 @@ from django import template
 from django.forms.fields import MultipleChoiceField
 
 from copy import copy
-from wagtail.wagtailcore.models import Page
+from wagtail.core.models import Page
 from molo.surveys.models import (
     MoloSurveyPage, SurveysIndexPage, PersonalisableSurvey)
 

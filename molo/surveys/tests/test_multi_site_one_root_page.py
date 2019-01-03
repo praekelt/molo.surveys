@@ -8,7 +8,7 @@ from molo.surveys.models import (
     MoloSurveyPage,
     MoloSurveyFormField
 )
-from wagtail.wagtailcore.models import Site
+from wagtail.core.models import Site
 
 
 class TestSites(TestCase, MoloTestCaseMixin):
