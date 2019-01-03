@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+8.0.0
+------
+- Upgrade to molo 8 and drop support for Python 2
+
 7.0.1
 ------
 - Bugfix: Prevent exception raised if survey does not have a translation
