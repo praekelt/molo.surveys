@@ -6,8 +6,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 import modelcluster.fields
 import molo.surveys.blocks
-import wagtail.wagtailcore.blocks
-import wagtail.wagtailcore.fields
+import wagtail.core.blocks
+import wagtail.core.fields
 
 
 class Migration(migrations.Migration):
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             name='CombinationRule',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('body', wagtail.wagtailcore.fields.StreamField([(b'Rule', molo.surveys.blocks.RuleSelectBlock()), (b'Operator', wagtail.wagtailcore.blocks.ChoiceBlock(choices=[(b'and', 'And'), (b'or', 'Or')])), (b'NestedLogic', wagtail.wagtailcore.blocks.StructBlock([(b'rule_1', molo.surveys.blocks.RuleSelectBlock(required=True)), (b'operator', wagtail.wagtailcore.blocks.ChoiceBlock(choices=[(b'and', 'And'), (b'or', 'Or')])), (b'rule_2', molo.surveys.blocks.RuleSelectBlock(required=True))]))])),
+                ('body', wagtail.core.fields.StreamField([(b'Rule', molo.surveys.blocks.RuleSelectBlock()), (b'Operator', wagtail.core.blocks.ChoiceBlock(choices=[(b'and', 'And'), (b'or', 'Or')])), (b'NestedLogic', wagtail.core.blocks.StructBlock([(b'rule_1', molo.surveys.blocks.RuleSelectBlock(required=True)), (b'operator', wagtail.core.blocks.ChoiceBlock(choices=[(b'and', 'And'), (b'or', 'Or')])), (b'rule_2', molo.surveys.blocks.RuleSelectBlock(required=True))]))])),
                 ('segment', modelcluster.fields.ParentalKey(on_delete=django.db.models.deletion.CASCADE, related_name='surveys_combinationrule_related', related_query_name='%(app_label)s_%(class)ss', to='wagtail_personalisation.Segment')),
             ],
             options={

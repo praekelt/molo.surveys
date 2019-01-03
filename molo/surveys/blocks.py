@@ -4,9 +4,9 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 
-from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel
-from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.fields import StreamField
+from wagtail.admin.edit_handlers import StreamFieldPanel
+from wagtail.core import blocks
+from wagtail.core.fields import StreamField
 
 
 class SkipState:

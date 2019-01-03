@@ -1,9 +1,9 @@
-molo.core<8.0.0,>=7.0.0
+molo.core<9.0.0,>=8.0.0
 celery<4.0
 dateparser>=0.7.0,<0.8.0
 django-celery
-wagtailsurveys==0.1.1
-wagtail-personalisation-molo==0.11.3
+wagtailsurveys==0.2.0
+wagtail-personalisation-molo==1.0.1
 psycopg2
 html5lib==0.9999999
 six==1.11.0

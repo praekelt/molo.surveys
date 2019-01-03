@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-import wagtail.wagtailcore.blocks
-import wagtail.wagtailcore.fields
+import wagtail.core.blocks
+import wagtail.core.fields
 
 
 class Migration(migrations.Migration):
@@ -21,11 +21,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='molosurveyformfield',
             name='skip_logic',
-            field=wagtail.wagtailcore.fields.StreamField([(b'choice', wagtail.wagtailcore.blocks.CharBlock())], blank=True, verbose_name=b'Answer options'),
+            field=wagtail.core.fields.StreamField([(b'choice', wagtail.core.blocks.CharBlock())], blank=True, verbose_name=b'Answer options'),
         ),
         migrations.AddField(
             model_name='personalisablesurveyformfield',
             name='skip_logic',
-            field=wagtail.wagtailcore.fields.StreamField([(b'choice', wagtail.wagtailcore.blocks.CharBlock())], blank=True, verbose_name=b'Answer options'),
+            field=wagtail.core.fields.StreamField([(b'choice', wagtail.core.blocks.CharBlock())], blank=True, verbose_name=b'Answer options'),
         ),
     ]

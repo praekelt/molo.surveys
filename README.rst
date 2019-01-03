@@ -19,7 +19,7 @@ Installation::
 
 Testing:
    read the .travis.yml file
-   follow the instructions under the scripts file
+   follow the instructions under the scripts heading
 
 Django setup::
 
