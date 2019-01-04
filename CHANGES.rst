@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+8.0.1
+------
+- Upgrade Six to fix dependency conflicts
+
 8.0.0
 ------
 - Upgrade to molo 8 and drop support for Python 2
