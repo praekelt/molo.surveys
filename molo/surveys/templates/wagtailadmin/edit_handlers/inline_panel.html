@@ -1,7 +1,12 @@
 {% load i18n %}
 {% load wagtailadmin_tags  %}
+
 {{ self.formset.management_form }}
 
+{% comment %}
+BEGIN CUSTOM TEMPLATE LOGIC
+Add formsets for Segmentation Rules
+{% endcomment %}
 {% if 'wagtail_personalisation_' in self.formset.prefix or 'surveys_' in self.formset.prefix %}
     {% blocktrans with heading=self.heading|lower %}
         <h2>{{ heading }}</h2>
@@ -131,6 +136,7 @@
     {% endif %}
 
 {% endif %}
+{# END CUSTOM TEMPLATE LOGIC #}
 
 <ul class="multiple" id="id_{{ self.formset.prefix }}-FORMS">
     {% if self.formset.non_form_errors %}
@@ -156,8 +162,10 @@
     <a class="button bicolor icon icon-plus" id="id_{{ self.formset.prefix }}-ADD">
         {% blocktrans with heading=self.heading|lower %}Add {{ heading }}{% endblocktrans %}
     </a>
+{# BEGIN CUSTOM TEMPLATE LOGIC #}
 </p>
 
 {% if 'wagtail_personalisation_' in self.formset.prefix or 'surveys_' in self.formset.prefix %}
     <hr>
 {% endif %}
+{# END CUSTOM TEMPLATE LOGIC #}
