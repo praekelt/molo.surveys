@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+8.0.2
+------
+- Upgrade wagtail-personalisation to be minimum 1.0.1
+- Updated overriding templates and added comments
+
 8.0.1
 ------
 - Upgrade Six to fix dependency conflicts
