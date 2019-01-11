@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+8.0.3
+-----
+- Upgrade wagtail-personalisation to be minimum 1.0.3
+
 8.0.2
 ------
 - Upgrade wagtail-personalisation to be minimum 1.0.1
