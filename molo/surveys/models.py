@@ -70,7 +70,7 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
     language = models.ForeignKey('core.SiteLanguage',
