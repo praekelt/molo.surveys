@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+
+8.1.0
+-----
+- Remove MoloPage
+
 8.0.3
 -----
 - Upgrade wagtail-personalisation to be minimum 1.0.3
