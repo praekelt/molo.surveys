@@ -105,7 +105,7 @@ def create_survey_index_pages(sender, instance, **kwargs):
 
 
 class MoloSurveyPage(
-        TranslatablePageMixinNotRoutable, Page,
+        TranslatablePageMixinNotRoutable,
         surveys_models.AbstractSurvey):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
