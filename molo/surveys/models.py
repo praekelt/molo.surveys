@@ -26,7 +26,6 @@ from molo.core.models import (
     index_pages_after_copy,
     get_translation_for
 )
-from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
 from wagtail.admin.edit_handlers import (
     FieldPanel,
@@ -38,7 +37,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core import blocks
 from wagtail.core.fields import StreamField
-from wagtail.core.models import Orderable
+from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -70,7 +69,7 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
     language = models.ForeignKey('core.SiteLanguage',
@@ -81,7 +80,7 @@ class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     translated_pages = models.ManyToManyField("self", blank=True)
 
 
-class SurveysIndexPage(MoloPage, PreventDeleteMixin):
+class SurveysIndexPage(Page, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
@@ -106,7 +105,7 @@ def create_survey_index_pages(sender, instance, **kwargs):
 
 
 class MoloSurveyPage(
-        TranslatablePageMixinNotRoutable, MoloPage,
+        TranslatablePageMixinNotRoutable, Page,
         surveys_models.AbstractSurvey):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
