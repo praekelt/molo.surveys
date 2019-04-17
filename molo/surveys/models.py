@@ -92,6 +92,15 @@ class SurveysIndexPage(Page, PreventDeleteMixin):
         SurveysIndexPage.objects.child_of(main).delete()
         super(SurveysIndexPage, self).copy(*args, **kwargs)
 
+    def get_site(self):
+        try:
+            return self.get_ancestors().filter(
+                depth=2).first().sites_rooted_here.get(
+                    site_name__icontains='main')
+        except Exception:
+            return self.get_ancestors().filter(
+                depth=2).first().sites_rooted_here.all().first() or None
+
 
 @receiver(index_pages_after_copy, sender=Main)
 def create_survey_index_pages(sender, instance, **kwargs):
