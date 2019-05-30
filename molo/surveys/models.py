@@ -418,7 +418,9 @@ class MoloSurveyPage(
     def serve(self, request, *args, **kwargs):
         if (not self.allow_multiple_submissions_per_user and
                 self.has_user_submitted_survey(request, self.id)):
-            return render(request, self.template, self.get_context(request))
+            if not (request.method == 'POST' and 'ajax' in request.POST):
+                return render(
+                    request, self.template, self.get_context(request))
 
         if ((self.has_page_breaks or self.multi_step) and
                 not self.display_survey_directly):
@@ -428,6 +430,17 @@ class MoloSurveyPage(
             form = self.get_form(request.POST, page=self, user=request.user)
 
             if form.is_valid():
+                # check if the post is made via ajax call
+                if 'ajax' in request.POST and \
+                        request.POST['ajax'] == 'True':
+                    # check if a submission exists for this question and user
+                    submission = self.get_submission_class().objects.filter(
+                        page=self, user__pk=request.user.pk)
+                    if submission.exists():
+                        # currently for submissions via ajax calls
+                        # user should be able to update their submission
+                        submission.delete()
+
                 self.set_survey_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
