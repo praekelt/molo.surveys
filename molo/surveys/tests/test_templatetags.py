@@ -58,6 +58,7 @@ class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
         self.client.post(survey.url, {
             'i-feel-i-can-be-myself-around-other-people':
                 'agree',
+            'ajax': 'True'
         })
         self.assertEquals(MoloSurveySubmission.objects.count(), 1)
         self.assertTrue(load_user_choice_poll_survey(
@@ -65,6 +66,20 @@ class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
             survey, 'i-feel-i-can-be-myself-around-other-people',
             'agree'))
         self.assertFalse(load_user_choice_poll_survey(
+            {'request': self.request},
+            survey, 'i-feel-i-can-be-myself-around-other-people',
+            'disagree'))
+        self.client.post(survey.url, {
+            'i-feel-i-can-be-myself-around-other-people':
+                'disagree',
+            'ajax': 'True'
+        })
+        self.assertEquals(MoloSurveySubmission.objects.count(), 1)
+        self.assertFalse(load_user_choice_poll_survey(
+            {'request': self.request},
+            survey, 'i-feel-i-can-be-myself-around-other-people',
+            'agree'))
+        self.assertTrue(load_user_choice_poll_survey(
             {'request': self.request},
             survey, 'i-feel-i-can-be-myself-around-other-people',
             'disagree'))
