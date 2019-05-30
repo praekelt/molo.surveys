@@ -7,9 +7,12 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from molo.core.models import Main, Languages, SiteLanguageRelation
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.surveys.models import (MoloSurveyPage, MoloSurveyFormField,
-                                 SurveysIndexPage, PersonalisableSurvey)
+                                 SurveysIndexPage, PersonalisableSurvey,
+                                 MoloSurveySubmission)
 
-from molo.surveys.templatetags.molo_survey_tags import get_survey_list
+from molo.surveys.templatetags.molo_survey_tags import (
+    get_survey_list, load_user_choice_poll_survey)
+from .base import create_survey
 
 
 def add_session_to_request(request):
@@ -17,6 +20,54 @@ def add_session_to_request(request):
     middleware = SessionMiddleware()
     middleware.process_request(request)
     request.session.save()
+
+
+class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
+
+    def setUp(self):
+        self.mk_main()
+        self.main = Main.objects.all().first()
+        self.language_setting = Languages.objects.create(
+            site_id=self.main.get_site().pk)
+        self.english = SiteLanguageRelation.objects.create(
+            language_setting=self.language_setting,
+            locale='en',
+            is_active=True)
+        self.surveys_index = SurveysIndexPage.objects.child_of(
+            self.main).first()
+        self.user = self.login()
+        # create a requset object
+        self.factory = RequestFactory()
+        self.request = self.factory.get('/')
+        self.request.site = self.site
+        self.request.user = self.user
+        add_session_to_request(self.request)
+
+    def test_load_user_choice_poll_survey(self):
+        create_survey([
+            {
+                "question": "I feel I can be myself around other people",
+                "type": 'radio',
+                "choices": ["agree", "disagree"],
+                "required": True,
+                "page_break": False,
+            },
+        ],
+            language=self.english)
+        survey = MoloSurveyPage.objects.last()
+        self.client.post(survey.url, {
+            'i-feel-i-can-be-myself-around-other-people':
+                'agree',
+        })
+        self.assertEquals(MoloSurveySubmission.objects.count(), 1)
+        self.assertTrue(load_user_choice_poll_survey(
+            {'request': self.request},
+            survey, 'i-feel-i-can-be-myself-around-other-people',
+            'agree'))
+        self.assertFalse(load_user_choice_poll_survey(
+            {'request': self.request},
+            survey, 'i-feel-i-can-be-myself-around-other-people',
+            'disagree'))
 
 
 class SurveyListTest(TestCase, MoloTestCaseMixin):
