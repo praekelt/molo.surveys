@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+8.3.0
+-----
+- Add ajax submissions
+
 8.2.0
 -----
 - Add get_site to index page
