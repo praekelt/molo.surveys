@@ -418,7 +418,9 @@ class MoloSurveyPage(
     def serve(self, request, *args, **kwargs):
         if (not self.allow_multiple_submissions_per_user and
                 self.has_user_submitted_survey(request, self.id)):
-            if request.method != 'POST' and 'ajax' not in request.POST:
+            if request.method == 'POST' and 'ajax' in request.POST:
+                pass
+            else:
                 return render(
                     request, self.template, self.get_context(request))
 
