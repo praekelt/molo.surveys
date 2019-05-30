@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+8.3.1
+-----
+- update travis secure
+
 8.3.0
 -----
 - Add ajax submissions
