@@ -99,6 +99,24 @@ def surveys_list(context, pk=None, only_linked_surveys=False,
 
 
 @register.simple_tag(takes_context=True)
+def load_user_choice_poll_survey(context, survey, field, choice):
+    if not survey or not field:
+        return False
+    request = context['request']
+    survey = survey.specific.get_main_language_page()
+    SubmissionClass = survey.specific.get_submission_class()
+    submissions = SubmissionClass.objects.filter(
+        page=survey, user=request.user)
+    if not submissions.exists():
+        return False
+    for submission in submissions:
+        data = submission.get_data()
+        if field in data and data[field] == choice:
+            return True
+    return False
+
+
+@register.simple_tag(takes_context=True)
 def submission_has_article(context, survey_id, submission_id):
     survey_page = get_object_or_404(Page, id=survey_id).specific
     SubmissionClass = survey_page.get_submission_class()
