@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import json
 from wagtail.core.models import Page
 
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from molo.surveys.models import MoloSurveyPage, SurveysIndexPage
 from molo.core.models import ArticlePage
 from django.shortcuts import get_object_or_404, redirect
@@ -72,6 +72,53 @@ def get_segment_user_count(request):
             context = {'errors': errors}
 
         return JsonResponse(context)
+
+
+class ResultsPercentagesJson(View):
+    def get(self, *args, **kwargs):
+        pages = self.request.site.root_page.get_descendants()
+        ids = []
+        for page in pages:
+            ids.append(page.id)
+        survey = get_object_or_404(
+            MoloSurveyPage, slug=kwargs['slug'], id__in=ids)
+        # Get information about form fields
+        data_fields = [
+            (field.clean_name, field.label)
+            for field in survey.get_form_fields()
+        ]
+
+        results = dict()
+        # Get all submissions for current page
+        submissions = (
+            survey.get_submission_class().objects.filter(page=survey))
+        for submission in submissions:
+            data = submission.get_data()
+
+            # Count results for each question
+            for name, label in data_fields:
+                answer = data.get(name)
+                if answer is None:
+                    # Something wrong with data.
+                    # Probably you have changed questions
+                    # and now we are receiving answers for old questions.
+                    # Just skip them.
+                    continue
+
+                if type(answer) is list:
+                    # answer is a list if the field type is 'Checkboxes'
+                    answer = u', '.join(answer)
+
+                question_stats = results.get(label, {})
+                question_stats[cautious_slugify(answer)] = \
+                    question_stats.get(answer, 0) + 1
+                results[label] = question_stats
+
+        for question, answers in results.items():
+            total = sum(answers.values())
+            for key in answers.keys():
+                answers[key] = int((answers[key] * 100) / total)
+        return JsonResponse(results)
 
 
 class SurveySuccess(TemplateView):

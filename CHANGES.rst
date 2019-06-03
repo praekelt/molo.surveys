@@ -1,5 +1,30 @@
 CHANGE LOG
 ==========
+
+8.3.2
+-----
+- Add a view for retrieving survey results as percentage as json
+
+8.3.1
+-----
+- update travis secure
+
+8.3.0
+-----
+- Add ajax submissions
+
+8.2.0
+-----
+- Add get_site to index page
+
+8.1.0
+-----
+- Remove MoloPage
+
+8.0.3
+-----
+- Upgrade wagtail-personalisation to be minimum 1.0.3
+
 8.0.2
 ------
 - Upgrade wagtail-personalisation to be minimum 1.0.1

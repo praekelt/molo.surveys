@@ -26,7 +26,6 @@ from molo.core.models import (
     index_pages_after_copy,
     get_translation_for
 )
-from molo.core.molo_wagtail_models import MoloPage
 from molo.core.utils import generate_slug
 from wagtail.admin.edit_handlers import (
     FieldPanel,
@@ -38,7 +37,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core import blocks
 from wagtail.core.fields import StreamField
-from wagtail.core.models import Orderable
+from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -70,7 +69,7 @@ ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
 FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
+class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
     parent_page_types = ['surveys.SurveysIndexPage']
     subpage_types = ['core.Footerpage']
     language = models.ForeignKey('core.SiteLanguage',
@@ -81,7 +80,7 @@ class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, MoloPage):
     translated_pages = models.ManyToManyField("self", blank=True)
 
 
-class SurveysIndexPage(MoloPage, PreventDeleteMixin):
+class SurveysIndexPage(Page, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
@@ -92,6 +91,15 @@ class SurveysIndexPage(MoloPage, PreventDeleteMixin):
         main = site.root_page
         SurveysIndexPage.objects.child_of(main).delete()
         super(SurveysIndexPage, self).copy(*args, **kwargs)
+
+    def get_site(self):
+        try:
+            return self.get_ancestors().filter(
+                depth=2).first().sites_rooted_here.get(
+                    site_name__icontains='main')
+        except Exception:
+            return self.get_ancestors().filter(
+                depth=2).first().sites_rooted_here.all().first() or None
 
 
 @receiver(index_pages_after_copy, sender=Main)
@@ -106,7 +114,7 @@ def create_survey_index_pages(sender, instance, **kwargs):
 
 
 class MoloSurveyPage(
-        TranslatablePageMixinNotRoutable, MoloPage,
+        TranslatablePageMixinNotRoutable,
         surveys_models.AbstractSurvey):
     parent_page_types = [
         'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
@@ -410,7 +418,9 @@ class MoloSurveyPage(
     def serve(self, request, *args, **kwargs):
         if (not self.allow_multiple_submissions_per_user and
                 self.has_user_submitted_survey(request, self.id)):
-            return render(request, self.template, self.get_context(request))
+            if not (request.method == 'POST' and 'ajax' in request.POST):
+                return render(
+                    request, self.template, self.get_context(request))
 
         if ((self.has_page_breaks or self.multi_step) and
                 not self.display_survey_directly):
@@ -420,6 +430,17 @@ class MoloSurveyPage(
             form = self.get_form(request.POST, page=self, user=request.user)
 
             if form.is_valid():
+                # check if the post is made via ajax call
+                if 'ajax' in request.POST and \
+                        request.POST['ajax'] == 'True':
+                    # check if a submission exists for this question and user
+                    submission = self.get_submission_class().objects.filter(
+                        page=self, user__pk=request.user.pk)
+                    if submission.exists():
+                        # currently for submissions via ajax calls
+                        # user should be able to update their submission
+                        submission.delete()
+
                 self.set_survey_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
