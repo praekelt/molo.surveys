@@ -111,7 +111,7 @@ class ResultsPercentagesJson(View):
 
                 question_stats = results.get(label, {})
                 question_stats[cautious_slugify(answer)] = \
-                    question_stats.get(answer, 0) + 1
+                    question_stats.get(cautious_slugify(answer), 0) + 1
                 results[label] = question_stats
 
         for question, answers in results.items():
