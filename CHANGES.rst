@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+8.3.2
+-----
+- Add a view for retrieving survey results as percentage as json
+
 8.3.1
 -----
 - update travis secure
