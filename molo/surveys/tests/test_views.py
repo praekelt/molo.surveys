@@ -256,6 +256,43 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_survey_form_field.label)
         self.assertContains(response, 'python</span> 50%')
 
+    def test_get_result_percentages_as_json(self):
+        molo_survey_page, molo_survey_form_field = \
+            self.create_molo_survey_page_with_field(
+                parent=self.section_index,
+                allow_multiple_submissions_per_user=True
+            )
+
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'python'
+        }, follow=True)
+        response = self.client.get(
+            '/surveys/%s/results_json/' % molo_survey_page.slug)
+        self.assertEqual(
+            response.json(), {'Your favourite animal': {'python': 100}})
+
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'java'
+        }, follow=True)
+        response = self.client.get(
+            '/surveys/%s/results_json/' % molo_survey_page.slug)
+        self.assertEqual(response.json(),
+                         {'Your favourite animal': {'java': 50, 'python': 50}})
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'java'
+        }, follow=True)
+        response = self.client.get(
+            '/surveys/%s/results_json/' % molo_survey_page.slug)
+        self.assertEqual(response.json(),
+                         {'Your favourite animal': {'java': 67, 'python': 33}})
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'java'
+        }, follow=True)
+        response = self.client.get(
+            '/surveys/%s/results_json/' % molo_survey_page.slug)
+        self.assertEqual(response.json(),
+                         {'Your favourite animal': {'java': 75, 'python': 25}})
+
     def test_multi_step_option(self):
         molo_survey_page, molo_survey_form_field = \
             self.create_molo_survey_page_with_field(
