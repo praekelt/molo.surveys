@@ -278,6 +278,20 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             '/surveys/%s/results_json/' % molo_survey_page.slug)
         self.assertEqual(response.json(),
                          {'Your favourite animal': {'java': 50, 'python': 50}})
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'java'
+        }, follow=True)
+        response = self.client.get(
+            '/surveys/%s/results_json/' % molo_survey_page.slug)
+        self.assertEqual(response.json(),
+                         {'Your favourite animal': {'java': 67, 'python': 33}})
+        response = self.client.post(molo_survey_page.url, {
+            molo_survey_form_field.label.lower().replace(' ', '-'): 'java'
+        }, follow=True)
+        response = self.client.get(
+            '/surveys/%s/results_json/' % molo_survey_page.slug)
+        self.assertEqual(response.json(),
+                         {'Your favourite animal': {'java': 75, 'python': 25}})
 
     def test_multi_step_option(self):
         molo_survey_page, molo_survey_form_field = \
