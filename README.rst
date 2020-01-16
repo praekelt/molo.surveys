@@ -13,6 +13,10 @@ molo.surveys
 
 An implementation of wagtailsurveys as a Molo plugin
 
+Note:
+This package has since been deprecated in favour of `molo.forms` https://github.com/praekeltfoundation/molo.forms
+
+
 Installation::
 
    pip install molo.surveys
